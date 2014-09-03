@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <actions/>
+    <description>This job will scan new PR in SRS github repo and executes Ci stuff</description>
+    <keepDependencies>false</keepDependencies>
+    <properties>
+        <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.9.1">
+            <projectUrl>https://github.com/propeoplemd/SPS/</projectUrl>
+        </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    </properties>
+    <scm class="hudson.plugins.git.GitSCM" plugin="git@2.2.5">
+        <configVersion>2</configVersion>
+        <userRemoteConfigs>
+            <hudson.plugins.git.UserRemoteConfig>
+                <name>origin</name>
+                <refspec>+refs/pull/*:refs/remotes/origin/pr/*</refspec>
+                <url>https://github.com/propeoplemd/SPS.git</url>
+                <credentialsId>c55a496e-7717-4f51-88d5-1a50b478ba55</credentialsId>
+            </hudson.plugins.git.UserRemoteConfig>
+        </userRemoteConfigs>
+        <branches>
+            <hudson.plugins.git.BranchSpec>
+                <name>**</name>
+            </hudson.plugins.git.BranchSpec>
+        </branches>
+        <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+        <submoduleCfg class="list"/>
+        <extensions>
+            <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+                <relativeTargetDir>new_pull_request</relativeTargetDir>
+            </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+        </extensions>
+    </scm>
+    <canRoam>true</canRoam>
+    <disabled>false</disabled>
+    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <triggers>
+        <org.jenkinsci.plugins.ghprb.GhprbTrigger plugin="ghprb@1.15-0">
+            <spec>H/3 * * * *</spec>
+            <adminlist>CHANGE_ME_to_botname
+                podarok
+                ygerasimov
+            </adminlist>
+            <allowMembersOfWhitelistedOrgsAsAdmin>true</allowMembersOfWhitelistedOrgsAsAdmin>
+            <orgslist>propeoplemd</orgslist>
+            <cron>H/3 * * * *</cron>
+            <triggerPhrase></triggerPhrase>
+            <onlyTriggerPhrase>false</onlyTriggerPhrase>
+            <useGitHubHooks>false</useGitHubHooks>
+            <permitAll>false</permitAll>
+            <commentFilePath>${WORKSPACE}/commentinfo.md</commentFilePath>
+            <whitelist></whitelist>
+            <autoCloseFailedPullRequests>false</autoCloseFailedPullRequests>
+            <whiteListTargetBranches>
+                <org.jenkinsci.plugins.ghprb.GhprbBranch>
+                    <branch></branch>
+                </org.jenkinsci.plugins.ghprb.GhprbBranch>
+            </whiteListTargetBranches>
+            <project>SRS_PR_BUILDER</project>
+        </org.jenkinsci.plugins.ghprb.GhprbTrigger>
+    </triggers>
+    <concurrentBuild>false</concurrentBuild>
+    <builders>
+        <hudson.tasks.Shell>
+            <command>
+echo "===============" > ${WORKSPACE}/commentinfo.md
+cd new_pull_request
+sudo mv drupal /var/www/build${BUILD_NUMBER}
+cd /var/www/build${BUILD_NUMBER}
+sudo chown -R www-data:jenkins *
+ansible-playbook sniffers.yml --extra-vars "workspace_root=${WORKSPACE} webroot=http://ci_server_ip_address/build${BUILD_NUMBER}"
+ansible-playbook reinstall.yml --extra-vars "mysql_user=root mysql_pass= mysql_db=drupal${BUILD_NUMBER}"
+sudo chown -R www-data:jenkins *
+            </command>
+        </hudson.tasks.Shell>
+    </builders>
+    <publishers/>
+    <buildWrappers>
+        <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.0">
+            <colorMapName>xterm</colorMapName>
+        </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+    </buildWrappers>
+</project>
