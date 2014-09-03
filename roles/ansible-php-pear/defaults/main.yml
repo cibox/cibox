@@ -1,0 +1,5 @@
+---
+# defaults file for php-pear
+
+pear_channels: []
+pear_packages: []

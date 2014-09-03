@@ -1,0 +1,14 @@
+- name: "Discover PEAR channels"
+  command: pear channel-discover {{ item }}
+  with_items: drush_pear_channels
+  register: drush_pear_channel_result
+  changed_when: "'initialized' not in drush_pear_channel_result.stdout"
+  failed_when: "'failed' in drush_pear_channel_result.stdout"
+  tags: [drush,pear]
+- name: "Install PEAR packages"
+  command: pear install {{ item }}
+  with_items: drush_pear_packages
+  register: drush_pear_package_result
+  changed_when: "'is already installed' not in drush_pear_package_result.stdout"
+  failed_when:  "'No releases available for package' in drush_pear_package_result.stdout"
+  tags: [drush,pear]

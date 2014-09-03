@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: Pierre Buyle
+  description: Ansible role for configuring Drush
+  license: Apache v2
+  min_ansible_version: 1.2
+  platforms:
+  - name: Ubuntu
+    versions:
+    - all
+  - name: Debian
+    versions:
+    - all
+  categories:
+  - development
+  - packaging
+  - system
+dependencies: []

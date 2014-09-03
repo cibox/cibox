@@ -1,0 +1,24 @@
+<?php
+# {{ ansible_managed }}
+{% set keys = [] -%}
+{%- for key, value in drushrc.iteritems() recursive -%}
+{%- set ignore = keys.append(key) -%}
+{%- set outer_loop = loop -%}
+{%- if value is mapping -%}
+{{ outer_loop(value.iteritems()) }}
+{%- elif value is string %}
+  $options["{{ keys|join('"]["') }}"] = "{{ value }}";
+{% elif value is sequence %}
+  $options["{{ keys|join('"]["') }}"] = array(
+{%- for inner_value in value -%}
+{%- if inner_value is string -%}
+"{{ inner_value }}"
+{%- elif inner_value is iterable -%}
+{{ outer_loop(inner_value) }}
+{%- endif -%}
+{%- if not loop.last -%}, {%- endif -%}
+{%- endfor -%}
+);
+{% endif %}
+{%- set ignore = keys.pop() %}
+{%- endfor -%}
