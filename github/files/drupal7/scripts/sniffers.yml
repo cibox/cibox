@@ -1,0 +1,89 @@
+---
+# This playbook should be executed using ansible-playbook command
+# Developed for ansible version >= 1.7
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    # this variable will be overridden from jenkins.
+    workspace_root: .
+    artifacts_file: commentinfo.md
+    webroot: http://localhost
+    installation_profile_name: pp
+    phpcs_extensions: php,inc,install,module
+    custom_modules_path: sites/all/modules/custom/
+    custom_themes_path: sites/all/themes/custom
+    ignore_path: sites/all/themes/circle
+    composer_global_require:
+      - drupal/coder:dev-7.x-2.x
+      - squizlabs/php_codesniffer=*
+    git_repos:
+      - { branch: 'master', repo: 'http://git.drupal.org/sandbox/coltrane/1921926.git', name: 'DrupalSecure' } # git clone --branch master http://git.drupal.org/sandbox/coltrane/1921926.git DrupalSecure
+      - { branch: '7.x-1.x', repo: 'https://github.com/klausi/drupalpractice.git', name: 'DrupalPractice' } #git clone --branch 7.x-1.x https://github.com/klausi/drupalpractice.git DrupalPractice
+      - { branch: 'master', repo: 'https://github.com/podarok/Symfony2-coding-standard.git', name: 'Symfony2' }
+    phpcs_standards_packs:
+      - { path: '/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal', name: 'Drupal' } #/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal Drupal
+      - { path: '/root/.composer/vendor/podarok/DrupalSecure/DrupalSecure', name: 'DrupalSecure' } #/root/.composer/vendor/podarok/DrupalSecure DrupalSecure
+      - { path: '/root/.composer/vendor/podarok/DrupalPractice/DrupalPractice', name: 'DrupalPractice' } #/root/.composer/vendor/podarok/DrupalPractice DrupalPractice
+      - { path: '/root/.composer/vendor/podarok/Symfony2', name: 'Symfony2' }
+
+    phpcs_standards:
+      - Drupal
+      - DrupalPractice
+      - DrupalSecure
+
+    jshint_folders:
+      - { name: 'modules', path: 'sites/all/modules/custom' }
+      - { name: 'themes', path: 'sites/all/themes/custom' }
+      - { name: 'profile', path: 'profiles/pp' }
+
+    scsslint_folders:
+      - { name: 'themes', path: 'sites/all/themes/custom' }
+
+  pre_tasks:
+
+  - name: Install composer global requires
+    sudo: yes
+    shell: "composer global require {{ item }}"
+    with_items: composer_global_require
+    tags:
+      - sniffers
+      - composer
+      - git
+
+  - name: Install global git repos
+    sudo: yes
+    git: repo={{ item.repo }} dest=/root/.composer/vendor/podarok/{{ item.name }} version={{ item.branch }}
+    with_items: git_repos
+    #ignore_errors: yes
+    tags:
+      - sniffers
+      - git
+
+  - name: Install php codesniffer standards
+    sudo: yes
+    file: src={{ item.path }} dest=/usr/share/php/PHP/CodeSniffer/Standards/{{ item.name }} state=link
+    with_items: phpcs_standards_packs
+    tags:
+      - sniffers
+      - git
+
+  - name: PHP CodeSniffer
+    sudo: yes
+    shell: 'echo "CodeSniffer: {{ item }} standard file {{ webroot }}/{{ item }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && phpcs --standard={{ item }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} profiles/{{ installation_profile_name }} {{ custom_themes_path }} --report-file={{ item }}sniff.txt --ignore={{ ignore_path }}'
+    with_items: phpcs_standards
+
+  - name: JSHint
+    sudo: yes
+    shell: 'echo "JSHint: {{ item.name }} standard file {{ webroot }}/{{ item.name }}jshint.txt" >> {{ workspace_root }}/{{ artifacts_file }} && find {{ item.path }} -type f \( -iname "*.js" ! -iname "*.min.js" \) -print0 | sudo xargs -0 jshint > {{ item.name }}jshint.txt'
+    with_items: "jshint_folders"
+
+  - name: SCSS lint
+    sudo: yes
+    ignore_errors: yes
+    shell: 'echo "SCSS-lint: {{ item.name }} standard file {{ webroot }}/scsslint{{ item.name }}.txt" >> {{ workspace_root }}/{{ artifacts_file }} && find {{ item.path }} -name "*.scss" -print0 | xargs -0 scss-lint > scsslint{{ item.name }}.txt || true'
+    with_items: scsslint_folders
+
+  - name: Website credentials
+    lineinfile: dest={{ workspace_root }}/{{ artifacts_file }} line="Build site installed at {{ webroot }}"

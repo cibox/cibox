@@ -1,0 +1,31 @@
+---
+# This playbook should be executed using reinstall.sh script
+# Developed for ansible version >= 1.7
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    drupal_user: admin
+    drupal_pass: propeople
+    installation_profile_name: pp
+    mysql_user: drupal
+    mysql_pass: drupal
+    mysql_db: drupal
+
+  tasks:
+
+  - name: Droping drupal database
+    mysql_db: name={{ mysql_db }} state=absent
+
+  - name: Creating drupal database
+    mysql_db: name={{ mysql_db }} state=present
+
+  - name: Installing drupal
+    sudo: yes
+    shell: "drush -y si {{ installation_profile_name }} --db-url=mysql://{{ mysql_user }}:{{ mysql_pass }}@127.0.0.1:/{{ mysql_db }} --account-name={{ drupal_user }} --account-pass={{ drupal_pass }}"
+
+  handlers:
+#    - name: import livedb
+#      mysql_db: name=livedrupal state=import target=livedb.sql.gz
+#      ignore_errors: yes

@@ -1,0 +1,319 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
+# xml - Manage bits and pieces of XML files
+#
+# Copyright 2014, Red Hat, Inc.
+# Tim Bielawa <tbielawa@redhat.com>
+# Magnus Hedemark <mhedemar@redhat.com>
+#
+# This software may be freely redistributed under the terms of the GNU
+# general public license version 2.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+
+DOCUMENTATION = '''
+---
+module: xml
+short_description: Manage bits and pieces of XML files or strings
+description:
+  - A CRUD-like interface to managing bits of XML flies. You might also be interested in a brief tutorial, U(http://www.w3schools.com/xpath/). Note that module this does not handle complicated xpath expressions. So limit xpath selectors to simple expressions.
+version_added: "1.0"
+options:
+  file:
+    description:
+      - Path to the file to operate on. File must exist ahead of time.
+    required: true unless xmlstring is given
+    default: null
+    choices: []
+  xmlstring:
+    description:
+      - A string containing XML on which to operate.
+    required: true unless file is given
+    default: null
+    choices: []
+  xpath:
+    description:
+      - A valid XPath expression describing the item(s) you want to manipulate. Operates on the document root, C(/), by default.
+    required: false
+    default: /
+    choices: []
+  ensure:
+    description:
+      - Set or remove an xpath selection (node(s), attribute(s))
+    required: false
+    default: present
+    choices:
+      - "absent"
+      - "present"
+  value:
+    description:
+      - Desired state of the selected attribute. Either a string, or to unset a value, the Python C(None) keyword (YAML Equivalent, C(null)).
+    required: false
+    default: Elements default to no value (but present). Attributes default to an empty string.
+    choices: []
+  add_children:
+    description:
+      - 'Add additional child-element(s) to a selected element. Child elements must be given in a list and each item may be either a string (ex: C(children=ansible) to add an empty C(<ansible/>) child element), or a hash where the key is an element name and the value is the element value.'
+    required: false
+    default: null
+    choices: []
+  set_children:
+    description:
+      - 'Set the the child-element(s) of a selected element. Removes any existing children. Child elements must be specified as in C(add_children).'
+    required: false
+    default: null
+    choices: []
+  count:
+    description:
+      - "Search for a given C(xpath) and provide the count of any matches"
+    required: false
+    default: null
+    choices: []
+  print_match:
+    description:
+      - "Search for a given C(xpath) and print out any matches"
+    required: false
+    default: null
+    choices: []
+requirements:
+    - The remote end must have the Python C(lxml) library installed
+author: Tim Bielawa, Magnus Hedemark
+'''
+
+
+from io import BytesIO
+from lxml import etree
+try:
+    import json
+except:
+    import simplejson as json
+import lxml
+import os
+
+def print_match(tree, xpath, module):
+    match = tree.xpath(xpath)
+    match_xpaths = []
+    for m in match:
+        match_xpaths.append(tree.getpath(m))
+    match_str = json.dumps(match_xpaths)
+    msg = "selector '%s' match: %s" % (xpath, match_str)
+    finish(tree, xpath, module, changed=False, msg=msg)
+
+def count(tree, xpath, module):
+    """ Return the count of nodes matching the xpath """
+    hits = tree.xpath("count(/%s)" % xpath)
+    finish(tree, xpath, module, changed=False, msg=int(hits), hitcount=int(hits))
+
+def is_node(tree, xpath):
+    """ Test if a given xpath matches anything and if that match is a node.
+
+    For now we just assume you're only searching for one specific thing."""
+    if xpath_matches(tree, xpath):
+        # OK, it found something
+        match = tree.xpath(xpath)
+        if type(match[0]) == lxml.etree._Element:
+            return True
+
+    return False
+
+def is_attribute(tree, xpath):
+    """ Test if a given xpath matches and that match is an attribute """
+    if xpath_matches(tree, xpath):
+        match = tree.xpath(xpath)
+        if type(match[0]) == lxml.etree._ElementStringResult:
+            return True
+
+    return False
+
+def xpath_matches(tree, xpath):
+    """ Test if a node exists """
+    if tree.xpath(xpath):
+        return True
+    else:
+        return False
+
+def delete_xpath_target(tree, xpath, module):
+    try:
+        for node in tree.xpath(xpath):
+            if not module.check_mode: node.getparent().remove(node)
+    except:
+        abort("Couldn't delete xpath target: %s" % xpath, module)
+    else:
+        finish(tree, xpath, module, changed=True)
+
+def set_target_children(tree, xpath, children, module):
+    matches = tree.xpath(xpath)
+
+    # Create a list of our new children
+    children = children_to_nodes(children=children, module=module)
+
+    changed = False
+
+    # xpaths always return matches as a list, so....
+    for match in matches:
+        # First remove any existing children
+        for element in match.getchildren():
+            if not module.check_mode: match.remove(element)
+
+        # Add our new children to the node
+        if not module.check_mode: match.extend(children)
+        changed = True
+
+    # Write it out
+    finish(tree, xpath, module, changed=changed)
+
+def add_target_children(tree, xpath, children, module):
+    if is_node(tree, xpath):
+        new_kids = children_to_nodes(children, module)
+        for node in tree.xpath(xpath):
+            if not module.check_mode: node.extend(new_kids)
+        finish(tree, xpath, module, changed=True)
+    else:
+        finish(tree, xpath, module)
+
+def set_target_attribute(tree, xpath, attribute, value, module):
+    changed = False
+
+    if is_node(tree, xpath):
+        for element in tree.xpath(xpath):
+            if (element.get(attribute) != value):
+                if not module.check_mode: element.set(attribute, value)
+                changed = True
+
+    finish(tree, xpath, module, changed=changed)
+
+def child_to_element(child, module):
+    ch_type = type(child)
+    if ch_type == str or ch_type == unicode:
+        return etree.Element(child)
+    elif ch_type == dict:
+        if len(child) > 1:
+            abort("Can only create children from hashes with one key", module)
+
+        (key, value) = child.items()[0]
+        if type(value) == dict:
+            node = etree.Element(key, value)
+        else:
+            node = etree.Element(key)
+            node.text = value
+        return node
+    else:
+        abort("Invalid child type: %s. Children must be either strings or hashes." % str(ch_type), module)
+
+def children_to_nodes(children=[], module=None):
+    """turn a str/hash/list of str&hash into a list of elements"""
+    return [child_to_element(child, module) for child in children]
+
+def abort(msg, m):
+    m.fail_json(msg=msg)
+
+def finish(tree, xpath, m, changed=False, msg="", hitcount=0):
+    if changed:
+        tree.write(m.params['file'], xml_declaration=True, encoding='UTF-8')
+    m.exit_json(changed=changed,actions={"xpath": xpath, "ensure": m.params['ensure']}, msg=msg, count=hitcount)
+
+def main():
+    module = AnsibleModule(
+        argument_spec=dict(
+            file=dict(required=False, default=None),
+            xmlstring=dict(required=False, default=None),
+            xpath=dict(required=False, default='/'),
+            ensure=dict(required=False, default='present', choices=['absent', 'present']),
+            value=dict(required=False, default=None),
+            attribute=dict(required=False, default=None),
+            add_children=dict(required=False, default=None),
+            set_children=dict(required=False, default=None),
+            count=dict(required=False, default=None, type='bool'),
+            print_match=dict(required=False, default=None, type='bool')
+        ),
+        supports_check_mode=True,
+        mutually_exclusive = [
+            ['value','set_children'],
+            ['value','add_children'],
+            ['set_children', 'add_children'],
+            ['file', 'xmlstring']
+        ]
+    )
+
+    xml_file = module.params['file']
+    xml_string = module.params['xmlstring']
+    xpath = module.params['xpath']
+    ensure = module.params['ensure']
+    value = module.params['value']
+    attribute = module.params['attribute']
+    set_children = module.params['set_children']
+    add_children = module.params['add_children']
+
+    ##################################################################
+    # Check if the file exists
+    # No: abort
+    if xml_string:
+        infile = BytesIO(xml_string.encode('utf-8'))
+    elif os.path.isfile(xml_file):
+        infile = file(xml_file, 'r')
+    else:
+        module.fail_json(
+            msg="The target XML source does not exist: %s" %
+            xml_file)
+
+    # Try to parse in the target XML file
+    try:
+        x = etree.parse(infile)
+    except etree.XMLSyntaxError, e:
+        module.fail_json(
+            msg="Error while parsing file: %s" %
+            str(e))
+
+    if module.params['print_match']:
+        print_match(x, xpath, module)
+
+    if module.params['count']:
+        count(x, xpath, module)
+
+    # module.fail_json(msg="OK. Well, etree parsed the xml file...")
+
+    # module.exit_json(what_did={"foo": "bar"}, changed=True)
+
+    ##################################################################
+    # File exists:
+    # Ensure:
+    if ensure == 'absent':
+        # - absent: delete xpath target
+        delete_xpath_target(x, xpath, module)
+        # Exit
+    # - present: carry on
+
+    ##################################################################
+    # children && value both set?: should have already aborted by now
+    ##################################################################
+
+    ##################################################################
+    # add_children && set_children both set?: should have already aborted by now
+    ##################################################################
+
+    ##################################################################
+    # set_children set?
+    # Yes: Set children of target
+    if module.params['set_children']:
+        set_target_children(x, xpath, set_children, module)
+
+    ##################################################################
+    # add_children set?
+    # Yes: Add children to target
+    if module.params['add_children']:
+        add_target_children(x, xpath, add_children, module)
+
+    # No?: Carry on
+
+    ##################################################################
+    # Is the xpath target an attribute selector?
+    # Yes: Set the attribute, exit
+    if module.params['value']:
+        set_target_attribute(x, xpath, attribute, value, module)
+
+######################################################################
+from ansible.module_utils.basic import *
+main()

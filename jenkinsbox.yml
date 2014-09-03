@@ -1,0 +1,241 @@
+---
+# This playbook should be executed using 
+# ansible-playbook jenkinsbox.yml
+# command
+# Developed for ansible version >= 1.7
+- hosts: spsbox
+#  connection: local
+  gather_facts: yes
+  remote_user: root
+
+  roles:
+    - ansible-php-pear
+    - ansible-role-ansible
+    - ansible-composer
+    - ansible-jenkins
+
+  vars_prompt:
+    jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
+    jenkins_pass: "Enter linux root user pass that will be used as superuser in jenkins UI"
+  vars:
+  # We are using unix pam autentification module for jenkins.
+    plugins:
+      - 'ansicolor'
+      - 'credentials'
+      - 'git-client'
+      - 'git'
+      - 'github-api'
+      - 'github'
+      - 'ghprb'
+      - 'htmlpublisher'
+      - 'jquery'
+      - 'matrix-auth'
+      - 'matrix-project'
+      - 'php'
+      - 'project-description-setter'
+      - 'ssh-credentials'
+    # @todo not uset yet
+    project_name: SPS
+    # @todo not uset yet
+    project_url: https://github.com/propeoplemd/{{ project_name }}
+    # @todo not uset yet
+    project_repo_url: https://github.com/propeoplemd/{{ project_name }}.git
+    # Delay before jenkins up and running. Sometimes it is not enouph.
+    startup_delay_s: 30
+    pear_channels:
+      - pear.drush.org
+    pear_packages:
+      - drush/drush
+      # PHP_CodeSniffer 2.x.x not supported. Please, check for 1.x version.
+      - pear/PHP_CodeSniffer
+    apt_repos:
+      - ppa:chris-lea/node.js
+    apt_packages:
+      - python-software-properties
+      - ruby1.9.1
+      - ruby1.9.1-dev
+      - rubygems1.9.1
+      - irb1.9.1
+      - ri1.9.1
+      - rdoc1.9.1
+      - build-essential
+      - libopenssl-ruby1.9.1
+      - libssl-dev
+      - zlib1g-dev
+      - apache2
+      - mysql-server
+      - mysql-client
+      - python-mysqldb
+      - php5
+      - php5-gd
+      - nodejs
+      - php5-mcrypt
+      - libapache2-mod-php5
+      - php5-mysql
+      - tree
+    gem_packages:
+      - jshint
+      - scss-lint
+    npm_packages:
+      - jshint
+    apache2_modules:
+      - rewrite
+    composer_global_require:
+      - drupal/coder:dev-7.x-2.x
+      - squizlabs/php_codesniffer=*
+    git_repos:
+      - { branch: 'master', repo: 'http://git.drupal.org/sandbox/coltrane/1921926.git', name: 'DrupalSecure' } # git clone --branch master http://git.drupal.org/sandbox/coltrane/1921926.git DrupalSecure
+      - { branch: '7.x-1.x', repo: 'https://github.com/klausi/drupalpractice.git', name: 'DrupalPractice' } #git clone --branch 7.x-1.x https://github.com/klausi/drupalpractice.git DrupalPractice
+      - { branch: 'master', repo: 'https://github.com/podarok/Symfony2-coding-standard.git', name: 'Symfony2' }
+    jenkins_configs:
+      - jenkins.model.JenkinsLocationConfiguration.xml
+      - org.jenkinsci.plugins.ghprb.GhprbTrigger.xml
+      - jobs/{{ project_name }}_PR_BUILDER/config.xml
+    phpcs_standards:
+      - { path: '/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal', name: 'Drupal' } #/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal Drupal
+      - { path: '/root/.composer/vendor/podarok/DrupalSecure/DrupalSecure', name: 'DrupalSecure' } #/root/.composer/vendor/podarok/DrupalSecure DrupalSecure
+      - { path: '/root/.composer/vendor/podarok/DrupalPractice/DrupalPractice', name: 'DrupalPractice' } #/root/.composer/vendor/podarok/DrupalPractice DrupalPractice
+      - { path: '/root/.composer/vendor/podarok/Symfony2', name: 'Symfony2' }
+
+
+  pre_tasks:
+  - name: Setup - get environment data for later usage
+    setup:
+    register: allmy
+    tags:
+      - jenkins_jobs
+
+  - name: Adding jenkins user to group shadow
+    user: name=jenkins groups=shadow append=yes
+
+  - name: Adding jenkins user to nopasswd sudoers
+    lineinfile: dest=/etc/sudoers line="jenkins ALL=(ALL) NOPASSWD:ALL"
+
+  - name: Install apt repos
+    apt_repository: repo={{ item }}
+    with_items: apt_repos
+    tags:
+      - nodejs
+
+  - name: Update apt cache
+    sudo: yes
+    apt: update_cache=yes
+
+  - name: Install apt packages
+    apt: name={{ item }} state=present
+    with_items: apt_packages
+    tags:
+      - sniffers
+      - gem
+      - ruby
+
+  - name: Install nodejs packages
+    npm: name={{ item }} global=yes
+    with_items: npm_packages
+
+  - name: Update ruby alternatives for using ruby 1.9.1(3) version
+    sudo: yes
+    shell: "update-alternatives --install /usr/bin/ruby ruby /usr/bin/ruby1.9.1 400 --slave /usr/share/man/man1/ruby.1.gz ruby.1.gz /usr/share/man/man1/ruby1.9.1.1.gz --slave /usr/bin/ri ri /usr/bin/ri1.9.1 --slave /usr/bin/irb irb /usr/bin/irb1.9.1 --slave /usr/bin/rdoc rdoc /usr/bin/rdoc1.9.1"
+    tags:
+      - sniffers
+      - ruby
+
+  - name: Install gem packages
+    shell: "gem install {{ item }}"
+    with_items: gem_packages
+    ignore_errors: yes
+    tags:
+      - sniffers
+      - gem
+      - ruby
+
+    # @todo More smart way to upload jobs. Move job names to options.
+  - name: Check if job already renamed.
+    stat: path=/var/lib/jenkins/jobs/{{ project_name }}_PR_BUILDER
+    register: prbuilder_stat
+    tags:
+      - jenkins_jobs
+
+  - name: Copy local files for enabling jenkins permissions
+    sudo: yes
+    synchronize: src=files/jenkins/ dest=/var/lib/jenkins recursive=yes archive=no
+    when: prbuilder_stat.stat.exists == false
+    tags:
+      - jenkins_jobs
+
+  - name: Change owner for jenkins files.
+    file: path=/var/lib/jenkins owner=jenkins group=jenkins force=yes recurse=yes state=directory
+    tags:
+      - jenkins_jobs
+
+  - name: Rename jenkins jobs to meet project name.
+    sudo: yes
+    shell: "mv /var/lib/jenkins/jobs/PR_BUILDER /var/lib/jenkins/jobs/{{ project_name }}_PR_BUILDER"
+    when: prbuilder_stat.stat.exists == false
+    tags:
+      - jenkins_jobs
+
+  - name: Remove PR_BUILDER from remote.
+    sudo: yes
+    file: path=/var/lib/jenkins/jobs/PR_BUILDER state=absent
+    when: prbuilder_stat.stat.exists == true
+    tags:
+      - jenkins_jobs
+    # end of @todo More smart way to upload jobs. Move job names to options.
+
+  - name: Change host IP address in jenkins configs
+    replace: dest=/var/lib/jenkins/{{ item }} regexp='ci_server_ip_address' replace={{ allmy.ansible_facts.ansible_default_ipv4.address }}
+    with_items: jenkins_configs
+    tags:
+      - jenkins_jobs
+
+  tasks:
+
+  - name: Install composer global requires
+    sudo: yes
+    shell: "composer global require {{ item }}"
+    with_items: composer_global_require
+    tags:
+      - sniffers
+      - composer
+      - git
+
+  - name: Install global git repos
+    sudo: yes
+    git: repo={{ item.repo }} dest=/root/.composer/vendor/podarok/{{ item.name }} version={{ item.branch }}
+    with_items: git_repos
+    #ignore_errors: yes
+    tags:
+      - sniffers
+      - git
+
+  - name: Install php codesniffer standards
+    sudo: yes
+    file: src={{ item.path }} dest=/usr/share/php/PHP/CodeSniffer/Standards/{{ item.name }} state=link
+    with_items: phpcs_standards
+    tags:
+      - sniffers
+      - git
+
+  - name: apt-get update
+    apt: update_cache=yes
+    tags:
+      - lamp
+
+  - name: Apache2 modules
+    apache2_module: state=present name={{ item }}
+    with_items: apache2_modules
+    tags:
+      - apache
+      - lamp
+    notify: Restart Apache
+
+  - name: Copy apache vhost file
+    synchronize: src=files/sites-enabled/000-default.conf dest=/etc/apache2/sites-enabled/000-default.conf
+    sudo: yes
+    notify: Restart Apache
+
+  handlers:
+  - name: Restart Apache
+    sudo: yes
+    service: name=apache2 state=restarted
