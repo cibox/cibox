@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: Pierre Buyle <buyle@pheromone.ca>
+  description: Install PEAR and PEAR packages.
+  company: Phéromone
+  license: Apache v2
+  min_ansible_version: 1.2
+  platforms:
+  - name: Ubuntu
+    versions:
+    - all
+  - name: Debian
+    versions:
+    - all
+  categories:
+
+  - packaging
+dependencies: []

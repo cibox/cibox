@@ -1,0 +1,21 @@
+---
+- name: Install the system PEAR package
+  apt: name=php-pear state=present
+  when: ansible_os_family == "Debian"
+  tags: [packages,php,pear]
+
+- name: Discover PEAR channels
+  command: pear channel-discover {{ item }}
+  with_items: pear_channels
+  register: pear_channel_result
+  changed_when: "'initialized' not in pear_channel_result.stdout"
+  failed_when: "'failed' in pear_channel_result.stdout"
+  tags: [packages,php,pear]
+
+- name: Install PEAR packages
+  command: pear install {{ item }}
+  with_items: pear_packages
+  register: pear_package_result
+  changed_when: "'is already installed' not in pear_package_result.stdout"
+  failed_when:  "'No releases available for package' in pear_package_result.stdout"
+  tags: [packages,php,pear]

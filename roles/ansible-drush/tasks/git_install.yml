@@ -1,0 +1,14 @@
+---
+- name: "Checkout Drush repository"
+  git: dest={{drush_git_dest}} repo={{drush_git_repo}} version={{drush_git_version}}
+  tags: [drush]
+- name: "Create Drush binary symlink"
+  file: path={{drush_git_bin}} src={{drush_git_dest}}/drush state=link
+  tags: [drush]
+- name: "Composer install"
+  shell: chdir="{{drush_git_dest}}" {{drush_composer_bin}} install --no-interaction --no-ansi
+  tags: [drush]
+- name: "Run Drush to download additional dependencies"
+  shell: "{{drush_git_bin}} version"
+- set_fact:
+    drush_complete_sh: "{{drush_git_dest}}/drush.complete.sh"
