@@ -46,7 +46,7 @@
     <hudson.tasks.Shell>
       <command>
 cd new_pull_request
-sudo mv drupal /var/www/demo
+sudo rsync --delete -ra drupal/ /var/www/demo
 cd /var/www/demo
 sudo chown -R www-data:jenkins *
 ansible-playbook reinstall.yml --extra-vars &quot;mysql_user=root mysql_pass= mysql_db=demo&quot;
