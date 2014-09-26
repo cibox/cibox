@@ -73,6 +73,8 @@
       - libapache2-mod-php5
       - php5-mysql
       - tree
+      - php5-imagick
+      - imagemagick
     gem_packages:
       - jshint
       - scss-lint
