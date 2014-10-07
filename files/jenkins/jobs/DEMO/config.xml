@@ -51,7 +51,7 @@ sudo rsync --delete -ra drupal/ /var/www/demo
 cd /var/www/demo
 sudo chown -R www-data:jenkins *
 ansible-playbook reinstall.yml --extra-vars &quot;mysql_user=root mysql_pass= mysql_db=demo&quot;
-sudo chown -R www-data:jenkins *</command>
+sudo chown -R www-data:jenkins ../demo</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
