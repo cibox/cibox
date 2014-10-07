@@ -3,7 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: spsbox
+- hosts: demobox
 #  connection: local
   gather_facts: yes
   remote_user: root
@@ -190,6 +190,10 @@
     with_items: jenkins_configs
     tags:
       - jenkins_jobs
+
+  - name: Create ansible config directory
+    sudo: yes
+    file: path=/etc/ansible state=directory mode=775
 
   tasks:
 
