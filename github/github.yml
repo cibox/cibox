@@ -12,7 +12,7 @@
   roles:
 
   vars:
-    repo_subfolder: SPS
+    repo_subfolder: DEMO # name of the future project, should be changed manually
     drupal_subfolder: drupal
     installation_profile_name: pp
     drupal_version: 7
@@ -41,6 +41,51 @@
   - name: Copy local profile files to drupal directory
     synchronize: src=files/drupal{{ drupal_version }}/profiles/{{ installation_profile_name }}/ dest={{ repo_subfolder }}/{{ drupal_subfolder }}/profiles/{{ installation_profile_name }}/ recursive=yes archive=no
     register: profile_copy
+
+  - name: Create folder placeholders for sniffers 1
+    sudo: yes
+    shell: "mkdir {{ repo_subfolder }}/{{ drupal_subfolder }}/sites/all/modules/custom/"
+    ignore_errors: yes
+
+  - name: Create folder placeholders for sniffers 2
+    sudo: yes
+    shell: "mkdir {{ repo_subfolder }}/{{ drupal_subfolder }}/sites/all/modules/contrib"
+    ignore_errors: yes
+
+  - name: Create folder placeholders for sniffers 3
+    sudo: yes
+    shell: "mkdir {{ repo_subfolder }}/{{ drupal_subfolder }}/sites/all/themes/custom/"
+    ignore_errors: yes
+
+  - name: Create folder placeholders for sniffers 4
+    sudo: yes
+    shell: "mkdir {{ repo_subfolder }}/{{ drupal_subfolder }}/sites/all/themes/contrib/"
+    ignore_errors: yes
+
+  - name: Create folder placeholders for sniffers 5
+    sudo: yes
+    shell: "mkdir {{ repo_subfolder }}/{{ drupal_subfolder }}/sites/all/modules/features"
+    ignore_errors: yes
+
+  - name: Create empty readme files for placeholders 1
+    sudo: yes
+    file: path={{ repo_subfolder }}/{{ drupal_subfolder }}/sites/all/modules/custom/readme.txt state=touch
+
+  - name: Create empty readme files for placeholders 2
+    sudo: yes
+    file: path={{ repo_subfolder }}/{{ drupal_subfolder }}/sites/all/modules/contrib/readme.txt state=touch
+
+  - name: Create empty readme files for placeholders 3
+    sudo: yes
+    file: path={{ repo_subfolder }}/{{ drupal_subfolder }}/sites/all/themes/custom/readme.txt state=touch
+
+  - name: Create empty readme files for placeholders 4
+    sudo: yes
+    file: path={{ repo_subfolder }}/{{ drupal_subfolder }}/sites/all/themes/contrib/readme.txt state=touch
+
+  - name: Create empty readme files for placeholders 5
+    sudo: yes
+    file: path={{ repo_subfolder }}/{{ drupal_subfolder }}/sites/all/modules/features/readme.txt state=touch
 
   - name: Injecting vmbox into repo
     synchronize: src=files/vagrant/{{ vm_provisioner }}/ dest={{ repo_subfolder }}/ recursive=yes archive=no
