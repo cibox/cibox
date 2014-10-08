@@ -70,7 +70,7 @@ sudo mv drupal /var/www/build${BUILD_NUMBER}
 cd /var/www/build${BUILD_NUMBER}
 sudo chown -R www-data:jenkins *
 ansible-playbook sniffers.yml --extra-vars "workspace_root=${WORKSPACE} webroot=http://ci_server_ip_address/build${BUILD_NUMBER}"
-ansible-playbook reinstall.yml --extra-vars "mysql_user=root mysql_pass= mysql_db=drupal${BUILD_NUMBER}"
+ansible-playbook reinstall.yml --extra-vars "mysql_user=root mysql_pass= mysql_db=drupal${BUILD_NUMBER} php_env_vars='APP_ENV=dev'"
 sudo chown -R www-data:jenkins ../build${BUILD_NUMBER}
             </command>
         </hudson.tasks.Shell>
