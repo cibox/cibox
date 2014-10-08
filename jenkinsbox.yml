@@ -3,14 +3,13 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: demobox
+- hosts: VAS
 #  connection: local
   gather_facts: yes
   remote_user: root
 
   roles:
     - ansible-php-pear
-    - ansible-role-ansible
     - ansible-composer
     - ansible-jenkins
 
@@ -50,7 +49,9 @@
       - pear/PHP_CodeSniffer
     apt_repos:
       - ppa:chris-lea/node.js
+      - ppa:ansible/ansible
     apt_packages:
+      - software-properties-common
       - python-software-properties
       - ruby1.9.1
       - ruby1.9.1-dev
@@ -75,6 +76,7 @@
       - tree
       - php5-imagick
       - imagemagick
+      - ansible
     gem_packages:
       - jshint
       - scss-lint
