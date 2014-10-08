@@ -3,7 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: VAS
+- hosts: Change_me
 #  connection: local
   gather_facts: yes
   remote_user: root
@@ -34,7 +34,7 @@
       - 'project-description-setter'
       - 'ssh-credentials'
     # @todo not uset yet
-    project_name: SPS
+    project_name: Change_me
     # @todo not uset yet
     project_url: https://github.com/propeoplemd/{{ project_name }}
     # @todo not uset yet
