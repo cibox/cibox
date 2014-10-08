@@ -12,6 +12,8 @@
     mysql_user: drupal
     mysql_pass: drupal
     mysql_db: drupal
+    cache_folder: /var/www/cache
+    php_env_vars: '' # APP_ENV=dev - this varible will be set at PR_BUILDER from CI shell executor.
 
   tasks:
 
@@ -20,12 +22,13 @@
 
   - name: Creating drupal database
     mysql_db: name={{ mysql_db }} state=present
+    
+  - name: Creating cache folder
+    sudo: yes
+    file: path={{ cache_folder }} state=directory recurse=yes
 
   - name: Installing drupal
     sudo: yes
-    shell: "drush -y si {{ installation_profile_name }} --db-url=mysql://{{ mysql_user }}:{{ mysql_pass }}@127.0.0.1:/{{ mysql_db }} --account-name={{ drupal_user }} --account-pass={{ drupal_pass }}"
+    shell: "{{ php_env_vars}} drush -y si {{ installation_profile_name }} --db-url=mysql://{{ mysql_user }}:{{ mysql_pass }}@127.0.0.1:/{{ mysql_db }} --account-name={{ drupal_user }} --account-pass={{ drupal_pass }}"
 
   handlers:
-#    - name: import livedb
-#      mysql_db: name=livedrupal state=import target=livedb.sql.gz
-#      ignore_errors: yes
