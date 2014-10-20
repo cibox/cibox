@@ -3,7 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: 8kWkm
+- hosts: Change_me
 #  connection: local
   gather_facts: yes
   remote_user: root
