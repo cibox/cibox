@@ -3,7 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: Change_me
+- hosts: 8kWkm
 #  connection: local
   gather_facts: yes
   remote_user: root
@@ -228,7 +228,7 @@
   - name: apt-get update
     apt: update_cache=yes
     tags:
-      - lamp
+      - lamp  
 
   - name: Apache2 modules
     apache2_module: state=present name={{ item }}
@@ -242,6 +242,17 @@
     synchronize: src=files/sites-enabled/000-default.conf dest=/etc/apache2/sites-enabled/000-default.conf
     sudo: yes
     notify: Restart Apache
+    
+  - name: Set default my.cnf settings 
+    lineinfile: dest=/etc/mysql/my.cnf regexp="{{ item.regexp }}" line="{{ item.line }}"
+    with_items:
+     - { regexp: '^innodb_file_per_table', line: 'innodb_file_per_table = 1' }   
+     - { regexp: '^tmp_table_size', line: 'tmp_table_size = 160M' }  
+     - { regexp: '^max_heap_table_size', line: 'max_heap_table_size = 160M' }
+     - { regexp: '^collation-server', line: 'collation-server=utf8_unicode_ci' }
+     - { regexp: '^innodb_flush_log_at_trx_commit', line: 'innodb_flush_log_at_trx_commit = 0 # or 2' }
+     - { regexp: '^query_cache_size', line: 'query_cache_size = 16M' } 
+     - { regexp: '^table_cache', line: 'table_cache = 800' } 
 
   handlers:
   - name: Restart Apache
