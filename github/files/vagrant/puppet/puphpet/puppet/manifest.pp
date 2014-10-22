@@ -88,7 +88,7 @@ case $::osfamily {
       require => Exec['bash_git']
     }
 
-    file_line { 'link ~/.bash_git':
+    file_line {'link ~/.bash_git':
       ensure  => present,
       line    => 'if [ -f ~/.bash_git ] ; then source ~/.bash_git; fi',
       path    => "/home/${::ssh_username}/.bash_profile",
@@ -1539,3 +1539,10 @@ exec { "phpcs":
 
 include ansible::master
 
+# Mysql default config my.cnf
+file_line { 'innodb_file_per_table':
+   path    => '/etc/mysql/my.cnf',
+   line    => 'innodb_file_per_table = 1',
+   require => ['mysql'],
+      
+      }
