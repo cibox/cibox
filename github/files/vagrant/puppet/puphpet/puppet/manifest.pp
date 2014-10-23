@@ -88,7 +88,7 @@ case $::osfamily {
       require => Exec['bash_git']
     }
 
-    file_line { 'link ~/.bash_git':
+    file_line {'link ~/.bash_git':
       ensure  => present,
       line    => 'if [ -f ~/.bash_git ] ; then source ~/.bash_git; fi',
       path    => "/home/${::ssh_username}/.bash_profile",
@@ -1539,3 +1539,53 @@ exec { "phpcs":
 
 include ansible::master
 
+# Mysql default config my.cnf
+file_line { 'innodb_file_per_table':
+   path    => '/etc/mysql/my.cnf',
+   line    => 'innodb_file_per_table = 1',
+   notify  => Service['mysql'],
+}
+
+file_line { 'tmp_table_size':
+   path    => '/etc/mysql/my.cnf',
+   line    => 'tmp_table_size = 160M',
+   notify  => Service['mysql'],
+}
+
+file_line { 'max_heap_table_size':
+   path    => '/etc/mysql/my.cnf',
+   line    => 'max_heap_table_size = 160M',
+   notify  => Service['mysql'],
+}
+
+file_line { 'character-set-server':
+   path    => '/etc/mysql/my.cnf',
+   line    => 'character-set-server=utf8',
+   notify  => Service['mysql'],
+}
+
+file_line { 'collation-server':
+   path    => '/etc/mysql/my.cnf',
+   line    => 'collation-server=utf8_unicode_ci',
+   notify  => Service['mysql'],
+}
+
+file_line { 'innodb_flush_log_at_trx_commit':
+   path    => '/etc/mysql/my.cnf',
+   line    => 'innodb_flush_log_at_trx_commit = 0 # or 2',
+   notify  => Service['mysql'],
+}
+
+file_line { 'query_cache_size':
+   path    => '/etc/mysql/my.cnf',
+   line    => 'query_cache_size = 16M',
+   notify  => Service['mysql'],
+}
+
+file_line { 'table_cache':
+   path    => '/etc/mysql/my.cnf',
+   line    => 'table_cache = 800',
+   notify  => Service['mysql'],
+}
+      
+   
