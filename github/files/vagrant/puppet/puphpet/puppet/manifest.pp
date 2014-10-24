@@ -1594,12 +1594,6 @@ file_line { 'tmpdir':
    notify  => Service['mysql'],
 }
 
-augeas{"test1" :
-  context => '/etc/apparmor.d/usr.sbin.mysqld',
-  changes => 'ins </run/shm/mysql/* rw,> after </run/mysqld/mysqld.sock w,>',
-  onlyif  => 'match other_value size > 0',
-}
-
 
 
 
