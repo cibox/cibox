@@ -706,7 +706,7 @@ if hash_key_equals($php_values, 'install', 1) {
     each( $php_values['ini'] ) |$key, $value| {
       if is_array($value) {
         each( $php_values['ini'][$key] ) |$innerkey, $innervalue| {
-          puphpet::ini { "${key}_${innerkey}":
+         puphpet::php::ini { "${key}_${innerkey}":
             entry       => "CUSTOM_${innerkey}/${key}",
             value       => $innervalue,
             php_version => $php_values['version'],
@@ -714,7 +714,7 @@ if hash_key_equals($php_values, 'install', 1) {
           }
         }
       } else {
-        puphpet::ini { $key:
+       puphpet::php::ini { $key:
           entry       => "CUSTOM/${key}",
           value       => $value,
           php_version => $php_values['version'],
@@ -737,7 +737,7 @@ if hash_key_equals($php_values, 'install', 1) {
     }
   }
 
-  puphpet::ini { $key:
+ puphpet::php::ini { $key:
     entry       => 'CUSTOM/date.timezone',
     value       => $php_values['timezone'],
     php_version => $php_values['version'],
@@ -805,13 +805,13 @@ if hash_key_equals($apache_values, 'install', 1) {
 if hash_key_equals($xdebug_values, 'install', 1)
   and hash_key_equals($php_values, 'install', 1)
 {
-  class { 'puphpet::xdebug':
+  class { 'puphpet::php::xdebug':
     webserver => $xdebug_webserver_service
   }
 
   if is_hash($xdebug_values['settings']) and count($xdebug_values['settings']) > 0 {
     each( $xdebug_values['settings'] ) |$key, $value| {
-      puphpet::ini { $key:
+     puphpet::php::ini { $key:
         entry       => "XDEBUG/${key}",
         value       => $value,
         php_version => $php_values['version'],
@@ -1587,5 +1587,21 @@ file_line { 'table_cache':
    line    => 'table_cache = 800',
    notify  => Service['mysql'],
 }
+
+file_line { 'tmpdir':
+   path    => '/etc/mysql/my.cnf',
+   line    => 'tmpdir = /run/shm/mysql',
+   notify  => Service['mysql'],
+}
+
+augeas{"test1" :
+  context => '/etc/apparmor.d/usr.sbin.mysqld',
+  changes => 'ins </run/shm/mysql/* rw,> after </run/mysqld/mysqld.sock w,>',
+  onlyif  => 'match other_value size > 0',
+}
+
+
+
+
       
    
