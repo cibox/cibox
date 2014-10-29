@@ -736,7 +736,6 @@ if hash_key_equals($php_values, 'install', 1) {
       }
     }
   }
-   if $key == undef { $key = sha1(fqdn_rand 10000000, [key]))}
  puphpet::ini {$key:
     entry       => 'CUSTOM/date.timezone',
     value       => $php_values['timezone'],
@@ -1592,18 +1591,4 @@ file_line { 'tmpdir':
    path    => '/etc/mysql/my.cnf',
    line    => 'tmpdir = /run/shm/mysql',
    notify  => Service['mysql'],
-}
-
-# Updated apparmor conf with run/shm/mysql/* rw, line.
-augeas{"apparmor":
-  context => "/etc/apparmor.d/usr.sbin.mysqld",
-  changes => [
-      "ins run/shm/mysql/* rw, after run/mysqld/mysqld.sock w,"
-      ],
-  notify  => Service["mysql"],
-}
-
-
-
-      
-   
+} 
