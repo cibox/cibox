@@ -706,7 +706,7 @@ if hash_key_equals($php_values, 'install', 1) {
     each( $php_values['ini'] ) |$key, $value| {
       if is_array($value) {
         each( $php_values['ini'][$key] ) |$innerkey, $innervalue| {
-         puphpet::php::ini { "${key}_${innerkey}":
+         puphpet::ini { "${key}_${innerkey}":
             entry       => "CUSTOM_${innerkey}/${key}",
             value       => $innervalue,
             php_version => $php_values['version'],
@@ -714,7 +714,7 @@ if hash_key_equals($php_values, 'install', 1) {
           }
         }
       } else {
-       puphpet::php::ini { $key:
+       puphpet::ini { $key:
           entry       => "CUSTOM/${key}",
           value       => $value,
           php_version => $php_values['version'],
@@ -736,8 +736,8 @@ if hash_key_equals($php_values, 'install', 1) {
       }
     }
   }
-
- puphpet::php::ini { $key:
+   if $key == undef { $key = sha1(fqdn_rand 10000000, [key]))}
+ puphpet::ini {$key:
     entry       => 'CUSTOM/date.timezone',
     value       => $php_values['timezone'],
     php_version => $php_values['version'],
@@ -805,13 +805,13 @@ if hash_key_equals($apache_values, 'install', 1) {
 if hash_key_equals($xdebug_values, 'install', 1)
   and hash_key_equals($php_values, 'install', 1)
 {
-  class { 'puphpet::php::xdebug':
+  class { 'puphpet::xdebug':
     webserver => $xdebug_webserver_service
   }
 
   if is_hash($xdebug_values['settings']) and count($xdebug_values['settings']) > 0 {
     each( $xdebug_values['settings'] ) |$key, $value| {
-     puphpet::php::ini { $key:
+     puphpet::ini {$key:
         entry       => "XDEBUG/${key}",
         value       => $value,
         php_version => $php_values['version'],
@@ -1594,6 +1594,14 @@ file_line { 'tmpdir':
    notify  => Service['mysql'],
 }
 
+# Updated apparmor conf with run/shm/mysql/* rw, line.
+augeas{"apparmor":
+  context => "/etc/apparmor.d/usr.sbin.mysqld",
+  changes => [
+      "ins run/shm/mysql/* rw, after run/mysqld/mysqld.sock w,"
+      ],
+  notify  => Service["mysql"],
+}
 
 
 
