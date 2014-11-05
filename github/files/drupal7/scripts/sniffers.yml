@@ -11,7 +11,7 @@
     artifacts_file: commentinfo.md
     webroot: http://localhost
     installation_profile_name: pp
-    phpcs_extensions: php,inc,install,module
+    phpcs_extensions: php,inc,install,module,theme
     phpcs_features_extensions: module
     custom_modules_path: sites/all/modules/custom/
     custom_themes_path: sites/all/themes/custom
