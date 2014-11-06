@@ -34,11 +34,11 @@
       - 'project-description-setter'
       - 'ssh-credentials'
     # @todo not uset yet
-    project_name: csua
+    project_name: CHANGE_ME
     # @todo not uset yet
     project_url: https://github.com/podarok/{{ project_name }}
     # @todo not uset yet
-    project_repo_url: https://github.com/propeoplemd/{{ project_name }}.git
+    project_repo_url: https://github.com/podarok/{{ project_name }}.git
     # Delay before jenkins up and running. Sometimes it is not enouph.
     startup_delay_s: 40
     pear_channels:
