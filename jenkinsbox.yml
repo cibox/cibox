@@ -3,7 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: Change_me
+- hosts: demo
 #  connection: local
   gather_facts: yes
   remote_user: root
@@ -11,7 +11,7 @@
   roles:
     - ansible-php-pear
     - ansible-composer
-    - ansible-jenkins
+#    - ansible-jenkins
 
   vars_prompt:
     jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
@@ -34,9 +34,9 @@
       - 'project-description-setter'
       - 'ssh-credentials'
     # @todo not uset yet
-    project_name: Change_me
+    project_name: csua
     # @todo not uset yet
-    project_url: https://github.com/propeoplemd/{{ project_name }}
+    project_url: https://github.com/podarok/{{ project_name }}
     # @todo not uset yet
     project_repo_url: https://github.com/propeoplemd/{{ project_name }}.git
     # Delay before jenkins up and running. Sometimes it is not enouph.
@@ -77,6 +77,7 @@
       - php5-imagick
       - imagemagick
       - ansible
+      - git
     gem_packages:
       - jshint
       - scss-lint
@@ -124,6 +125,7 @@
   - name: Update apt cache
     sudo: yes
     apt: update_cache=yes
+    ignore_errors: yes
 
   - name: Install apt packages
     apt: name={{ item }} state=present
