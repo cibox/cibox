@@ -3,7 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: demo
+- hosts: CHANGE_ME
 #  connection: local
   gather_facts: yes
   remote_user: root
@@ -11,7 +11,7 @@
   roles:
     - ansible-php-pear
     - ansible-composer
-#    - ansible-jenkins
+    - ansible-jenkins
 
   vars_prompt:
     jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
@@ -40,7 +40,7 @@
     # @todo not uset yet
     project_repo_url: https://github.com/propeoplemd/{{ project_name }}.git
     # Delay before jenkins up and running. Sometimes it is not enouph.
-    startup_delay_s: 30
+    startup_delay_s: 40
     pear_channels:
       - pear.drush.org
     pear_packages:
