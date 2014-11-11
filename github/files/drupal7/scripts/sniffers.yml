@@ -106,6 +106,9 @@
 
     phpcs_drupal_sniffs_skip: []
 
+    phpcs_sniffs:
+      Drupal: "{{ phpcs_drupal_sniffs | difference(phpcs_drupal_sniffs_skip) }}"
+
   pre_tasks:
 
   - name: Install composer global requires
