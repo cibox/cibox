@@ -44,6 +44,68 @@
     scsslint_folders:
       - { name: 'themes', path: 'sites/all/themes/custom' }
 
+    phpcs_drupal_sniffs:
+      - Drupal.Array.Array
+      - Drupal.Classes.ClassCreateInstance
+      - Drupal.Classes.ClassDeclaration
+      - Drupal.Classes.InterfaceName
+      - Drupal.Commenting.DocCommentAlignment
+      - Drupal.Commenting.FileComment
+      - Drupal.Commenting.FunctionComment
+      - Drupal.Commenting.InlineComment
+      - Drupal.ControlStructures.ControlSignature
+      - Drupal.ControlStructures.ElseCatchNewline
+      - Drupal.ControlStructures.ElseIf
+      - Drupal.ControlStructures.InlineControlStructure
+      - Drupal.ControlStructures.TemplateControlStructure
+      - Drupal.CSS.ClassDefinitionClosingBraceSpace
+      - Drupal.CSS.ClassDefinitionNameSpacing
+      - Drupal.CSS.ClassDefinitionOpeningBraceSpace
+      - Drupal.CSS.ColourDefinition
+      - Drupal.CSS.Indentation
+      - Drupal.Files.LineLength
+      - Drupal.Files.TxtFileLineLength
+      - Drupal.Formatting.DisallowCloseTag
+      - Drupal.Formatting.MultiLineAssignment
+      - Drupal.Formatting.SpaceInlineIf
+      - Drupal.Formatting.SpaceUnaryOperator
+      - Drupal.Functions.DiscouragedFunctions
+      - Drupal.Functions.FunctionDeclaration
+      - Drupal.InfoFiles.ClassFiles
+      - Drupal.InfoFiles.Required
+      - Drupal.NamingConventions.KeywordLowerCase
+      - Drupal.NamingConventions.ValidClassName
+      - Drupal.NamingConventions.ValidFunctionName
+      - Drupal.NamingConventions.ValidGlobal
+      - Drupal.NamingConventions.ValidVariableName
+      - Drupal.Semantics.Br
+      - Drupal.Semantics.ConstantName
+      - Drupal.Semantics.EmptyInstall
+      - Drupal.Semantics.FunctionAlias
+      - Drupal.Semantics.FunctionCall
+      - Drupal.Semantics.FunctionT
+      - Drupal.Semantics.FunctionWatchdog
+      - Drupal.Semantics.InstallHooks
+      - Drupal.Semantics.InstallT
+      - Drupal.Semantics.LStringTranslatable
+      - Drupal.Semantics.PregSecurity
+      - Drupal.Semantics.RemoteAddress
+      - Drupal.Semantics.TInHookMenu
+      - Drupal.Semantics.TInHookSchema
+      - Drupal.Strings.ConcatenationSpacing
+      - Drupal.Strings.UnnecessaryStringConcat
+      - Drupal.WhiteSpace.CloseBracketSpacing
+      - Drupal.WhiteSpace.EmptyLines
+      - Drupal.WhiteSpace.FileEnd
+      - Drupal.WhiteSpace.ObjectOperatorIndent
+      - Drupal.WhiteSpace.ObjectOperatorSpacing
+      - Drupal.WhiteSpace.OpenBracketSpacing
+      - Drupal.WhiteSpace.OperatorSpacing
+      - Drupal.WhiteSpace.ScopeClosingBrace
+      - Drupal.WhiteSpace.ScopeIndent
+
+    phpcs_drupal_sniffs_skip: []
+
   pre_tasks:
 
   - name: Install composer global requires
