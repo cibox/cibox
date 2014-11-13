@@ -1,6 +1,7 @@
 cibox
 =====
 
+Wiki https://github.com/propeoplemd/cibox/wiki
 
 This repo consists basically from two playbooks
 - CI server installation/provisioning jenkinsbox.yml
