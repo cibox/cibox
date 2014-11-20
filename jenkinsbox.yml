@@ -17,7 +17,8 @@
     jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
     jenkins_pass: "Enter linux root user pass that will be used as superuser in jenkins UI"
   vars:
-    swap_size: 2359296
+    # This should be a parameter 'count' for unix 'dd' command
+    swap_size: 2G
   # We are using unix pam autentification module for jenkins.
     plugins:
       - 'ansicolor'
@@ -34,6 +35,7 @@
       - 'php'
       - 'project-description-setter'
       - 'ssh-credentials'
+      - 'hipchat'
     # @todo not uset yet
     project_name: CHANGE_ME
     # @todo not uset yet
@@ -118,7 +120,7 @@
 
   - name: Create swapfile if not present
     sudo: yes
-    shell: 'dd if=/dev/zero of=/swapfile1 bs=1024 count={{ swap_size }}'
+    shell: 'dd if=/dev/zero of=/swapfile1 bs=1 count={{ swap_size }}'
     when: is_swapfile.changed == true and is_swapfile.size == 0
 
   - name: Make swapfile as swap
