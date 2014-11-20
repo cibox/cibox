@@ -18,6 +18,7 @@
     jenkins_pass: "Enter linux root user pass that will be used as superuser in jenkins UI"
   vars:
     # This should be a parameter 'count' for unix 'dd' command
+    # See http://druler.com/node/860 for additional instructions.
     swap_size: 2G
   # We are using unix pam autentification module for jenkins.
     plugins:
