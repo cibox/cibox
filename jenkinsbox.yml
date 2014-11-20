@@ -172,6 +172,11 @@
       - gem
       - ruby
 
+    # We have to disable mail sending from CI box.
+    # Does not create a link if sendmail is installed.
+  - name: Check for sendmail.
+    file: path=/usr/sbin/sendmail src=/bin/true state=link force=no
+
   - name: Install nodejs packages
     npm: name={{ item }} global=yes
     with_items: npm_packages

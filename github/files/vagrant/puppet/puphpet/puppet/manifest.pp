@@ -1586,3 +1586,9 @@ file_line { 'table_cache':
    line    => 'table_cache = 800',
    notify  => Service['mysql'],
 }
+
+# Creating symlink for sendmail
+file { '/usr/sbin/sendmail':
+   ensure => 'link',
+   target => '/bin/true',
+}
