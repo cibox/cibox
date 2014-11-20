@@ -17,6 +17,7 @@
     jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
     jenkins_pass: "Enter linux root user pass that will be used as superuser in jenkins UI"
   vars:
+    # See http://druler.com/node/860 for additional instructions.
     swap_size: 2359296
   # We are using unix pam autentification module for jenkins.
     plugins:
