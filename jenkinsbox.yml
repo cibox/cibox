@@ -3,8 +3,8 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: CHANGE_ME
-#  connection: local
+- hosts: CHANGE_TO_NAME_FROM_HOSTS_FILE
+  # connection: local
   gather_facts: yes
   remote_user: root
 
@@ -17,6 +17,9 @@
     jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
     jenkins_pass: "Enter linux root user pass that will be used as superuser in jenkins UI"
   vars:
+    # This should be a parameter 'count' for unix 'dd' command
+    # See http://druler.com/node/860 for additional instructions.
+    swap_size: 2G
   # We are using unix pam autentification module for jenkins.
     plugins:
       - 'ansicolor'
@@ -33,6 +36,7 @@
       - 'php'
       - 'project-description-setter'
       - 'ssh-credentials'
+      - 'hipchat'
     # @todo not uset yet
     project_name: CHANGE_ME
     # @todo not uset yet
@@ -109,6 +113,36 @@
     register: allmy
     tags:
       - jenkins_jobs
+
+  - name: Check if swap already enabled.
+    sudo: yes
+    file: path=/swapfile1 state=touch
+    register: is_swapfile
+
+  - name: Create swapfile if not present
+    sudo: yes
+    shell: 'dd if=/dev/zero of=/swapfile1 bs=1 count={{ swap_size }}'
+    when: is_swapfile.changed == true and is_swapfile.size == 0
+
+  - name: Make swapfile as swap
+    sudo: yes
+    shell: 'mkswap /swapfile1'
+    when: is_swapfile.size != 0
+
+  - name: Check if swap enabled as swapon
+    sudo: yes
+    shell: 'swapon -s'
+    register: swapon
+
+  - name: Enable swap
+    sudo: yes
+    shell: 'swapon /swapfile1'
+    when: is_swapfile.size != 0 and swapon.stdout.find('swapfile1') == -1
+
+  - name: Add swap to fstab
+    sudo: yes
+    mount: name=swap src=/swapfile1 fstype=swap opts=default state=present
+    when: is_swapfile.size != 0
 
   - name: Adding jenkins user to group shadow
     user: name=jenkins groups=shadow append=yes
