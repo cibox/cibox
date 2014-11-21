@@ -3,7 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: vagrant
+- hosts: CHANGE_ME
 #  connection: local
   gather_facts: yes
   remote_user: root
@@ -203,10 +203,6 @@
     file: path=/etc/ansible state=directory mode=775
 
   tasks:
-    #If you ever want to flush all the handler commands immediately though
-  # - shell: some tasks go here
-  # - meta: flush_handlers #flush all the handler commands immediately though this line
-  # - shell: some other tasks
 
   - name: Install composer global requires
     sudo: yes
