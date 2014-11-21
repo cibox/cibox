@@ -280,14 +280,25 @@
     tags:
       - apache
       - lamp
-    notify: Restart Apache
+    notify: Restart apache
 
   - name: Copy apache vhost file
     synchronize: src=files/sites-enabled/000-default.conf dest=/etc/apache2/sites-enabled/000-default.conf
     sudo: yes
-    notify: Restart Apache
+    tags:
+      - apache
+    notify: Restart apache
+
+  - name: Add's to my.cnf file
+    lineinfile: dest=/etc/mysql/my.cnf line="innodb_lock_wait_timeout = 900"
+    sudo: yes
+    tags:
+      - mysql
+    notify: Restart mysql
 
   handlers:
-  - name: Restart Apache
-    sudo: yes
+  - name: Restart apache
     service: name=apache2 state=restarted
+  - name: Restart mysql
+    service: name=mysql state=restarted
+   
