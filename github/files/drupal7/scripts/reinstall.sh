@@ -5,4 +5,4 @@
 # sudo apt-get update
 # sudo apt-get install ansible
 # sudo apt-get install python-mysqldb
-ansible-playbook reinstall.yml
+time ansible-playbook reinstall.yml
