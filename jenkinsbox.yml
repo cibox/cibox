@@ -19,7 +19,8 @@
   vars:
     # This should be a parameter 'count' for unix 'dd' command
     # See http://druler.com/node/860 for additional instructions.
-    swap_size: 2G
+    swap_size: 100M
+    swap_blocks: 24
   # We are using unix pam autentification module for jenkins.
     plugins:
       - 'ansicolor'
@@ -121,7 +122,7 @@
 
   - name: Create swapfile if not present
     sudo: yes
-    shell: 'dd if=/dev/zero of=/swapfile1 bs=1 count={{ swap_size }}'
+    shell: 'dd if=/dev/zero of=/swapfile1 bs={{ swap_size }} count={{ swap_blocks }}'
     when: is_swapfile.changed == true and is_swapfile.size == 0
 
   - name: Make swapfile as swap
