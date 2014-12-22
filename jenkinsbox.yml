@@ -3,6 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
+# CHAGNE_ME with name from the host file
 - hosts: CHANGE_TO_NAME_FROM_HOSTS_FILE
   # connection: local
   gather_facts: yes
@@ -39,11 +40,14 @@
       - 'ssh-credentials'
       - 'hipchat'
     # @todo not uset yet
-    project_name: CHANGE_ME
+    # CHAGNE_ME with project repository name
+    project_name: CHAGNE_ME                
+    # CHAGNE_ME with Github User or Company account.
+    user_company: CHAGNE_ME   
     # @todo not uset yet
-    project_url: https://github.com/podarok/{{ project_name }}
+    project_url: https://github.com/{{user_company}}/{{ project_name }}
     # @todo not uset yet
-    project_repo_url: https://github.com/podarok/{{ project_name }}.git
+    project_repo_url: https://github.com/{{user_company}}/{{ project_name }}.git
     # Delay before jenkins up and running. Sometimes it is not enouph.
     startup_delay_s: 40
     pear_channels:
