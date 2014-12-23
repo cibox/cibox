@@ -3,6 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
+# CHAGNE_ME with name from the host file
 - hosts: CHANGE_TO_NAME_FROM_HOSTS_FILE
   # connection: local
   gather_facts: yes
@@ -39,11 +40,14 @@
       - 'ssh-credentials'
       - 'hipchat'
     # @todo not uset yet
-    project_name: CHANGE_ME
+    # CHAGNE_ME with project repository name
+    project_name: CHAGNE_ME                
+    # CHAGNE_ME with Github User or Company account.
+    user_company: CHAGNE_ME   
     # @todo not uset yet
-    project_url: https://github.com/podarok/{{ project_name }}
+    project_url: https://github.com/{{user_company}}/{{ project_name }}
     # @todo not uset yet
-    project_repo_url: https://github.com/podarok/{{ project_name }}.git
+    project_repo_url: https://github.com/{{user_company}}/{{ project_name }}.git
     # Delay before jenkins up and running. Sometimes it is not enouph.
     startup_delay_s: 40
     pear_channels:
@@ -290,12 +294,26 @@
       - apache
     notify: Restart apache
 
-  - name: Add's to my.cnf file
-    lineinfile: dest=/etc/mysql/my.cnf line="innodb_lock_wait_timeout = 900"
-    sudo: yes
-    tags:
-      - mysql
-    notify: Restart mysql
+  - name: Add required lines to my.cnf file
+    lineinfile: 
+      state=present
+      dest=/etc/mysql/my.cnf
+      regexp="{{ item.regexp }}"
+      line="{{ item.line }}"
+    with_items:
+    - { regexp: '^innodb_lock_wait_timeout', line: 'innodb_lock_wait_timeout = 900' }
+    - { regexp: '^innodb_file_per_table', line: 'innodb_file_per_table = 1' }
+    - { regexp: '^tmp_table_size', line: 'tmp_table_size = 160M' }
+    - { regexp: '^character-set-server', line: 'character-set-server = utf8' }
+    - { regexp: '^innodb_flush_log_at_trx_commit', line: 'innodb_flush_log_at_trx_commit = 0' }
+    - { regexp: '^collation-server', line: 'collation-server = utf8_unicode_ci' }
+    - { regexp: '^query_cache_size', line: 'query_cache_size = 16M' }
+    - { regexp: '^table_cache', line: 'table_cache = 800' }
+
+    sudo: yes
+    tags:
+      - mysql
+    notify: Restart mysql
 
   handlers:
   - name: Restart apache
