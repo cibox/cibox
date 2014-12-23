@@ -51,7 +51,7 @@
     pear_packages:
       - drush/drush
       # PHP_CodeSniffer 2.x.x not supported. Please, check for 1.x version.
-      - pear/PHP_CodeSniffer
+      - pear/PHP_CodeSniffer-1.5.6
     apt_repos:
       - ppa:chris-lea/node.js
       - ppa:ansible/ansible
