@@ -50,7 +50,7 @@
       - pear.drush.org
     pear_packages:
       - drush/drush
-      # PHP_CodeSniffer 2.x.x not supported. Please, check for 1.x version.
+      # Use PHP_CodeSniffer 2.x for Drupal 8 and 1.x for Drupal 7.
       - pear/PHP_CodeSniffer-1.5.6
     apt_repos:
       - ppa:chris-lea/node.js
