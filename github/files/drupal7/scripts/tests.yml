@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    behat_root: '../tests/behat'
+    config_file: behat.vm.yml
+    features_dir: features
+
+  pre_tasks:
+
+  - name: Install behat dependencies from composer.json
+    shell: "cd {{ behat_root }} && composer up"
+    tags:
+      - composer
+
+  - name: Run headlses Behat tests
+    shell: 'echo "HeadLess Behat tests:\n"'
+    shell: "cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }} --tags '~@javascript'"
+
+  - name: Run browser Behat tests
+    shell: 'echo "Browser Behat tests:\n"'
+    shell: "cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }} --tags '@javascript'"
