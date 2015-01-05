@@ -34,5 +34,6 @@
 
   - name: Run automated tests
     shell: sh runtests.sh
+    when: run_tests
 
   handlers:
