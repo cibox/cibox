@@ -1,5 +1,5 @@
 ---
-# This playbook should be executed using 
+# This playbook should be executed using
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
