@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  remote_user: root
+  vars:
+    java_packages:
+      - openjdk-6-jdk
+  roles:
+    - geerlingguy.java
+    - { role: ansible-role-tomcat6, tomcat6_enabled: false }

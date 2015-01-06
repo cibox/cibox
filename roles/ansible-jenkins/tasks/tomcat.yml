@@ -1,0 +1,16 @@
+---
+- name: Create tomcat Vhost for jenkins
+  sudo: yes
+  file: src=/usr/share/jenkins/jenkins.war dest=/var/lib/tomcat6/webapps/jenkins.war state=link owner=tomcat6 group=tomcat6
+
+- name: Copy custom configs to tomcat jenkins instance
+  sudo: yes
+  shell: rm -rf /usr/share/tomcat6/.jenkins && cp -R /var/lib/jenkins /usr/share/tomcat6/.jenkins
+
+- name: Fix permissions for tomcat usage
+  sudo: yes
+  file: path=/usr/share/tomcat6/.jenkins owner=tomcat6 group=tomcat6 recurse=yes
+
+- name: Restart tomcat
+  sudo: yes
+  shell: service tomcat6 restart
