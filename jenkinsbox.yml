@@ -3,12 +3,15 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: CHANGE_TO_NAME_FROM_HOSTS_FILE
+- hosts: test
   # connection: local
   gather_facts: yes
   remote_user: root
 
   roles:
+    - geerlingguy.java
+    - geerlingguy.tomcat6
+    - geerlingguy.solr
     - ansible-php-pear
     - ansible-composer
     - ansible-jenkins
@@ -21,7 +24,9 @@
     # See http://druler.com/node/860 for additional instructions.
     swap_size: 100M
     swap_blocks: 24
-  # We are using unix pam autentification module for jenkins.
+    # Use 8080 port instead of default 8983 port of tomcat
+    tomcat6_catalina_port: 8080
+    # We are using unix pam autentification module for jenkins.
     plugins:
       - 'ansicolor'
       - 'credentials'
