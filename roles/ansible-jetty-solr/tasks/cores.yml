@@ -1,0 +1,16 @@
+---
+
+- name: Clone solr index cores from default collection1
+  shell: rm -rf /opt/solr/solr/{{ item.value.name }} && cp -R /opt/solr/solr/collection1 /opt/solr/solr/{{ item.value.name }}
+  with_dict: jetty_solr_cores
+
+- name: Clean indexes data
+  file: path=/opt/solr/solr/{{ item.value.name }}/data state=absent
+  with_dict: jetty_solr_cores
+
+- name: Set configs to Solr
+  synchronize: src=files/solr/{{ item.value.module }}/{{ item.value.config_version }} dest=/opt/solr/solr/{{ item.value.name }}/conf recursive=yes archive=no
+  with_dict: jetty_solr_cores
+
+- name: Fix permissions after modifications
+  file: path=/opt/solr/solr group=solr owner=solr recurse=yes

@@ -179,4 +179,7 @@ redis:
     settings:
         conf_port: '6379'
 
+solr:
+    config_path: "/var/www/docroot/sites/all/modules/contrib/apachesolr/solr-conf/solr-4.x/"
+
 
