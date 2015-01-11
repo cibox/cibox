@@ -1,0 +1,54 @@
+---
+# Stolen here https://www.digitalocean.com/community/tutorials/how-to-install-solr-on-ubuntu-14-04
+
+- name: Prepare Java
+  file: path=/usr/java state=directory
+  file: src=/usr/lib/jvm/java-7-openjdk-amd64 dest=/usr/java/default state=link
+
+- name: Download Solr with Jetty
+  get_url: dest=/opt url=http://archive.apache.org/dist/lucene/solr/{{ jetty_solr_version }}/solr-{{ jetty_solr_version }}.tgz
+
+- name: Unarchive downloaded Solr
+  shell: cd /opt && tar -xvf solr-{{ jetty_solr_version }}.tgz
+
+- name: Cope actual Solr sources
+  shell: rm -rf /opt/solr && cp -R /opt/solr-{{ jetty_solr_version }}/example /opt/solr
+
+- name: Copy jetty settings
+  template:
+    src: jetty.j2
+    dest: /etc/default/jetty
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Copy jetty logging settings
+  template:
+    src: jetty-logging.xml.j2
+    dest: /opt/solr/etc/jetty-logging.xml
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create Solr user
+  user: name=solr comment="Solr user" shell=/sbin/false home=/opt/solr
+
+- name: Grant permission to Solr user in his directory
+  file: path=/opt/solr group=solr owner=solr recurse=yes
+
+- name: Get init.d script for jetty
+  get_url: dest=/etc/init.d/jetty url=https://gist.githubusercontent.com/peterc/404672/raw/77591f254b055a0fc6165df808ded10e1bb02565/jetty
+
+- name: Make jetty script executable
+  file: path=/etc/init.d/jetty state=file mode=0755
+
+- name: Update services list
+  shell: update-rc.d jetty defaults
+
+- include: cores.yml
+
+- name: Ensure jetty is running.
+  service:
+    name: jetty
+    state: started
+    enabled: yes
