@@ -9,10 +9,10 @@
   remote_user: root
 
   roles:
-    - ansible-jetty-solr
     - ansible-php-pear
     - ansible-composer
     - ansible-jenkins
+    - ansible-jetty-solr
 
   vars_prompt:
     jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"

@@ -14,8 +14,6 @@
   when: ansible_distribution in [ 'Debian', 'Ubuntu' ]
   register: jenkins_install
 
-- include: tomcat.yml
-
 # Install Jenkins cli
 - include: cli.yml
 

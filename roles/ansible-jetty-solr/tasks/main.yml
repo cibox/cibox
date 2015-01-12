@@ -1,18 +1,30 @@
 ---
 # Stolen here https://www.digitalocean.com/community/tutorials/how-to-install-solr-on-ubuntu-14-04
 
-- name: Prepare Java
+- name: Install dependencies
+  sudo: yes
+  action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=installed update-cache=yes"
+  with_items: jetty_solr_dependencies
+
+- name: Prepare Java folder
   file: path=/usr/java state=directory
+
+- name: Prepare java binaries
   file: src=/usr/lib/jvm/java-7-openjdk-amd64 dest=/usr/java/default state=link
+
+- name: If solr was downloaded
+  stat: path=/opt/solr-{{ jetty_solr_version }}.tgz
+  register: solr_tar
 
 - name: Download Solr with Jetty
   get_url: dest=/opt url=http://archive.apache.org/dist/lucene/solr/{{ jetty_solr_version }}/solr-{{ jetty_solr_version }}.tgz
+  when: solr_tar.stat.exists == false
 
 - name: Unarchive downloaded Solr
   shell: cd /opt && tar -xvf solr-{{ jetty_solr_version }}.tgz
 
 - name: Cope actual Solr sources
-  shell: rm -rf /opt/solr && cp -R /opt/solr-{{ jetty_solr_version }}/example /opt/solr
+  shell: rsync -ra /opt/solr-{{ jetty_solr_version }}/example/ /opt/solr/
 
 - name: Copy jetty settings
   template:

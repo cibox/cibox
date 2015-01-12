@@ -18,7 +18,7 @@
   <adminlist>ppbot
 podarok
 ygerasimov</adminlist>
-  <publishedURL>http://ci_server_ip_address:8080/jenkins/</publishedURL>
+  <publishedURL>http://ci_server_ip_address:8080/</publishedURL>
   <requestForTestingPhrase>Can one of the admins verify this patch? Use &quot;ok to test&quot; or &apos;&apos;test this please&quot; for manual build execution.</requestForTestingPhrase>
   <jobs/>
 </org.jenkinsci.plugins.ghprb.GhprbTrigger_-DescriptorImpl>
