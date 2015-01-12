@@ -3,9 +3,9 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: CHANGE_TO_NAME_FROM_HOSTS_FILE
+- hosts: CHANGE_ME_TO_THE_ONE_FROM_hosts_FILE
   # connection: local
-  gather_facts: yes
+- gather_facts: yes
   remote_user: root
 
   roles:
@@ -273,6 +273,7 @@
 
   - name: apt-get update
     apt: update_cache=yes
+    ignore_errors: yes
     tags:
       - lamp
 
