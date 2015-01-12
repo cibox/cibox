@@ -1,0 +1,13 @@
+---
+
+- name: If module is downloaded already
+  stat: path=~/{{ jetty_solr_module }}
+  register: drupal_solr_module
+
+- name: Download Drupal modules with solr configs
+  shell: drush dl {{ jetty_solr_module }} --destination=/root
+  when: drupal_solr_module.stat.exists == false
+
+- name: Set configs to Solr
+  shell: rsync -ra /root/{{ jetty_solr_module }}/{{ jetty_solr_module_config_path }}/ /opt/solr/solr/{{ item.value.name }}/conf/
+  with_dict: jetty_solr_cores

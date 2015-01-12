@@ -3,15 +3,16 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: CHANGE_TO_NAME_FROM_HOSTS_FILE
+- hosts: CHANGE_ME_TO_THE_ONE_FROM_hosts_FILE
   # connection: local
-  gather_facts: yes
+- gather_facts: yes
   remote_user: root
 
   roles:
     - ansible-php-pear
     - ansible-composer
     - ansible-jenkins
+    - ansible-jetty-solr
 
   vars_prompt:
     jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
@@ -21,7 +22,7 @@
     # See http://druler.com/node/860 for additional instructions.
     swap_size: 100M
     swap_blocks: 24
-  # We are using unix pam autentification module for jenkins.
+    # We are using unix pam autentification module for jenkins.
     plugins:
       - 'ansicolor'
       - 'credentials'
@@ -272,6 +273,7 @@
 
   - name: apt-get update
     apt: update_cache=yes
+    ignore_errors: yes
     tags:
       - lamp
 
@@ -302,4 +304,3 @@
     service: name=apache2 state=restarted
   - name: Restart mysql
     service: name=mysql state=restarted
-   

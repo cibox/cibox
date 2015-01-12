@@ -8,5 +8,5 @@
   tags: composer
 
 - name: make composer executable
-  shell: chmod a+x /usr/local/bin/composer
+  file: path=/usr/local/bin/composer state=touch mode=0755
   tags: composer
