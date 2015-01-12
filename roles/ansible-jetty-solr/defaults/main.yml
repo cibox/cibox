@@ -1,5 +1,7 @@
 ---
 
+jetty_solr_dependencies:
+  - 'openjdk-7-jdk'
 jetty_solr_port: 8389
 jetty_solr_version: 4.4.0
 jetty_solr_cores:
