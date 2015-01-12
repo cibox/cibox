@@ -12,9 +12,7 @@
   lineinfile: dest=/opt/solr/solr/{{ item.value.name }}/core.properties regexp="name=collection1" line="name={{ item.value.name }}"
   with_dict: jetty_solr_cores
 
-- name: Set configs to Solr
-  synchronize: src=files/solr/{{ item.value.module }}/{{ item.value.config_version }}/ dest=/opt/solr/solr/{{ item.value.name }}/conf/ recursive=yes archive=no delete=yes
-  with_dict: jetty_solr_cores
+- include: configs.yml
 
 - name: Fix permissions after modifications
   file: path=/opt/solr/solr group=solr owner=solr recurse=yes
