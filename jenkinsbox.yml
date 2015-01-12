@@ -9,6 +9,7 @@
   remote_user: root
 
   roles:
+    - ansible-behat-selenium2
     - ansible-php-pear
     - ansible-composer
     - ansible-jenkins
