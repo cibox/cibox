@@ -54,6 +54,7 @@ server:
         - php5-memcache
         - unzip
         - libaugeas-dev
+        - libaugeas-ruby
     dot_files:
         - bash_aliases: null
     _prevent_empty: ''
