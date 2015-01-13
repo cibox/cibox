@@ -1,0 +1,41 @@
+---
+
+- name: Prepare directory for global composer libs
+  sudo: yes
+  file: path={{ composer_dir }} state=directory
+  tags:
+    - sniffers
+
+- name: Install composer global requires
+  sudo: yes
+  shell: "cd {{ composer_dir }} && composer require {{ item }}"
+  with_items: composer_global_require
+  tags:
+    - sniffers
+    - composer
+    - git
+
+- name: Install global git repos
+  sudo: yes
+  git: repo={{ item.repo }} dest={{ composer_dir }}/vendor/podarok/{{ item.name }} version={{ item.branch }}
+  with_items: git_repos
+  #ignore_errors: yes
+  tags:
+    - sniffers
+    - git
+
+- name: Install php codesniffer standards
+  sudo: yes
+  file: src={{ composer_dir }}/{{ item.path }} dest={{ composer_dir }}/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/{{ item.name }} state=link
+  with_items: phpcs_standards
+  tags:
+    - sniffers
+    - git
+
+- name: Fix permissions for composer libs
+  sudo: yes
+  file: path={{ composer_dir }} state=directory mode=0655 recurse=yes
+
+- name: Create symlink to PATH
+  sudo: yes
+  file: src={{ composer_dir }}/vendor/bin/phpcs dest={{ phpcs_bin }} state=link mode=0655

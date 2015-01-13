@@ -5,7 +5,7 @@
 # Developed for ansible version >= 1.7
 - hosts: CHANGE_ME_TO_THE_ONE_FROM_hosts_FILE
   # connection: local
-- gather_facts: yes
+  gather_facts: yes
   remote_user: root
 
   roles:
@@ -13,6 +13,7 @@
     - ansible-composer
     - ansible-jenkins
     - ansible-jetty-solr
+    - ansible-sniffers
 
   vars_prompt:
     jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
@@ -89,22 +90,10 @@
       - jshint
     apache2_modules:
       - rewrite
-    composer_global_require:
-      - drupal/coder:dev-7.x-2.x
-      - squizlabs/php_codesniffer=1.5.6
-    git_repos:
-      - { branch: 'master', repo: 'http://git.drupal.org/sandbox/coltrane/1921926.git', name: 'DrupalSecure' } # git clone --branch master http://git.drupal.org/sandbox/coltrane/1921926.git DrupalSecure
-      - { branch: '7.x-1.x', repo: 'https://github.com/klausi/drupalpractice.git', name: 'DrupalPractice' } #git clone --branch 7.x-1.x https://github.com/klausi/drupalpractice.git DrupalPractice
-      - { branch: 'master', repo: 'https://github.com/podarok/Symfony2-coding-standard.git', name: 'Symfony2' }
     jenkins_configs:
       - jenkins.model.JenkinsLocationConfiguration.xml
       - org.jenkinsci.plugins.ghprb.GhprbTrigger.xml
       - jobs/{{ project_name }}_PR_BUILDER/config.xml
-    phpcs_standards:
-      - { path: '/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal', name: 'Drupal' } #/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal Drupal
-      - { path: '/root/.composer/vendor/podarok/DrupalSecure/DrupalSecure', name: 'DrupalSecure' } #/root/.composer/vendor/podarok/DrupalSecure DrupalSecure
-      - { path: '/root/.composer/vendor/podarok/DrupalPractice/DrupalPractice', name: 'DrupalPractice' } #/root/.composer/vendor/podarok/DrupalPractice DrupalPractice
-      - { path: '/root/.composer/vendor/podarok/Symfony2', name: 'Symfony2' }
 
   pre_tasks:
   - name: Setup - get environment data for later usage
@@ -241,32 +230,6 @@
     file: path=/etc/ansible state=directory mode=775
 
   tasks:
-
-  - name: Install composer global requires
-    sudo: yes
-    shell: "composer global require {{ item }}"
-    with_items: composer_global_require
-    tags:
-      - sniffers
-      - composer
-      - git
-
-  - name: Install global git repos
-    sudo: yes
-    git: repo={{ item.repo }} dest=/root/.composer/vendor/podarok/{{ item.name }} version={{ item.branch }}
-    with_items: git_repos
-    #ignore_errors: yes
-    tags:
-      - sniffers
-      - git
-
-  - name: Install php codesniffer standards
-    sudo: yes
-    file: src={{ item.path }} dest=/usr/share/php/PHP/CodeSniffer/Standards/{{ item.name }} state=link
-    with_items: phpcs_standards
-    tags:
-      - sniffers
-      - git
 
   - name: apt-get update
     apt: update_cache=yes
