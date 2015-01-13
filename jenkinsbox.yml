@@ -3,7 +3,9 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: CHANGE_ME_TO_THE_ONE_FROM_hosts_FILE
+#- hosts: test
+
+- hosts: CHANGE_ME_TO_THE_ONE_FROM_hosts_FILEgi
   # connection: local
   gather_facts: yes
   remote_user: root

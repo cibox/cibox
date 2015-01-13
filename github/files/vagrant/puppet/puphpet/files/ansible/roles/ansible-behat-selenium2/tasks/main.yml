@@ -20,6 +20,6 @@
 
 - name: Enable xvfb on boot
   sudo: yes
-  shell: update-rc.d xvfb defaults && update-rc.d selenium defaults
+  shell: update-rc.d xvfb defaults
 
 #- include: debug.yml
