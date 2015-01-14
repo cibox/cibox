@@ -1556,10 +1556,6 @@ package { 'scss-lint':
 package { "python-mysqldb":
   ensure  => latest
 }
-exec { "phpcs":
-  command => "pear install PHP_CodeSniffer",
-  returns => [0, 1, 100]
-}
 
 include ansible::master
 
