@@ -18,9 +18,11 @@
     features_path: sites/all/modules/features
     features_ignore_path: sites/all/features/nonstandard
     ignore_path: sites/all/themes/circle
+    phpcs_path: /root/.composer/vendor/bin/phpcs
     composer_global_require:
       - drupal/coder:dev-7.x-2.x
-      - squizlabs/php_codesniffer=*
+      # Use PHP_CodeSniffer 2.x for Drupal 8 and 1.x for Drupal 7.
+      - squizlabs/php_codesniffer=1.5.6
     git_repos:
       - { branch: 'master', repo: 'http://git.drupal.org/sandbox/coltrane/1921926.git', name: 'DrupalSecure' } # git clone --branch master http://git.drupal.org/sandbox/coltrane/1921926.git DrupalSecure
       - { branch: '7.x-1.x', repo: 'https://github.com/klausi/drupalpractice.git', name: 'DrupalPractice' } #git clone --branch 7.x-1.x https://github.com/klausi/drupalpractice.git DrupalPractice
@@ -74,12 +76,12 @@
 
   - name: PHP CodeSniffer
     sudo: yes
-    shell: 'echo "CodeSniffer: {{ item }} standard file {{ webroot }}/{{ item }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && phpcs --standard={{ item }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} profiles/{{ installation_profile_name }} {{ custom_themes_path }} --report-file={{ item }}sniff.txt --ignore={{ ignore_path }}'
+    shell: 'echo "CodeSniffer: {{ item }} standard file {{ webroot }}/{{ item }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && {{ phpcs_path }} --standard={{ item }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} profiles/{{ installation_profile_name }} {{ custom_themes_path }} --report-file={{ item }}sniff.txt --ignore={{ ignore_path }}'
     with_items: phpcs_standards
 
   - name: PHP CodeSniffer for features
     sudo: yes
-    shell: 'echo "CodeSniffer: Features {{ item }} standard file {{ webroot }}/Features{{ item }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && phpcs --standard={{ item }} --extensions={{ phpcs_features_extensions }} -n {{ features_path }} --report-file=Features{{ item }}sniff.txt --ignore={{ features_ignore_path }}'
+    shell: 'echo "CodeSniffer: Features {{ item }} standard file {{ webroot }}/Features{{ item }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && {{ phpcs_path }} --standard={{ item }} --extensions={{ phpcs_features_extensions }} -n {{ features_path }} --report-file=Features{{ item }}sniff.txt --ignore={{ features_ignore_path }}'
     with_items: phpcs_standards
     
   - name: JSHint
