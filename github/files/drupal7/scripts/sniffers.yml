@@ -74,6 +74,7 @@
   pre_tasks:
 
   - name: Was it downloaded
+    sudo: yes
     stat: path={{ composer_dir }}
     register: composer_dir
 
@@ -81,6 +82,7 @@
     apt_repository: repo={{ item }}
     with_items: sniffers_apt_repos
     when: composer_dir.stat.exists == false
+    sudo: yes
     tags:
       - nodejs
 
@@ -93,6 +95,7 @@
   - name: Install apt packages
     apt: name={{ item }} state=present
     with_items: sniffers_apt_packages
+    sudo: yes
     tags:
       - sniffers
       - composer
@@ -139,6 +142,7 @@
     file: src={{ composer_dir }}/vendor/bin/phpcs dest={{ phpcs_bin }} state=link mode=0655 force=yes
 
   - name: Install nodejs packages
+    sudo: yes
     npm: name={{ item }} global=yes
     with_items: npm_packages
 
@@ -153,6 +157,7 @@
     shell: "gem install {{ item }}"
     with_items: gem_packages
     ignore_errors: yes
+    sudo: yes
     tags:
       - sniffers
       - gem
