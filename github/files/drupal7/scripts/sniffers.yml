@@ -33,13 +33,12 @@
       - { path: 'vendor/drupal/coder/coder_sniffer/Drupal', name: 'Drupal' } #/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal Drupal
       - { path: 'vendor/podarok/DrupalSecure/DrupalSecure', name: 'DrupalSecure' } #/root/.composer/vendor/podarok/DrupalSecure DrupalSecure
       - { path: 'vendor/podarok/DrupalPractice/DrupalPractice', name: 'DrupalPractice' } #/root/.composer/vendor/podarok/DrupalPractice DrupalPractice
-#      - { path: 'vendor/podarok/Symfony2', name: 'Symfony2' }
+      - { path: 'vendor/podarok/Symfony2', name: 'Symfony2' }
 
     npm_packages:
       - jshint
 
     gem_packages:
-      - jshint
       - scss-lint
 
     sniffers_apt_repos:
@@ -171,6 +170,7 @@
 
   - name: JSHint
     sudo: yes
+    ignore_errors: yes
     shell: 'echo "JSHint: {{ item.name }} standard file {{ webroot }}/{{ item.name }}jshint.txt" >> {{ workspace_root }}/{{ artifacts_file }} && find {{ item.path }} ! -path "*mute*" -type f \( -iname "*.js" ! -iname "*min.js" \) -print0 | sudo xargs -0 jshint > {{ item.name }}jshint.txt'
     with_items: "jshint_folders"
 
