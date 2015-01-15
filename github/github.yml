@@ -92,6 +92,9 @@
     when: with_vm == True
     register: vmbox
 
+  - name: Copying directory with tests
+    synchronize: src=files/tests/ dest={{ repo_subfolder }} recursive=yes archive=no
+
   - name: Copying installation scripts - reinstall.sh and playbook reinstall.yml
     synchronize: src=files/drupal{{ drupal_version }}/scripts/ dest={{ repo_subfolder }}/{{ drupal_subfolder }}/ recursive=yes archive=no
     when: with_reinstall == True

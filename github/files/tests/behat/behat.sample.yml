@@ -1,0 +1,18 @@
+default:
+  paths:
+    features: 'features'
+  extensions:
+    Behat\MinkExtension\Extension:
+      goutte: ~
+      selenium2:
+        wd_host: 127.0.0.1:4444/wd/hub
+        browser: chrome
+      base_url: http://drupal.192.168.56.132.xip.io/
+    Drupal\DrupalExtension\Extension:
+      blackbox: ~
+      api_driver: 'drupal'
+      drupal:
+        drupal_root: '../../drupal'
+      drush:
+        alias: self
+        root: '../../drupal'

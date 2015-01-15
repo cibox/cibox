@@ -1599,3 +1599,12 @@ file { '/usr/sbin/sendmail':
    ensure => 'link',
    target => '/bin/true',
 }
+
+# Run ansible vm playbook
+#exec { 'ansible-playbook':
+#  cwd     => "/vagrant/puphpet/files/ansible",
+#  command => "ansible-playbook vm.yml",
+#  onlyif  => 'test -d /vagrant/puphpet/files/ansible',
+#  returns => [0, 1],
+#  require => Class[ansible::install]
+#}

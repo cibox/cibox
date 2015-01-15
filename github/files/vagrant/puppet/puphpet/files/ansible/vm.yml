@@ -1,0 +1,13 @@
+---
+
+- hosts: test
+  connection: local
+  gather_facts: yes
+  user: root
+
+  roles:
+#    - ansible-sniffers
+#    - ansible-jetty-solr
+    - ansible-behat-selenium2
+
+  vars:
