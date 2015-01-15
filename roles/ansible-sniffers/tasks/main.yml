@@ -57,7 +57,7 @@
 
 - name: Create symlink to PATH
   sudo: yes
-  file: src={{ composer_dir }}/vendor/bin/phpcs dest={{ phpcs_bin }} state=link mode=0655
+  file: src={{ composer_dir }}/vendor/bin/phpcs dest={{ phpcs_bin }} state=link mode=0655 force=yes
 
 - name: Install nodejs packages
   npm: name={{ item }} global=yes
