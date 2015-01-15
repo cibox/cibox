@@ -4,21 +4,35 @@
   gather_facts: no
 
   vars:
+    workspace_root: .
+    artifacts_file: commentinfo.md
+    behat_base_url: http://drupal.192.168.56.132.xip.io/
+    behat_drupal_root: /var/www/drupal
     behat_root: '../tests/behat'
-    config_file: behat.vm.yml
+    config_file: behat.yml
     features_dir: features
 
   pre_tasks:
 
+  - name: Check if vendor libs are loaded
+    stat: path=/{{ behat_root }}/vendor/drupal
+    register: composer_installed
+
   - name: Install behat dependencies from composer.json
     shell: "cd {{ behat_root }} && composer up"
+    when: composer_installed.stat.exists == false
     tags:
       - composer
 
-  - name: Run headlses Behat tests
-    shell: 'echo "HeadLess Behat tests:\n"'
-    shell: "cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }} --tags '~@javascript'"
+  - name: configure behat
+    shell: export BEHAT_PARAMS="extensions[Drupal\\DrupalExtension\\Extension][drupal][drupal_root]={{ behat_drupal_root }}&extensions[Behat\\MinkExtension\\Extension][base_url]={{ behat_base_url }}"
 
-  - name: Run browser Behat tests
-    shell: 'echo "Browser Behat tests:\n"'
-    shell: "cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }} --tags '@javascript'"
+  - name: Create dynamic behat.yml
+    template: src={{ behat_root }}/behat.yml.j2 dest={{ behat_root }}/behat.yml
+
+  - name: Run headlses Behat tests
+    shell: 'echo "Behat tests: standard file {{ behat_base_url }}/tests.html" >> {{ behat_drupal_root }}/{{ artifacts_file }} && cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }} --format html --tags "~@javascript" --out {{ behat_drupal_root }}/tests.html'
+
+#  - name: Run browser Behat tests
+#    shell: 'echo "Browser Behat tests:\n"'
+#    shell: "cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }} --tags '@javascript'"
