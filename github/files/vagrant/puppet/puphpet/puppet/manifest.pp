@@ -1533,22 +1533,8 @@ alternatives { 'gem':
 # magic!
 include ruby::ruby193
 
-include nodejs
-
-package { 'jshint':
-  ensure   => present,
-  provider => 'npm',
-  require => Class['ruby::ruby193']
-}
-
 package { 'ruby-augeas':
   ensure   => installed,
-  provider => 'gem',
-  require => Class['ruby::ruby193']
-}
-
-package { 'scss-lint':
-  ensure   => latest,
   provider => 'gem',
   require => Class['ruby::ruby193']
 }
