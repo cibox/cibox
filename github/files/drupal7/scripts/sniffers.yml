@@ -131,7 +131,7 @@
     sudo: yes
     file: path={{ composer_dir }} state=directory mode=0655 recurse=yes
 
-  - name: Create symlink to PATH
+  - name: Create symlink to phpcs binary
     sudo: yes
     file: src={{ composer_dir }}/vendor/bin/phpcs dest={{ phpcs_bin }} state=link mode=0655 force=yes
 
