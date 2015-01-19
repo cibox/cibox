@@ -9,8 +9,13 @@
 - name: Prepare Java folder
   file: path=/usr/java state=directory
 
-- name: Prepare java binaries
+- name: Prepare java binaries for amd64
   file: src=/usr/lib/jvm/java-7-openjdk-amd64 dest=/usr/java/default state=link
+  when: ansible_machine == 'amd64'
+
+- name: Prepare java binaries for i686
+  file: src=/usr/lib/jvm/java-1.7.0-openjdk-i386 dest=/usr/java/default state=link
+  when: ansible_machine == 'i686'
 
 - name: If solr was downloaded
   stat: path=/opt/solr-{{ jetty_solr_version }}.tgz
@@ -23,7 +28,7 @@
 - name: Unarchive downloaded Solr
   shell: cd /opt && tar -xvf solr-{{ jetty_solr_version }}.tgz
 
-- name: Cope actual Solr sources
+- name: Copy actual Solr sources
   shell: rsync -ra /opt/solr-{{ jetty_solr_version }}/example/ /opt/solr/
 
 - name: Copy jetty settings
