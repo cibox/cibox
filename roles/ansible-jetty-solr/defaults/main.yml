@@ -22,7 +22,3 @@ jetty_solr_cores:
     name: demo
     config_version: 4.x
     module: search_api_solr
-  sj_production:
-    name: sj_production
-    config_version: 4.x
-    module: search_api_solr
