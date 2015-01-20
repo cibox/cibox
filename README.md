@@ -12,4 +12,41 @@ This repo consists basically from two playbooks
 - CI server installation/provisioning jenkinsbox.yml
 - github.yml repo builder with drupal, vagrant, puppet, drupal pp installation profile, scripts for reinstalling and sniffing with sniffers
 
-You have to use Ubuntu 12.04 LTS or 14.04 LTS systems for CI server
+You have to use *64bit* Ubuntu 12.04 LTS or 14.04 LTS systems for CI server
+
+Possible variations
+=====
+
+Currently jenkinsbox.yml playbook powered with tags, so you can run only part of it.
+
+Install SOLR only
+=====
+
+```sh
+ansible-playbook jenkinsbox.yml --tags "ansible-jetty-solr"
+```
+
+Install php stack.
+=====
+
+```sh
+ansible-playbook jenkinsbox.yml --tags "php-stack"
+```
+
+Other tags self-explained
+=====
+
+run them as
+```sh
+ansible-playbook jenkinsbox.yml --tags "TAGNAME"
+```
+
+- ansible-jenkins
+- ansible-composer
+- ansible-php-pear
+- ansible-sniffers
+- apache
+- mysql
+
+
+
