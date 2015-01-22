@@ -16,8 +16,10 @@
     custom_modules_path: sites/all/modules/custom/
     custom_themes_path: sites/all/themes/custom
     features_path: sites/all/modules/features
-    features_ignore_path: sites/all/features/nonstandard
-    ignore_path: sites/all/themes/circle
+    phpcs_modules_ignore:
+      - sites/all/themes/custom/nonstandard
+    phpcs_features_ignore:
+      - sites/all/features/nonstandard
     composer_dir: /usr/share/composer
     phpcs_bin: /usr/bin/phpcs
 
@@ -160,12 +162,12 @@
   tasks:
   - name: PHP CodeSniffer
     sudo: yes
-    shell: 'echo "CodeSniffer: {{ item.name }} standard file {{ webroot }}/{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && {{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} profiles/{{ installation_profile_name }} {{ custom_themes_path }} --report-file={{ item.name }}sniff.txt --ignore={{ ignore_path }}'
+    shell: 'echo "CodeSniffer: {{ item.name }} standard file {{ webroot }}/{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && {{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} profiles/{{ installation_profile_name }} {{ custom_themes_path }} --report-file={{ item.name }}sniff.txt --ignore={{ phpcs_modules_ignore | join(",") }}'
     with_items: phpcs_standards
 
   - name: PHP CodeSniffer for features
     sudo: yes
-    shell: 'echo "CodeSniffer: Features {{ item.name }} standard file {{ webroot }}/Features{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && {{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_features_extensions }} -n {{ features_path }} --report-file=Features{{ item.name }}sniff.txt --ignore={{ features_ignore_path }}'
+    shell: 'echo "CodeSniffer: Features {{ item.name }} standard file {{ webroot }}/Features{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && {{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_features_extensions }} -n {{ features_path }} --report-file=Features{{ item.name }}sniff.txt --ignore={{ features_ignore_path }} --ignore={{ phpcs_features_ignore | join(",") }}'
     with_items: phpcs_standards
 
   - name: JSHint
