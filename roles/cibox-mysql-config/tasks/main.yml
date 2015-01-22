@@ -1,1 +1,10 @@
 ---
+
+  - name: Add preconfigured settings to my.cnf file
+    ini_file: dest=/etc/mysql/my.cnf section={{ item.section }} option={{ item.option }} value={{ item.value }}
+    sudo: yes
+    with_items: my_cnf
+    tags:
+      - mysql
+      - php-stack
+    notify: Restart mysql
