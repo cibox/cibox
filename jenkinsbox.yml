@@ -3,7 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: CHANGE_ME_TO_PROPER_HOSTNAME_FROM_HOSTS_FILE
+- hosts: CHANGE_TO_APPROPRIATE_HOST
   # connection: local
   gather_facts: yes
   remote_user: root
@@ -243,14 +243,6 @@
       - apache
       - php-stack
     notify: Restart apache
-
-  - name: Add's to my.cnf file
-    lineinfile: dest=/etc/mysql/my.cnf line="innodb_lock_wait_timeout = 900"
-    sudo: yes
-    tags:
-      - mysql
-      - php-stack
-    notify: Restart mysql
 
   handlers:
   - name: Restart apache

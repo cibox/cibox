@@ -1,1 +1,12 @@
 ---
+
+my_cnf:
+  - { section: 'mysqld', option: 'file_per_table', value: '1' }
+  - { section: 'mysqld', option: 'tmp_table_size', value: '160M' }
+  - { section: 'mysqld', option: 'max_heap_table_size', value: '160M' }
+  - { section: 'mysqld', option: 'character-set-server', value: 'utf8' }
+  - { section: 'mysqld', option: 'collation-server', value: 'utf8_unicode_ci' }
+  - { section: 'mysqld', option: 'innodb_flush_log_at_trx_commit', value: '0' }
+  - { section: 'mysqld', option: 'query_cache_size', value: '16M' }
+  - { section: 'mysqld', option: 'table_cache', value: '800' }
+
