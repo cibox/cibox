@@ -3,7 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: CHANGE_ME_TO_THE_HOSTALIAS_FROM_HOSTS_FILE
+- hosts: CHANGE_ME_TO_PROPER_HOSTNAME_FROM_HOSTS_FILE
   # connection: local
   gather_facts: yes
   remote_user: root
@@ -14,6 +14,7 @@
     - { role: ansible-jenkins, tags: ["ansible-jenkins"] }
     - { role: ansible-jetty-solr, tags: ["ansible-jetty-solr"] }
     - { role: ansible-sniffers, tags: ["ansible-sniffers", "php-stack"] }
+    - { role: cibox-mysql-config, tags: ["mysql", "php-stack","cibox-mysql-config"] }
 
   vars_prompt:
     jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
@@ -40,6 +41,8 @@
       - 'project-description-setter'
       - 'ssh-credentials'
       - 'hipchat'
+      - 'scripttrigger'
+      - 'parameterized-trigger'
     # @todo not uset yet
     project_name: CHANGE_ME
     # @todo not uset yet
