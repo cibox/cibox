@@ -55,6 +55,8 @@ server:
         - unzip
         - libaugeas-dev
         - libaugeas-ruby
+        - imagemagick
+        - php5-imagick
     dot_files:
         - bash_aliases: null
     _prevent_empty: ''
