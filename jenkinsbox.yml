@@ -77,6 +77,8 @@
       - imagemagick
       - ansible
       - git
+      - imagemagick
+      - php5-imagick
     apache2_modules:
       - rewrite
     jenkins_configs:
@@ -175,6 +177,7 @@
     # @todo More smart way to upload jobs. Move job names to options.
   - name: Check if job already renamed.
     stat: path=/var/lib/jenkins/jobs/{{ project_name }}_PR_BUILDER
+    register: prbuilder_stat
     tags:
       - ansible-jenkins
 
