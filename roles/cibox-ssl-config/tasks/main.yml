@@ -1,5 +1,21 @@
 ---
 
+  - name: Install rng-tools package
+    sudo: yes
+    apt: name=rng-tools state=present
+    tags:
+      - apache
+      - php-stack
+      - ssl
+
+  - name: Generate random key
+    sudo: yes
+    shell: rngd -r /dev/urandom
+    tags:
+      - apache
+      - php-stack
+      - ssl
+
   - name: Assures /etc/apache2/ssl dir exists
     sudo: yes
     file: path=/etc/apache2/ssl state=directory
