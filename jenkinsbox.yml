@@ -248,7 +248,7 @@
       - php-stack
     notify: Restart apache
 
-  - name: Generate random key
+  - name: Starting random rnd-tools service
     sudo: yes
     shell: rngd -r /dev/urandom
 
