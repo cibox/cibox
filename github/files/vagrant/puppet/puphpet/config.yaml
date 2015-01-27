@@ -72,6 +72,7 @@ apache:
     modules:
         - php
         - rewrite
+        - ssl
     vhosts:
         EYZeANveIIwp:
             servername: drupal.192.168.56.132.xip.io
@@ -84,6 +85,18 @@ apache:
             ssl_key: ''
             ssl_chain: ''
             ssl_certs_dir: ''
+       SYZeANveIIwp:
+            servername: drupal.192.168.56.132.xip.io
+            docroot: /var/www/drupal
+            port: '443'
+            override:
+                - All
+            custom_fragment: ''
+            ssl: '1'
+            ssl_cert: '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+            ssl_key: '/etc/ssl/private/ssl-cert-snakeoil.key'
+            ssl_chain: ''
+            ssl_certs_dir: '/etc/ssl/certs'
     mod_pagespeed: 0
     mod_spdy: 0
 nginx:
