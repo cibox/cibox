@@ -80,6 +80,7 @@
       - git
       - imagemagick
       - php5-imagick
+      - rng-tools
     apache2_modules:
       - rewrite
     jenkins_configs:
@@ -246,6 +247,10 @@
       - apache
       - php-stack
     notify: Restart apache
+
+  - name: Generate random key
+    sudo: yes
+    shell: rngd -r /dev/urandom
 
   handlers:
   - name: Restart apache
