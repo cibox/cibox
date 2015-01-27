@@ -14,7 +14,8 @@
     - { role: ansible-jenkins, tags: ["ansible-jenkins"] }
     - { role: ansible-jetty-solr, tags: ["ansible-jetty-solr"] }
     - { role: ansible-sniffers, tags: ["ansible-sniffers", "php-stack"] }
-    - { role: cibox-mysql-config, tags: ["mysql", "php-stack","cibox-mysql-config"] }
+    - { role: cibox-mysql-config, tags: ["mysql", "php-stack", "cibox-mysql-config"] }
+    - { role: cibox-ssl-config, tags: ["apache", "php-stack", "ssl", "cibox-ssl-config"] }
 
   vars_prompt:
     jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
@@ -79,6 +80,7 @@
       - git
       - imagemagick
       - php5-imagick
+      - rng-tools
     apache2_modules:
       - rewrite
     jenkins_configs:
@@ -97,7 +99,6 @@
     sudo: yes
     file: path=/swapfile1 state=touch
     register: is_swapfile
-
 
   - name: Create swapfile if not present
     sudo: yes
@@ -246,6 +247,10 @@
       - apache
       - php-stack
     notify: Restart apache
+
+  - name: Starting random rnd-tools service
+    sudo: yes
+    shell: rngd -r /dev/urandom
 
   handlers:
   - name: Restart apache
