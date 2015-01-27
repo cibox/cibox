@@ -85,7 +85,7 @@ apache:
             ssl_key: ''
             ssl_chain: ''
             ssl_certs_dir: ''
-       SYZeANveIIwp:
+        SYZeANveIIwp:
             servername: drupal.192.168.56.132.xip.io
             docroot: /var/www/drupal
             port: '443'
