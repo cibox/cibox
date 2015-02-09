@@ -1,7 +1,7 @@
 ---
 
 my_cnf:
-  - { section: 'mysqld', option: 'file_per_table', value: '1' }
+  - { section: 'mysqld', option: 'innodb_file_per_table', value: '1' }
   - { section: 'mysqld', option: 'tmp_table_size', value: '160M' }
   - { section: 'mysqld', option: 'max_heap_table_size', value: '160M' }
   - { section: 'mysqld', option: 'character-set-server', value: 'utf8' }
