@@ -12,7 +12,6 @@
 
 # Respond to incoming requests.
 sub vcl_recv {
-  #return (pass);
   if (req.request == "GET" && req.url ~ "^/varnishcheck$") {
     error 200 "Varnish is Ready";
   }
