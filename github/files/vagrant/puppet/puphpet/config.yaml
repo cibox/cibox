@@ -201,3 +201,12 @@ varnish:
     update_vhosts: 1
     update_ports: 1
     drupal_vcl: 1
+    settings:
+      # Apache/Backend port and ip.
+      backend_ip: '127.0.0.1'
+      backend_port: '8080'
+      # Varnish/Frontend port and ip.
+      frontend_ip: '127.0.0.1'
+      frontend_port: '80'
+      # Storage size for the Varnish.
+      storage_size: '1G'
