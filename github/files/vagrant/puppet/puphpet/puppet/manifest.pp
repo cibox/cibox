@@ -422,19 +422,17 @@ if hash_key_equals($apache_values, 'install', 1) {
       }
 
       # Update IP and PORT for Varnish.
-      # Replace "ip" with '127.0.0.1' for non SSL Virtual Hosts.
-      # Replace "port" with '8080' for non SSL Virtual Hosts.
       if hash_key_equals($varnish_values, 'install', 0) or hash_key_equals($varnish_values, 'update_vhosts', 0) or ('ssl' in $vhost and str2bool($vhost['ssl'])) {
         $vhost_merged = $vhost
       }
       else {
         $vhost_merged = merge($vhost, {
-          'port' => '8080',
-          'ip'  => '127.0.0.1'
+          'ip'  => $varnish_values['settings']['backend_ip'],
+          'port' => $varnish_values['settings']['backend_port']
         })
       }
 
-        create_resources(apache::vhost, { "${key}" => merge($vhost_merged, {
+      create_resources(apache::vhost, { "${key}" => merge($vhost_merged, {
           'custom_fragment' => template('puphpet/apache/custom_fragment.erb'),
           'ssl'             => 'ssl' in $vhost and str2bool($vhost['ssl']) ? { true => true, default => false },
           'ssl_cert'        => $vhost['ssl_cert'] ? { undef => undef, '' => undef, default => $vhost['ssl_cert'] },
@@ -1631,8 +1629,8 @@ if hash_key_equals($varnish_values, 'install', 1) {
 
   # Configure varnish.
   class {'varnish':
-    varnish_listen_port => '80',
-    varnish_storage_size => '1G',
+    varnish_listen_port => $varnish_values['settings']['frontend_port'],
+    varnish_storage_size => $varnish_values['settings']['storage_size'],
     varnish_vcl_conf => hash_key_equals($varnish_values, 'drupal_vcl', 1) ? { true => '/etc/varnish/drupal_vcl.vcl', default => '/etc/varnish/default.vcl' },
     subscribe => Exec['init_varnish_config']
   }
@@ -1641,16 +1639,16 @@ if hash_key_equals($varnish_values, 'install', 1) {
   if hash_key_equals($varnish_values, 'update_ports', 1) {
     file_line { 'update_ports_listen':
       path  => '/etc/apache2/ports.conf',
-      line  => 'Listen 127.0.0.1:8080',
-      match => '^Listen.*80*',
+      line  => "Listen ${varnish_values['settings']['backend_ip']}:${varnish_values['settings']['backend_port']}",
+      match => "^Listen.*${varnish_values['settings']['frontend_port']}*",
       require => [
         Concat['/etc/apache2/ports.conf']
       ]
     }
     file_line { 'update_ports_name_virtualhost':
       path  => '/etc/apache2/ports.conf',
-      line  => 'NameVirtualHost 127.0.0.1:8080',
-      match => '^NameVirtualHost.*80*',
+      line  => "NameVirtualHost ${varnish_values['settings']['backend_ip']}:${varnish_values['settings']['backend_port']}",
+      match => "^NameVirtualHost.*${varnish_values['settings']['frontend_port']}*",
       require => [
         Concat['/etc/apache2/ports.conf']
       ]
@@ -1658,7 +1656,7 @@ if hash_key_equals($varnish_values, 'install', 1) {
     file_line { 'remove_ports_listen':
       ensure  => absent,
       path  => '/etc/apache2/ports.conf',
-      line  => 'Listen 80',
+      line  => "Listen ${varnish_values['settings']['frontend_port']}",
       require => [
         Concat['/etc/apache2/ports.conf']
       ]
@@ -1666,7 +1664,7 @@ if hash_key_equals($varnish_values, 'install', 1) {
     file_line { 'remove_ports_name_virtualhost':
       ensure  => absent,
       path  => '/etc/apache2/ports.conf',
-      line  => 'NameVirtualHost *:80',
+      line  => "NameVirtualHost *:${varnish_values['settings']['frontend_port']}",
       require => [
         Concat['/etc/apache2/ports.conf']
       ]
@@ -1697,7 +1695,7 @@ else {
   file_line { 'remove_ports_listen':
     ensure  => absent,
     path  => '/etc/apache2/ports.conf',
-    line  => 'Listen 127.0.0.1:8080',
+    line  => "Listen ${varnish_values['settings']['backend_ip']}:${varnish_values['settings']['backend_port']}",
     require => [
       Concat['/etc/apache2/ports.conf']
     ]
@@ -1705,7 +1703,7 @@ else {
   file_line { 'remove_ports_name_virtualhost':
     ensure  => absent,
     path  => '/etc/apache2/ports.conf',
-    line  => 'NameVirtualHost 127.0.0.1:8080',
+    line  => "NameVirtualHost ${varnish_values['settings']['backend_ip']}:${varnish_values['settings']['backend_port']}",
     require => [
       Concat['/etc/apache2/ports.conf']
     ]
