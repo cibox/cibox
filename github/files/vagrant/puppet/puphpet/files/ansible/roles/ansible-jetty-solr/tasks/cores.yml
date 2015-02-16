@@ -1,0 +1,18 @@
+---
+
+- name: Clone solr index cores from default collection1
+  shell: rsync -ra /opt/solr/solr/collection1/ /opt/solr/solr/{{ item.value.name }}/
+  with_dict: jetty_solr_cores
+
+- name: Clean indexes data
+  file: path=/opt/solr/solr/{{ item.value.name }}/data state=absent
+  with_dict: jetty_solr_cores
+
+- name: Rename cores
+  lineinfile: dest=/opt/solr/solr/{{ item.value.name }}/core.properties regexp="name=collection1" line="name={{ item.value.name }}"
+  with_dict: jetty_solr_cores
+
+- include: configs.yml
+
+- name: Fix permissions after modifications
+  file: path=/opt/solr/solr group=solr owner=solr recurse=yes

@@ -1,5 +1,5 @@
 ---
-# This playbook should be executed using 
+# This playbook should be executed using
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
@@ -16,6 +16,7 @@
     - { role: ansible-sniffers, tags: ["ansible-sniffers", "php-stack"] }
     - { role: cibox-mysql-config, tags: ["mysql", "php-stack", "cibox-mysql-config"] }
     - { role: cibox-ssl-config, tags: ["apache", "php-stack", "ssl", "cibox-ssl-config"] }
+    - { role: ansible-behat-selenium2 }
 
   vars_prompt:
     jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
