@@ -194,8 +194,10 @@ redis:
     install: 0
     settings:
         conf_port: '6379'
-
 solr:
     config_path: "/var/www/docroot/sites/all/modules/contrib/apachesolr/solr-conf/solr-4.x/"
-
-
+varnish:
+    install: 0
+    update_vhosts: 1
+    update_ports: 1
+    drupal_vcl: 1

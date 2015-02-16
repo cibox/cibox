@@ -289,6 +289,8 @@ if $yaml_values == undef {
   $php_values = hiera('php', false)
 } if $hhvm_values == undef {
   $hhvm_values = hiera('hhvm', false)
+} if $varnish_values == undef {
+  $varnish_values = hiera('varnish', false)
 }
 
 if hash_key_equals($apache_values, 'install', 1) {
@@ -419,7 +421,20 @@ if hash_key_equals($apache_values, 'install', 1) {
         }
       }
 
-      create_resources(apache::vhost, { "${key}" => merge($vhost, {
+      # Update IP and PORT for Varnish.
+      # Replace "ip" with '127.0.0.1' for non SSL Virtual Hosts.
+      # Replace "port" with '8080' for non SSL Virtual Hosts.
+      if hash_key_equals($varnish_values, 'install', 0) or hash_key_equals($varnish_values, 'update_vhosts', 0) or ('ssl' in $vhost and str2bool($vhost['ssl'])) {
+        $vhost_merged = $vhost
+      }
+      else {
+        $vhost_merged = merge($vhost, {
+          'port' => '8080',
+          'ip'  => '127.0.0.1'
+        })
+      }
+
+        create_resources(apache::vhost, { "${key}" => merge($vhost_merged, {
           'custom_fragment' => template('puphpet/apache/custom_fragment.erb'),
           'ssl'             => 'ssl' in $vhost and str2bool($vhost['ssl']) ? { true => true, default => false },
           'ssl_cert'        => $vhost['ssl_cert'] ? { undef => undef, '' => undef, default => $vhost['ssl_cert'] },
@@ -1598,4 +1613,107 @@ file_line { 'table_cache':
 file { '/usr/sbin/sendmail':
    ensure => 'link',
    target => '/bin/true',
+}
+
+# Install varnish. Otherwise remove Varnish for correct work apache.
+if $varnish_values == undef {
+  $varnish_values = hiera('varnish', false)
+}
+
+if hash_key_equals($varnish_values, 'install', 1) {
+  # Init varnish config.
+  exec { 'init_varnish_config':
+    command => "cp /vagrant/puphpet/files/varnish/drupal_vcl.vcl /etc/varnish/drupal_vcl.vcl",
+    onlyif  => 'test -d /vagrant/puphpet/files/varnish',
+    returns => [0, 1],
+    require => Package['varnish']
+  }
+
+  # Configure varnish.
+  class {'varnish':
+    varnish_listen_port => '80',
+    varnish_storage_size => '1G',
+    varnish_vcl_conf => hash_key_equals($varnish_values, 'drupal_vcl', 1) ? { true => '/etc/varnish/drupal_vcl.vcl', default => '/etc/varnish/default.vcl' },
+    subscribe => Exec['init_varnish_config']
+  }
+
+  # Update port.conf.
+  if hash_key_equals($varnish_values, 'update_ports', 1) {
+    file_line { 'update_ports_listen':
+      path  => '/etc/apache2/ports.conf',
+      line  => 'Listen 127.0.0.1:8080',
+      match => '^Listen.*80*',
+      require => [
+        Concat['/etc/apache2/ports.conf']
+      ]
+    }
+    file_line { 'update_ports_name_virtualhost':
+      path  => '/etc/apache2/ports.conf',
+      line  => 'NameVirtualHost 127.0.0.1:8080',
+      match => '^NameVirtualHost.*80*',
+      require => [
+        Concat['/etc/apache2/ports.conf']
+      ]
+    }
+    file_line { 'remove_ports_listen':
+      ensure  => absent,
+      path  => '/etc/apache2/ports.conf',
+      line  => 'Listen 80',
+      require => [
+        Concat['/etc/apache2/ports.conf']
+      ]
+    }
+    file_line { 'remove_ports_name_virtualhost':
+      ensure  => absent,
+      path  => '/etc/apache2/ports.conf',
+      line  => 'NameVirtualHost *:80',
+      require => [
+        Concat['/etc/apache2/ports.conf']
+      ]
+    }
+    exec { "service apache2 restart && service varnish restart":
+      subscribe => [
+        File_line['update_ports_listen'],
+        File_line['update_ports_name_virtualhost'],
+        File_line['remove_ports_listen'],
+        File_line['remove_ports_name_virtualhost'],
+      ],
+    }
+  }
+}
+else {
+  # Since /var/lib/varnish is tmpfs we need unmount it first.
+  exec { 'unmount_varnish_lib':
+    command => 'umount -l /var/lib/varnish',
+    onlyif  => 'test -d /var/lib/varnish',
+    returns => [0, 1]
+  }
+  package { 'varnish':
+    ensure => 'absent',
+    subscribe => Exec['unmount_varnish_lib']
+  }
+
+  # Cleanup Varnish settings in ports.conf.
+  file_line { 'remove_ports_listen':
+    ensure  => absent,
+    path  => '/etc/apache2/ports.conf',
+    line  => 'Listen 127.0.0.1:8080',
+    require => [
+      Concat['/etc/apache2/ports.conf']
+    ]
+  }
+  file_line { 'remove_ports_name_virtualhost':
+    ensure  => absent,
+    path  => '/etc/apache2/ports.conf',
+    line  => 'NameVirtualHost 127.0.0.1:8080',
+    require => [
+      Concat['/etc/apache2/ports.conf']
+    ]
+  }
+  exec { "service apache2 restart":
+    subscribe => [
+      File_line['remove_ports_listen'],
+      File_line['remove_ports_name_virtualhost'],
+    ],
+  }
 }
