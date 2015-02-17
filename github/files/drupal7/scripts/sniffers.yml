@@ -167,7 +167,7 @@
 
   - name: PHP CodeSniffer for features
     sudo: yes
-    shell: 'echo "CodeSniffer: Features {{ item.name }} standard file {{ webroot }}/Features{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && {{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_features_extensions }} -n {{ features_path }} --report-file=Features{{ item.name }}sniff.txt --ignore={{ features_ignore_path }} --ignore={{ phpcs_features_ignore | join(",") }}'
+    shell: 'echo "CodeSniffer: Features {{ item.name }} standard file {{ webroot }}/Features{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && {{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_features_extensions }} -n {{ features_path }} --report-file=Features{{ item.name }}sniff.txt --ignore={{ phpcs_features_ignore | join(",") }}'
     with_items: phpcs_standards
 
   - name: JSHint
