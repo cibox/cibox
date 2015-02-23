@@ -81,12 +81,16 @@
       - imagemagick
       - php5-imagick
       - rng-tools
+      - python-passlib
     apache2_modules:
       - rewrite
     jenkins_configs:
       - jenkins.model.JenkinsLocationConfiguration.xml
       - org.jenkinsci.plugins.ghprb.GhprbTrigger.xml
       - jobs/{{ project_name }}_PR_BUILDER/config.xml
+    backup_folder: /var/www/backup
+    backup_folder_user: propeople
+    backup_folder_pass: givemebackup
 
   pre_tasks:
   - name: Setup - get environment data for later usage
@@ -251,6 +255,15 @@
   - name: Starting random rnd-tools service
     sudo: yes
     shell: rngd -r /dev/urandom
+
+  - name: Create backup folder
+    file: path={{ backup_folder }} owner=www-data group=jenkins state=directory
+
+  - name: Copy .htaccess to the backup folder
+    synchronize: src=files/backup-folder/.htaccess dest={{ backup_folder }}/.htaccess
+
+  - name: Generate .htpasswd
+    htpasswd: path={{ backup_folder }}/.htpasswd name={{ backup_folder_user }} password={{ backup_folder_pass }}
 
   handlers:
   - name: Restart apache
