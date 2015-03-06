@@ -1,0 +1,5 @@
+---
+    # This should be a parameter 'count' for unix 'dd' command
+    # See http://druler.com/node/860 for additional instructions.
+    swap_size: 100M
+    swap_blocks: 24
