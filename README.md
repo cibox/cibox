@@ -49,6 +49,6 @@ ansible-playbook jenkinsbox.yml --tags "TAGNAME"
 - ansible-sniffers
 - apache
 - mysql
-
-
-
+- cibox-mysql-config
+- cibox-swap
+- cibox-ssl-config
