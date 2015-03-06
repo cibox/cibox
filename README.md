@@ -51,6 +51,4 @@ ansible-playbook jenkinsbox.yml --tags "TAGNAME"
 - mysql
 - cibox-mysql-config
 - cibox-swap
-
-
-
+- cibox-ssl-config
