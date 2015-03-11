@@ -55,6 +55,8 @@ server:
         - unzip
         - libaugeas-dev
         - libaugeas-ruby
+        - imagemagick
+        - php5-imagick
     dot_files:
         - bash_aliases: null
     _prevent_empty: ''
@@ -70,6 +72,7 @@ apache:
     modules:
         - php
         - rewrite
+        - ssl
     vhosts:
         EYZeANveIIwp:
             servername: drupal.192.168.56.132.xip.io
@@ -82,6 +85,18 @@ apache:
             ssl_key: ''
             ssl_chain: ''
             ssl_certs_dir: ''
+        SYZeANveIIwp:
+            servername: drupal.192.168.56.132.xip.io
+            docroot: /var/www/drupal
+            port: '443'
+            override:
+                - All
+            custom_fragment: ''
+            ssl: '1'
+            ssl_cert: '/etc/ssl/certs/ssl-cert-snakeoil.pem'
+            ssl_key: '/etc/ssl/private/ssl-cert-snakeoil.key'
+            ssl_chain: ''
+            ssl_certs_dir: '/etc/ssl/certs'
     mod_pagespeed: 0
     mod_spdy: 0
 nginx:
@@ -142,7 +157,7 @@ mysql:
     install: '1'
     root_password: root
     phpmyadmin: 0
-    adminer: '1'
+    adminer: '0'
     bind-address: '0.0.0.0'
     databases:
         nL5g8yIVTFjA:
@@ -179,8 +194,19 @@ redis:
     install: 0
     settings:
         conf_port: '6379'
-
 solr:
     config_path: "/var/www/docroot/sites/all/modules/contrib/apachesolr/solr-conf/solr-4.x/"
-
-
+varnish:
+    install: 0
+    update_vhosts: 1
+    update_ports: 1
+    drupal_vcl: 1
+    settings:
+      # Apache/Backend port and ip.
+      backend_ip: '127.0.0.1'
+      backend_port: '8080'
+      # Varnish/Frontend port and ip.
+      frontend_ip: '127.0.0.1'
+      frontend_port: '80'
+      # Storage size for the Varnish.
+      storage_size: '1G'
