@@ -30,3 +30,4 @@ mod 'ansible', :git => 'https://github.com/nvogel/puppet-ansible', :ref => '1.1.
 mod 'nodejs', :git => 'https://github.com/puppetlabs/puppetlabs-nodejs.git'
 mod 'alternatives', :git => 'https://github.com/adrienthebo/puppet-alternatives.git'
 mod 'pear', :git => 'https://github.com/rafaelfelix/puppet-pear.git'
+mod 'varnish', :git => 'https://github.com/Sanchiz/puppet-varnish.git'
