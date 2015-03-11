@@ -3,26 +3,25 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: CHANGE_ME_TO_THE_ONE_FROM_hosts_FILE
+- hosts: CHANGE_TO_APPROPRIATE_HOST
   # connection: local
   gather_facts: yes
   remote_user: root
 
   roles:
-    - ansible-php-pear
-    - ansible-composer
-    - ansible-jenkins
-    - ansible-jetty-solr
-    - ansible-sniffers
+    - { role: cibox-swap, tags: ["cibox-swap"] }
+    - { role: ansible-php-pear, tags: ["ansible-php-pear", "php-stack"] }
+    - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
+    - { role: ansible-jenkins, tags: ["ansible-jenkins"] }
+    - { role: ansible-jetty-solr, tags: ["ansible-jetty-solr"] }
+    - { role: ansible-sniffers, tags: ["ansible-sniffers", "php-stack"] }
+    - { role: cibox-mysql-config, tags: ["mysql", "php-stack", "cibox-mysql-config"] }
+    - { role: cibox-ssl-config, tags: ["apache", "php-stack", "ssl", "cibox-ssl-config"] }
 
   vars_prompt:
     jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
     jenkins_pass: "Enter linux root user pass that will be used as superuser in jenkins UI"
   vars:
-    # This should be a parameter 'count' for unix 'dd' command
-    # See http://druler.com/node/860 for additional instructions.
-    swap_size: 100M
-    swap_blocks: 24
     # We are using unix pam autentification module for jenkins.
     plugins:
       - 'ansicolor'
@@ -40,6 +39,8 @@
       - 'project-description-setter'
       - 'ssh-credentials'
       - 'hipchat'
+      - 'scripttrigger'
+      - 'parameterized-trigger'
     # @todo not uset yet
     project_name: CHANGE_ME
     # @todo not uset yet
@@ -74,76 +75,75 @@
       - imagemagick
       - ansible
       - git
+      - imagemagick
+      - php5-imagick
+      - rng-tools
+      - python-passlib
     apache2_modules:
       - rewrite
     jenkins_configs:
       - jenkins.model.JenkinsLocationConfiguration.xml
       - org.jenkinsci.plugins.ghprb.GhprbTrigger.xml
       - jobs/{{ project_name }}_PR_BUILDER/config.xml
+    backup_folder: /var/www/backup
+    backup_folder_user: propeople
+    backup_folder_pass: givemebackup
 
   pre_tasks:
   - name: Setup - get environment data for later usage
     setup:
     register: allmy
     tags:
-      - jenkins_jobs
-
-  - name: Check if swap already enabled.
-    sudo: yes
-    file: path=/swapfile1 state=touch
-    register: is_swapfile
-
-  - name: Create swapfile if not present
-    sudo: yes
-    shell: 'dd if=/dev/zero of=/swapfile1 bs={{ swap_size }} count={{ swap_blocks }}'
-    when: is_swapfile.changed == true and is_swapfile.size == 0
-
-  - name: Make swapfile as swap
-    sudo: yes
-    shell: 'mkswap /swapfile1'
-    when: is_swapfile.size != 0
-
-  - name: Check if swap enabled as swapon
-    sudo: yes
-    shell: 'swapon -s'
-    register: swapon
-
-  - name: Enable swap
-    sudo: yes
-    shell: 'swapon /swapfile1'
-    when: is_swapfile.size != 0 and swapon.stdout.find('swapfile1') == -1
-
-  - name: Add swap to fstab
-    sudo: yes
-    mount: name=swap src=/swapfile1 fstype=swap opts=default state=present
-    when: is_swapfile.size != 0
+      - ansible-jenkins
 
   - name: Adding jenkins user to group shadow
     user: name=jenkins groups=shadow append=yes
+    tags:
+      - ansible-jenkins
 
   - name: Adding jenkins user to group adm
     user: name=jenkins groups=adm append=yes
+    tags:
+      - ansible-jenkins
 
   - name: Adding jenkins user to nopasswd sudoers
     lineinfile: dest=/etc/sudoers line="jenkins ALL=(ALL) NOPASSWD:ALL"
+    tags:
+      - ansible-jenkins
 
   - name: Install apt repos
     apt_repository: repo={{ item }}
     with_items: apt_repos
+    tags:
+      - php-stack
+      - mysql
+      - apache
 
   - name: Update apt cache
     sudo: yes
     apt: update_cache=yes
     ignore_errors: yes
+    tags:
+      - php-stack
+      - mysql
+      - apache
 
   - name: Install apt packages
     apt: name={{ item }} state=present
     with_items: apt_packages
+    tags:
+      - php-stack
+      - mysql
+      - apache
 
     # We have to disable mail sending from CI box.
     # Does not create a link if sendmail is installed.
   - name: Check for sendmail.
     file: path=/usr/sbin/sendmail src=/bin/true state=link force=no
+    tags:
+      - php-stack
+      - mysql
+      - apache
 
 
     # @todo More smart way to upload jobs. Move job names to options.
@@ -151,58 +151,64 @@
     stat: path=/var/lib/jenkins/jobs/{{ project_name }}_PR_BUILDER
     register: prbuilder_stat
     tags:
-      - jenkins_jobs
+      - ansible-jenkins
 
   - name: Copy local files for enabling jenkins permissions
     sudo: yes
     synchronize: src=files/jenkins/ dest=/var/lib/jenkins recursive=yes archive=no
     when: prbuilder_stat.stat.exists == false
     tags:
-      - jenkins_jobs
+      - ansible-jenkins
 
   - name: Change owner for jenkins files.
     file: path=/var/lib/jenkins owner=jenkins group=jenkins force=yes recurse=yes state=directory
     tags:
-      - jenkins_jobs
+      - ansible-jenkins
 
   - name: Rename jenkins jobs to meet project name.
     sudo: yes
     shell: "mv /var/lib/jenkins/jobs/PR_BUILDER /var/lib/jenkins/jobs/{{ project_name }}_PR_BUILDER"
     when: prbuilder_stat.stat.exists == false
     tags:
-      - jenkins_jobs
+      - ansible-jenkins
 
   - name: Remove PR_BUILDER from remote.
     sudo: yes
     file: path=/var/lib/jenkins/jobs/PR_BUILDER state=absent
     when: prbuilder_stat.stat.exists == true
     tags:
-      - jenkins_jobs
+      - ansible-jenkins
     # end of @todo More smart way to upload jobs. Move job names to options.
 
   - name: Change host IP address in jenkins configs
     replace: dest=/var/lib/jenkins/{{ item }} regexp='ci_server_ip_address' replace={{ allmy.ansible_facts.ansible_default_ipv4.address }}
     with_items: jenkins_configs
     tags:
-      - jenkins_jobs
+      - ansible-jenkins
 
   - name: Create ansible config directory
     sudo: yes
     file: path=/etc/ansible state=directory mode=775
+    tags:
+      - php-stack
+      - mysql
+      - apache
 
   tasks:
   - name: apt-get update
     apt: update_cache=yes
     ignore_errors: yes
     tags:
-      - lamp
+      - php-stack
+      - mysql
+      - apache
 
   - name: Apache2 modules
     apache2_module: state=present name={{ item }}
     with_items: apache2_modules
     tags:
       - apache
-      - lamp
+      - php-stack
     notify: Restart apache
 
   - name: Copy apache vhost file
@@ -210,17 +216,31 @@
     sudo: yes
     tags:
       - apache
+      - php-stack
     notify: Restart apache
 
-  - name: Add's to my.cnf file
-    lineinfile: dest=/etc/mysql/my.cnf line="innodb_lock_wait_timeout = 900"
+  - name: Starting random rnd-tools service
     sudo: yes
-    tags:
-      - mysql
-    notify: Restart mysql
+    shell: rngd -r /dev/urandom
+
+  - name: Create backup folder
+    file: path={{ backup_folder }} owner=www-data group=jenkins state=directory
+
+  - name: Copy .htaccess to the backup folder
+    synchronize: src=files/backup-folder/.htaccess dest={{ backup_folder }}/.htaccess
+
+  - name: Generate .htpasswd
+    htpasswd: path={{ backup_folder }}/.htpasswd name={{ backup_folder_user }} password={{ backup_folder_pass }}
 
   handlers:
   - name: Restart apache
     service: name=apache2 state=restarted
+    tags:
+      - mysql
+      - apache
+      - php-stack
   - name: Restart mysql
     service: name=mysql state=restarted
+    tags:
+      - mysql
+      - php-stack

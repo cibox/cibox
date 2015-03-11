@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Restricted Area"
+AuthUserFile /var/www/backup/.htpasswd
+require valid-user
