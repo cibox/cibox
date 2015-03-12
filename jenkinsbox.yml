@@ -3,7 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: vpsdime
+- hosts: CHANGE_ME_TO_THE_NAME_FROM_HOSTS_FILE
   # connection: local
   gather_facts: no
   remote_user: root
@@ -230,6 +230,7 @@
   - name: Starting random rnd-tools service
     sudo: yes
     shell: rngd -r /dev/urandom
+    when: ansible_virtualization_type != "openvz"
 
   - name: Create backup folder
     file: path={{ backup_folder }} owner=www-data group=jenkins state=directory
