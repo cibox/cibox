@@ -9,7 +9,7 @@
   remote_user: root
 
   roles:
-    - { role: cibox-swap, tags: ["cibox-swap"] }
+    - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
     - { role: ansible-php-pear, tags: ["ansible-php-pear", "php-stack"] }
     - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
     - { role: ansible-jenkins, tags: ["ansible-jenkins"] }
