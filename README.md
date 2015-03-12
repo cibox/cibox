@@ -52,3 +52,20 @@ ansible-playbook jenkinsbox.yml --tags "TAGNAME"
 - cibox-mysql-config
 - cibox-swap
 - cibox-ssl-config
+
+
+OpenVZ support
+=====
+
+If your system build on OpenVZ stack and swap is disabled you may bypass
+it with using fakeswap.sh file within files/fakeswap directory
+
+for use this script run on remote system console
+```sh
+chmod a+x fakeswap.sh
+```
+and
+```sh
+sh ./fakeswap.sh 4086
+```
+for adding 4086MB swap size
