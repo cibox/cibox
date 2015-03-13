@@ -1,0 +1,51 @@
+#!/bin/bash
+# Note that this script requires you to have
+# an X window running on Display :99
+# This can be done by running: /usr/bin/Xvfb :99 -ac -screen 0 1024x768x8 &
+#
+# You can save this script as /etc/init.d/selenium to start and stop selenium
+ 
+PORT=4444
+ 
+DESC="Selenium server"
+RUN_AS=root
+JAVA_BIN=/usr/bin/java
+
+PID_FILE="/var/run/selenium.pid"
+JAR_FILE="/var/lib/selenium/selenium.jar"
+LOG_FILE="/var/log/selenium/selenium.log"
+CHROME_DRIVER="/var/lib/chrome-driver/chromedriver"
+ 
+DAEMON_OPTS=" -jar $JAR_FILE -log $LOG_FILE -port $PORT"
+ 
+NAME=selenium
+ 
+export DISPLAY=:99
+ 
+case "$1" in
+    start)
+        echo -n "Starting $DESC: "
+        start-stop-daemon -c $RUN_AS --start --background --pidfile $PID_FILE --make-pidfile --exec $JAVA_BIN -- $DAEMON_OPTS
+        echo "$NAME."
+        ;;
+ 
+    stop)
+        echo -n "Stopping $DESC: "
+        start-stop-daemon --stop --pidfile $PID_FILE
+        echo "$NAME."
+        ;;
+ 
+    restart|force-reload)
+        echo -n "Restarting $DESC: "
+        start-stop-daemon --stop --pidfile $PID_FILE
+        sleep 1
+        start-stop-daemon -c $RUN_AS --start --background --pidfile $PID_FILE  --make-pidfile --exec $JAVA_BIN -- $DAEMON_OPTS
+        echo "$NAME."
+        ;;
+ 
+    *)
+        N=/etc/init.d/$NAME
+        echo "Usage: $N {start|stop|restart|force-reload}" >&2
+        exit 1
+        ;;
+esac

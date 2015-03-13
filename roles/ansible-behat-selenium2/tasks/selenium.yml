@@ -1,0 +1,20 @@
+---
+
+- name: Check if Selenium standalone server is downloaded
+  stat: path=/var/lib/selenium/selenium.jar
+  register: selenium_server
+
+- name: Create dir for Selenium standalone server
+  file: path=/var/lib/selenium state=directory
+  when: selenium_server.stat.exists == false
+
+- name: Download GoogleChrome driver
+  get_url: url=http://selenium-release.storage.googleapis.com/2.44/selenium-server-standalone-2.44.0.jar dest=/root/selenium.jar
+  when: selenium_server.stat.exists == false
+
+- name: Get Selenium standalone server
+  shell: rsync -ra /root/selenium.jar /var/lib/selenium/selenium.jar
+  when: selenium_server.stat.exists == false
+
+- name: Create xvfb startup script
+  template: src=selenium.j2 dest=/etc/init.d/selenium  mode=0755

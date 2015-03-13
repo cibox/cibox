@@ -6,7 +6,7 @@
 #  when: jenkins_install.changed
 
 # Create Jenkins CLI destination directory
-- name: "Create Jenkins CLI destination directory: ${jenkins.dest}"
+- name: "Create Jenkins CLI destination directory: {{ jenkins.dest }}"
   sudo: yes
   action: file path={{ jenkins_dest }} state=directory
 

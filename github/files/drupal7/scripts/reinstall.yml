@@ -17,6 +17,7 @@
     backup_user: propeople
     backup_pass: givemebackup
     php_env_vars: '' # APP_ENV=dev - this varible will be set at PR_BUILDER from CI shell executor.
+    run_tests: true # Flag to run tests after reinstall or not.
 
   tasks:
 
@@ -33,5 +34,9 @@
   - name: Installing drupal
     sudo: yes
     shell: "{{ php_env_vars}} drush -y si {{ installation_profile_name }} --db-url=mysql://{{ mysql_user }}:{{ mysql_pass }}@127.0.0.1:/{{ mysql_db }} --account-name={{ drupal_user }} --account-pass={{ drupal_pass }}"
+
+  - name: Run automated tests
+    shell: sh runtests.sh
+    when: run_tests
 
   handlers:

@@ -1,0 +1,24 @@
+---
+
+jetty_solr_dependencies:
+  - 'openjdk-7-jdk'
+jetty_solr_port: 8389
+jetty_solr_version: 4.4.0
+jetty_solr_module: 'search_api_solr'
+jetty_solr_module_config_path: 'solr-conf/4.x'
+# Here is an example for apachesolr module integration
+# jetty_solr_module: 'apachesolr'
+# jetty_solr_module_config_path: 'solr-conf/solr-4.x'
+jetty_solr_cores:
+  default:
+    name: default
+    config_version: 4.x
+    module: search_api_solr
+  build:
+    name: build
+    config_version: 4.x
+    module: search_api_solr
+  demo:
+    name: demo
+    config_version: 4.x
+    module: search_api_solr

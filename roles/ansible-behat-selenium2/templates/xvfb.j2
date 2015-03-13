@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  echo "`basename $0` {start|stop}"
+  exit
+fi
+
+case "$1" in
+start)
+  /usr/bin/Xvfb :99 -ac -screen 0 1024x768x8 -extension RANDR &
+  export DISPLAY=:99 &
+  firefox &
+;;
+stop)
+  echo -n "Stopping Xvfb: "
+  killall Xvfb
+  echo -n "Stopping firefox: "
+  killall firefox
+
+;;
+esac
