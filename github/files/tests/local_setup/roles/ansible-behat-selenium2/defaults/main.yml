@@ -1,0 +1,14 @@
+---
+behat_selenium2_dependencies:
+  - xfonts-100dpi
+  - xfonts-75dpi
+  - xfonts-scalable
+  - xfonts-cyrillic
+  - xvfb
+  - x11-apps
+  - imagemagick
+  - firefox
+  - google-chrome-stable
+  - unzip
+  - tar
+ansible_pkg_mgr: apt

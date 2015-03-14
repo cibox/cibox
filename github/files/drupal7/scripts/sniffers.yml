@@ -22,6 +22,7 @@
       - sites/all/features/nonstandard
     composer_dir: /usr/share/composer
     phpcs_bin: /usr/bin/phpcs
+    build_reports_dir: build_reports
 
     composer_global_require:
       - drupal/coder:dev-7.x-2.x
@@ -159,27 +160,31 @@
       - gem
       - ruby
 
+  - name: Create directory for build reports
+    sudo: yes
+    file: path={{ build_reports_dir }} state=directory mode=0777
+
   tasks:
   - name: PHP CodeSniffer
     sudo: yes
-    shell: 'echo "CodeSniffer: {{ item.name }} standard file {{ webroot }}/{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && {{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} profiles/{{ installation_profile_name }} {{ custom_themes_path }} --report-file={{ item.name }}sniff.txt --ignore={{ phpcs_modules_ignore | join(",") }}'
+    shell: 'echo "CodeSniffer: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && {{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} profiles/{{ installation_profile_name }} {{ custom_themes_path }} --report-file={{ build_reports_dir }}/{{ item.name }}sniff.txt --ignore={{ phpcs_modules_ignore | join(",") }}'
     with_items: phpcs_standards
 
   - name: PHP CodeSniffer for features
     sudo: yes
-    shell: 'echo "CodeSniffer: Features {{ item.name }} standard file {{ webroot }}/Features{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && {{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_features_extensions }} -n {{ features_path }} --report-file=Features{{ item.name }}sniff.txt --ignore={{ phpcs_features_ignore | join(",") }}'
+    shell: 'echo "CodeSniffer: Features {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/Features{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && {{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_features_extensions }} -n {{ features_path }} --report-file={{ build_reports_dir }}/Features{{ item.name }}sniff.txt --ignore={{ phpcs_features_ignore | join(",") }}'
     with_items: phpcs_standards
 
   - name: JSHint
     sudo: yes
     ignore_errors: yes
-    shell: 'echo "JSHint: {{ item.name }} standard file {{ webroot }}/{{ item.name }}jshint.txt" >> {{ workspace_root }}/{{ artifacts_file }} && find {{ item.path }} ! -path "*mute*" -type f \( -iname "*.js" ! -iname "*min.js" \) -print0 | sudo xargs -0 jshint > {{ item.name }}jshint.txt'
+    shell: 'echo "JSHint: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/{{ item.name }}jshint.txt" >> {{ workspace_root }}/{{ artifacts_file }} && find {{ item.path }} ! -path "*mute*" -type f \( -iname "*.js" ! -iname "*min.js" \) -print0 | sudo xargs -0 jshint > {{ item.name }}jshint.txt'
     with_items: "jshint_folders"
 
   - name: SCSS lint
     sudo: yes
     ignore_errors: yes
-    shell: 'echo "SCSS-lint: {{ item.name }} standard file {{ webroot }}/scsslint{{ item.name }}.txt" >> {{ workspace_root }}/{{ artifacts_file }} && find {{ item.path }} -name "*.scss" -print0 | xargs -0 scss-lint > scsslint{{ item.name }}.txt || true'
+    shell: 'echo "SCSS-lint: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/scsslint{{ item.name }}.txt" >> {{ workspace_root }}/{{ artifacts_file }} && find {{ item.path }} -name "*.scss" -print0 | xargs -0 scss-lint > scsslint{{ item.name }}.txt || true'
     with_items: scsslint_folders
 
   - name: Website credentials
