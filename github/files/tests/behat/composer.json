@@ -1,7 +1,7 @@
 {
   "require": {
     "behat/drupal-propeople-context": "~1.2",
-    "emuse/behat-html-formatter": "dev-master"
+    "emuse/behat-html-formatter": "dev-master#801cc56ef937096c5ba2a7d12eba2d03e1a499ea"
   },
   "config": {
     "bin-dir": "bin/"
