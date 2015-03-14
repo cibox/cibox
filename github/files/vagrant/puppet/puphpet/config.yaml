@@ -8,7 +8,7 @@ vagrantfile-local:
             private_network: 192.168.56.132
             forwarded_port:
                 CocLsFE7aIwA:
-                    host: '8080'
+                    host: '8081'
                     guest: '80'
                 CocLsFE7aIwE:
                     host: '8083'
