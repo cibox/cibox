@@ -57,6 +57,9 @@ Vagrant.configure("2") do |config|
   # Install ansible inside the box.
   config.vm.provision :shell, :path => "puphpet/shell/ansible.sh"
 
+  # Install ansible playbooks inside the box.
+  config.vm.provision :shell, :path => "puphpet/ansible/run-ansible-playbook.sh"
+
   config.vm.provision :puppet do |puppet|
     ssh_username = !data['ssh']['username'].nil? ? data['ssh']['username'] : "vagrant"
     puppet.facter = {
