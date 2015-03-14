@@ -1472,7 +1472,6 @@ class drupal::solr {
   }
 }
 
-apt::ppa { 'ppa:ansible/ansible': }
 apt::ppa { 'ppa:chris-lea/node.js': }
 
 exec { "apt-update":
@@ -1555,8 +1554,6 @@ package { 'ruby-augeas':
 package { "python-mysqldb":
   ensure  => latest
 }
-
-include ansible::master
 
 # Mysql default config my.cnf
 file_line { 'innodb_file_per_table':
