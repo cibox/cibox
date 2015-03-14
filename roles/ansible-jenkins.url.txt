@@ -1,2 +1,0 @@
-	This repo was changed by @podarok to meet our user:pass passing requirements.
-	url = git@github.com:ICTO/ansible-jenkins.git
