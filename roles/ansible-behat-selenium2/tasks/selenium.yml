@@ -1,0 +1,22 @@
+---
+
+- name: Check if Selenium standalone server is downloaded
+  stat: path=/var/lib/selenium/selenium.jar
+  register: selenium_server
+  tags: behat-selenium
+
+- name: Create dir for Selenium standalone server
+  file: path=/var/lib/selenium state=directory
+  when: selenium_server.stat.exists == false
+  tags: behat-selenium
+
+- name: Download GoogleChrome driver
+  get_url: url=http://selenium-release.storage.googleapis.com/2.45/selenium-server-standalone-2.45.0.jar dest=/root/selenium.jar
+  when: selenium_server.stat.exists == false
+  tags: behat-selenium
+
+- name: Get Selenium standalone server
+  shell: rsync -ra /root/selenium.jar /var/lib/selenium/selenium.jar
+  when: selenium_server.stat.exists == false
+  tags: behat-selenium
+
