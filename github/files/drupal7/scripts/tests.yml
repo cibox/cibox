@@ -7,7 +7,7 @@
     workspace_root: .
     artifacts_file: commentinfo.md
     build_reports_dir: build_reports
-    behat_base_url: http://ptp.192.168.56.167.xip.io # WITHOUT TRAILING SLASH
+    behat_base_url: http://drupal.192.168.56.132.xip.io # WITHOUT TRAILING SLASH
     behat_drupal_root: /var/www/drupal
     behat_root: '../tests/behat'
     config_file: behat.yml
@@ -19,7 +19,7 @@
     selenium_jar_path: /var/lib/selenium/selenium.jar
     chrome_driver_path: /var/lib/chrome-driver/chromedriver
 
-  pre_tasks:
+  tasks:
   - name: Install behat dependencies from composer.json
     shell: "cd {{ behat_root }} && composer up"
     when: update_dependencies == 'yes'
@@ -51,13 +51,12 @@
       DISPLAY: ':99'
     when: run_javascript_tests == 'yes' and browser == 'firefox'
 
-  - name: Wait until selenium will start
+  - name: Wait until selenium start
     wait_for: port=4444 delay=10 host=127.0.0.1
 
   - name: Create directory for build reports
     file: path={{ behat_drupal_root }}/{{ build_reports_dir }} state=directory mode=0777
 
-  tasks:
   - name: Run full Behat tests
     ignore_errors: yes
     environment:
