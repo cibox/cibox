@@ -1,1 +1,0 @@
-	url = git@github.com:ginas/ansible-role-ansible.git

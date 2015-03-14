@@ -12,12 +12,12 @@
     - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
     - { role: ansible-php-pear, tags: ["ansible-php-pear", "php-stack"] }
     - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
-    - { role: ansible-jenkins, tags: ["ansible-jenkins"] }
-    - { role: ansible-jetty-solr, tags: ["ansible-jetty-solr"] }
-    - { role: ansible-sniffers, tags: ["ansible-sniffers", "php-stack"] }
+    - { role: cibox-jenkins, tags: ["cibox-jenkins"] }
+    - { role: cibox-jetty-solr, tags: ["cibox-jetty-solr"] }
+    - { role: cibox-sniffers, tags: ["cibox-sniffers", "php-stack"] }
     - { role: cibox-mysql-config, tags: ["mysql", "php-stack", "cibox-mysql-config"] }
     - { role: cibox-ssl-config, tags: ["apache", "php-stack", "ssl", "cibox-ssl-config"] }
-    - { role: ansible-behat-selenium2, tags: ["behat-selenium"] }
+    - { role: cibox-behat-selenium2, tags: ["cibox-behat-selenium", "behat-selenium"] }
 
   vars_prompt:
     jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
@@ -106,22 +106,22 @@
     setup:
     register: allmy
     tags:
-      - ansible-jenkins
+      - cibox-jenkins
 
   - name: Adding jenkins user to group shadow
     user: name=jenkins groups=shadow append=yes
     tags:
-      - ansible-jenkins
+      - cibox-jenkins
 
   - name: Adding jenkins user to group adm
     user: name=jenkins groups=adm append=yes
     tags:
-      - ansible-jenkins
+      - cibox-jenkins
 
   - name: Adding jenkins user to nopasswd sudoers
     lineinfile: dest=/etc/sudoers line="jenkins ALL=(ALL) NOPASSWD:ALL"
     tags:
-      - ansible-jenkins
+      - cibox-jenkins
 
   - name: Install apt repos
     apt_repository: repo={{ item }} validate_certs=no
@@ -171,40 +171,40 @@
     stat: path=/var/lib/jenkins/jobs/{{ project_name }}_PR_BUILDER
     register: prbuilder_stat
     tags:
-      - ansible-jenkins
+      - cibox-jenkins
 
   - name: Copy local files for enabling jenkins permissions
     sudo: yes
     synchronize: src=files/jenkins/ dest=/var/lib/jenkins recursive=yes archive=no
     when: prbuilder_stat.stat.exists == false
     tags:
-      - ansible-jenkins
+      - cibox-jenkins
 
   - name: Change owner for jenkins files.
     file: path=/var/lib/jenkins owner=jenkins group=jenkins force=yes recurse=yes state=directory
     tags:
-      - ansible-jenkins
+      - cibox-jenkins
 
   - name: Rename jenkins jobs to meet project name.
     sudo: yes
     shell: "mv /var/lib/jenkins/jobs/PR_BUILDER /var/lib/jenkins/jobs/{{ project_name }}_PR_BUILDER"
     when: prbuilder_stat.stat.exists == false
     tags:
-      - ansible-jenkins
+      - cibox-jenkins
 
   - name: Remove PR_BUILDER from remote.
     sudo: yes
     file: path=/var/lib/jenkins/jobs/PR_BUILDER state=absent
     when: prbuilder_stat.stat.exists == true
     tags:
-      - ansible-jenkins
+      - cibox-jenkins
     # end of @todo More smart way to upload jobs. Move job names to options.
 
   - name: Change host IP address in jenkins configs
     replace: dest=/var/lib/jenkins/{{ item }} regexp='ci_server_ip_address' replace={{ allmy.ansible_facts.ansible_default_ipv4.address }}
     with_items: jenkins_configs
     tags:
-      - ansible-jenkins
+      - cibox-jenkins
 
   - name: apt-get update
     apt: update_cache=yes
