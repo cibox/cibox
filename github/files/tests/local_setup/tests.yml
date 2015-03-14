@@ -4,4 +4,4 @@
   gather_facts: no
 
   roles:
-  - ansible-behat-selenium2
+  - cibox-behat-selenium2

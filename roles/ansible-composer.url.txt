@@ -1,1 +1,0 @@
-	url = git@github.com:Vinelab/ansible-composer.git
