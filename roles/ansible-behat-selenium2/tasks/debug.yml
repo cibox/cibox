@@ -1,9 +1,0 @@
----
-
-- name: Put behat sample for debug
-  synchronize: src=files/behat-debug dest=/root
-  tags: behat-selenium
-
-- name: Run composer
-  shell: cd /root/behat-debug && composer up
-  tags: behat-selenium
