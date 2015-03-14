@@ -92,6 +92,11 @@
     when: with_vm == True
     register: vmbox
 
+  - name: Add ansible roles to vagrant box
+    synchronize: src=../roles/ dest={{ repo_subfolder }}/puphpet/ansible/roles/ recursive=yes archive=no
+    when: with_vm == True
+    register: vmbox
+
   - name: Copying installation scripts - reinstall.sh and playbook reinstall.yml
     synchronize: src=files/drupal{{ drupal_version }}/scripts/ dest={{ repo_subfolder }}/{{ drupal_subfolder }}/ recursive=yes archive=no
     when: with_reinstall == True
