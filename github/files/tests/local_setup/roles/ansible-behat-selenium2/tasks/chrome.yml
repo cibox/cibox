@@ -1,0 +1,25 @@
+---
+
+- name: Check if GoogleChrome driver is downloaded
+  stat: path=/var/lib/chrome-driver/chromedriver
+  register: google_chrome_driver
+  tags: behat-selenium
+
+- name: Download GoogleChrome driver
+  get_url: url=http://chromedriver.storage.googleapis.com/2.14/chromedriver_linux64.zip dest=/root/chromedriver_linux64.zip mode=0755
+  when: google_chrome_driver.stat.exists == false
+  tags: behat-selenium
+
+- name: Create dir for GoogleChrome driver
+  file: path=/var/lib/chrome-driver state=directory
+  when: google_chrome_driver.stat.exists == false
+  tags: behat-selenium
+
+- name: Get GoogleChrome driver
+  shell: unzip /root/chromedriver_linux64.zip -d /var/lib/chrome-driver
+  when: google_chrome_driver.stat.exists == false
+  tags: behat-selenium
+
+- name: Make driver executable
+  file: path=/var/lib/chrome-driver/chromedriver state=touch mode=0777
+  tags: behat-selenium
