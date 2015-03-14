@@ -9,3 +9,6 @@
     - { role: ansible-jetty-solr }
 
   # See ansible-jetty-solr/default/main.yml file with variable to configure Solr schema and module settings.
+  vars:
+    - ansible_machine: amd64
+    - ansible_pkg_mgr: apt
