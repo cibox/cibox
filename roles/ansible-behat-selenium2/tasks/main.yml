@@ -19,12 +19,10 @@
 - include: selenium.yml
 
 - name: Create xvfb startup script
-  template: src=xvfb.j2 dest=/etc/init.d/xvfb  mode=0755
+  template: src=xvfb.j2 dest=/etc/init.d/xvfb  mode=0750
   tags: behat-selenium
 
 - name: Enable xvfb on boot
   sudo: yes
   shell: update-rc.d xvfb defaults
   tags: behat-selenium
-
-#- include: debug.yml

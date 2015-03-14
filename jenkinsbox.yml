@@ -3,7 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: CHANGE_ME_TO_THE_NAME_FROM_HOSTS_FILE
+- hosts: localvm
   # connection: local
   gather_facts: no
   remote_user: root
