@@ -51,7 +51,8 @@ server:
         - vim
         - htop
         - git
-        - php5-memcache
+        - php5-memcached
+        - memcached
         - unzip
         - libaugeas-dev
         - libaugeas-ruby
