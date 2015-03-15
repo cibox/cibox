@@ -4,15 +4,18 @@
 # command
 # Developed for ansible version >= 1.7
 # drupal subfolder with repo_subfolder name will be prepared after execution.
+# Usage: ansible-playbook github.yml --ask-sudo-pass
 
 - hosts: 127.0.0.1
   connection: local
   gather_facts: no
+  sudo: true
 
   roles:
 
   vars:
     repo_subfolder: DEMO # name of the future project, should be changed manually
+    local_user: root # name of user you are using on your machine. Usually should contain your user name instead of root
     drupal_subfolder: drupal
     installation_profile_name: pp
     drupal_version: 7
@@ -108,5 +111,8 @@
   - name: Unsetting inventory file executable bit
     file: path={{ repo_subfolder }}/{{ drupal_subfolder }}/hosts mode=666
     when: with_reinstall == True
+
+  - name: Return ownership to your user
+    file: path={{ repo_subfolder }} owner={{ local_user }} recurse=true
 
   handlers:
