@@ -1451,27 +1451,6 @@ mysql_grant { "drupal@%/drupal.*":
 	privileges => [ 'ALL' ],
 }
 
-#include solr
-#
-#if $yaml_values == undef {
-#  $yaml_values = loadyaml('/vagrant/puphpet/config.yaml')
-#} if $solr_values == undef {
-#  $solr_values = $yaml_values['solr']
-#}
-#
-## Solr config installation. see https://www.drupal.org/node/484800
-#class drupal::solr {
-#  exec { "copy_solr_config":
-#    command => "rm -rf /usr/share/solr/default/conf/ && cp -r " + $solr_values['config_path'] + " /usr/share/solr/default/conf/",
-#    returns => [0, 1, 100],
-#    require => Class['solr'],
-#  }
-#  exec { "/etc/init.d/jetty restart":
-#    subscribe => Exec["copy_solr_config"],
-#    refreshonly => true,
-#  }
-#}
-
 apt::ppa { 'ppa:chris-lea/node.js': }
 
 exec { "apt-update":
