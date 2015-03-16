@@ -41,7 +41,7 @@ Linux Containers
 =====
 
 When your system enpowered with linux containers(lxc), you can speedup a lot of things buy
-using them and get rid of virtualization.
+using them and getting rid of virtualization.
 For approaching lxc, please install vagrant plugin
 
 ```sh
@@ -70,3 +70,9 @@ and run the box by command
 ```sh
 VAGRANT_CI=yes vagrant up
 ```
+
+Do use 
+```
+VAGRANT_CI=yes
+```
+environment variable, if you got issues with all vagrant commands.
