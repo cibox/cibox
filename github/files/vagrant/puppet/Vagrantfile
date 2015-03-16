@@ -9,16 +9,25 @@ if !data['vm']['provider']['virtualbox'].empty?
   ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 end
 
+if !ENV['VAGRANT_CI'].empty?
+  ENV['VAGRANT_DEFAULT_PROVIDER'] = 'lxc'
+end
+
 Vagrant.configure("2") do |config|
   config.vm.box = "#{data['vm']['box']}"
   config.vm.box_url = "#{data['vm']['box_url']}"
+
+  if !ENV['VAGRANT_CI'].empty?
+    config.vm.box = "#{data['vm']['provider']['lxc']['box']}"
+    config.vm.box_url = "#{data['vm']['provider']['lxc']['box_url']}"
+  end
 
   if data['vm']['hostname'].to_s != ''
     config.vm.hostname = "#{data['vm']['hostname']}"
   end
 
   if data['vm']['network']['private_network'].to_s != ''
-    config.vm.network "private_network", ip: "#{data['vm']['network']['private_network']}"
+    config.vm.network "private_network", ip: "#{data['vm']['network']['private_network']}", lxc__bridge_name: "lxcbr0"
   end
 
   data['vm']['network']['forwarded_port'].each do |i, port|
