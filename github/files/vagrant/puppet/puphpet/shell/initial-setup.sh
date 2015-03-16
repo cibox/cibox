@@ -1,6 +1,7 @@
 #!/bin/bash
 
 VAGRANT_CORE_FOLDER=$(echo "$1")
+export "DEBIAN_FRONTEND=noninteractive"
 
 OS=$(/bin/bash "${VAGRANT_CORE_FOLDER}/shell/os-detect.sh" ID)
 CODENAME=$(/bin/bash "${VAGRANT_CORE_FOLDER}/shell/os-detect.sh" CODENAME)

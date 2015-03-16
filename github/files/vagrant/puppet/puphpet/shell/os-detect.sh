@@ -9,6 +9,8 @@ ID="unknown"
 CODENAME="unknown"
 RELEASE="unknown"
 
+export "DEBIAN_FRONTEND=noninteractive"
+
 if [ "${OS}" == "Linux" ]; then
     # detect centos
     grep "centos" /etc/issue -i -q
