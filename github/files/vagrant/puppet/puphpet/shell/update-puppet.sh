@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export "DEBIAN_FRONTEND=noninteractive"
+
 VAGRANT_CORE_FOLDER=$(cat "/.puphpet-stuff/vagrant-core-folder.txt")
 
 OS=$(/bin/bash "${VAGRANT_CORE_FOLDER}/shell/os-detect.sh" ID)
@@ -15,11 +17,11 @@ if [[ ! -f /.puphpet-stuff/update-puppet ]]; then
         dpkg -i "/.puphpet-stuff/puppetlabs-release-${CODENAME}.deb" >/dev/null
 
         echo "Running update-puppet apt-get update"
-        DEBIAN_FRONTEND=noninteractive apt-get update >/dev/null
+        apt-get update >/dev/null
         echo "Finished running update-puppet apt-get update"
 
         echo "Updating Puppet to version 3.4.x"
-        DEBIAN_FRONTEND=noninteractive apt-get install -y puppet=3.4.3-1puppetlabs1 puppet-common=3.4.3-1puppetlabs1 >/dev/null
+        apt-get install -y puppet=3.4.3-1puppetlabs1 puppet-common=3.4.3-1puppetlabs1 >/dev/null
         PUPPET_VERSION=$(puppet help | grep 'Puppet v')
         echo "Finished updating puppet to latest version: ${PUPPET_VERSION}"
 
