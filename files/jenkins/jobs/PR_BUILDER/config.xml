@@ -20,7 +20,7 @@
         </userRemoteConfigs>
         <branches>
             <hudson.plugins.git.BranchSpec>
-                <name>**</name>
+                <name>${sha1}</name>
             </hudson.plugins.git.BranchSpec>
         </branches>
         <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
