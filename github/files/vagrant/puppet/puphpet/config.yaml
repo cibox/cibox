@@ -154,7 +154,7 @@ xdebug:
         xdebug.remote_handler: dbgp
         xdebug.remote_port: '9000'
 drush:
-    install: '1'
+    install: '0'
     settings:
         drush.tag_branch: 6.x
 mysql:
