@@ -37,3 +37,36 @@ If ```xip.io``` not working - create row with
 
 in ```/etc/hosts```
 
+Linux Containers
+=====
+
+When your system enpowered with linux containers(lxc), you can speedup a lot of things buy
+using them and get rid of virtualization.
+For approaching lxc, please install vagrant plugin
+
+```sh
+vagrant plugin install vagrant-lxc
+apt-get install redir lxc
+```
+
+When your system is enpowered by apparmor, you should enable nfs mounts for your host
+machine
+Do that by editing ```/etc/apparmor.d/lxc/lxc-default``` file with one line
+
+```ruby
+profile lxc-container-default flags=(attach_disconnected,mediate_deleted) {
+  ...
+    mount options=(rw, bind, ro),
+  ...
+```
+and reload apparmor service
+```sh
+sudo /etc/init.d/apparmor reload
+```
+
+
+and run the box by command
+
+```sh
+VAGRANT_CI=yes vagrant up
+```
