@@ -20,6 +20,9 @@ vagrantfile-local:
                     memory: '1024'
                 setextradata:
                     VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root: 1
+            lxc:
+                box: fgrehm/precise64-lxc
+                box_url: https://atlas.hashicorp.com/fgrehm/boxes/precise64-lxc/versions/1.2.0/providers/lxc.box
         provision:
             puppet:
                 manifests_path: puphpet/puppet
