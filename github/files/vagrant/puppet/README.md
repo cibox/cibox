@@ -40,7 +40,7 @@ in ```/etc/hosts```
 Linux Containers
 =====
 
-When your system enpowered with linux containers(lxc), you can speedup a lot of things buy
+When your system enpowered with linux containers(lxc), you can speedup a lot of things by
 using them and getting rid of virtualization.
 For approaching lxc, please install vagrant plugin
 
