@@ -8,7 +8,7 @@ vagrantfile-local:
             private_network: 192.168.56.132
             forwarded_port:
                 CocLsFE7aIwA:
-                    host: '8080'
+                    host: '8081'
                     guest: '80'
                 CocLsFE7aIwE:
                     host: '8083'
@@ -20,6 +20,9 @@ vagrantfile-local:
                     memory: '1024'
                 setextradata:
                     VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root: 1
+            lxc:
+                box: fgrehm/precise64-lxc
+                box_url: https://atlas.hashicorp.com/fgrehm/boxes/precise64-lxc/versions/1.2.0/providers/lxc.box
         provision:
             puppet:
                 manifests_path: puphpet/puppet
