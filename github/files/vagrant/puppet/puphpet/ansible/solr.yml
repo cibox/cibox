@@ -6,7 +6,7 @@
   gather_facts: no
 
   roles:
-    - { role: ansible-jetty-solr }
+    - { role: cibox-jetty-solr }
 
   # See ansible-jetty-solr/default/main.yml file with variable to configure Solr schema and module settings.
   vars:

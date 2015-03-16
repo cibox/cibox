@@ -51,7 +51,8 @@ server:
         - vim
         - htop
         - git
-        - php5-memcache
+        - php5-memcached
+        - memcached
         - unzip
         - libaugeas-dev
         - libaugeas-ruby
@@ -61,7 +62,7 @@ server:
         - bash_aliases: null
     _prevent_empty: ''
 apache:
-    install: '1'
+    install: '0'
     settings:
         user: www-data
         group: www-data
@@ -115,7 +116,7 @@ nginx:
             envvars:
                 - 'APP_ENV dev'
 php:
-    install: '1'
+    install: '0'
     version: '54'
     composer: '0'
     modules:
