@@ -1,5 +1,5 @@
 ---
-- include: "{{ drush_install_mode }}_install.yml"
+- include: "composer_install.yml"
   when: drush_install_mode != 'none'
 - name: "Create global Drush configuration folder"
   file: path=/etc/drush/ state=directory
