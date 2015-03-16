@@ -16,6 +16,7 @@
       - php5-memcache
       - php5-imagick
       - php5-mysql
+      - php-apc
       - libapache2-mod-php5
     php_use_managed_ini: true
     php_display_errors: On
