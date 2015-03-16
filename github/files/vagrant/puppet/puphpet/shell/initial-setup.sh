@@ -17,7 +17,7 @@ fi
 if [[ ! -f /.puphpet-stuff/initial-setup-repo-update ]]; then
     if [ "${OS}" == 'debian' ] || [ "${OS}" == 'ubuntu' ]; then
         echo "Running initial-setup apt-get update"
-        apt-get update >/dev/null
+        DEBIAN_FRONTEND=noninteractive apt-get update >/dev/null
         touch /.puphpet-stuff/initial-setup-repo-update
         echo "Finished running initial-setup apt-get update"
     elif [[ "${OS}" == 'centos' ]]; then
@@ -53,7 +53,7 @@ fi
 
 if [[ "${OS}" == 'ubuntu' && ("${CODENAME}" == 'lucid' || "${CODENAME}" == 'precise') && ! -f /.puphpet-stuff/ubuntu-required-libraries ]]; then
     echo 'Installing basic curl packages (Ubuntu only)'
-    apt-get install -y libcurl3 libcurl4-gnutls-dev curl >/dev/null
+    DEBIAN_FRONTEND=noninteractive apt-get install -y libcurl3 libcurl4-gnutls-dev curl >/dev/null
     echo 'Finished installing basic curl packages (Ubuntu only)'
 
     touch /.puphpet-stuff/ubuntu-required-libraries
