@@ -1,6 +1,7 @@
 #!/bin/bash
 
 VAGRANT_CORE_FOLDER=$(cat "/.puphpet-stuff/vagrant-core-folder.txt")
+export "DEBIAN_FRONTEND=noninteractive"
 
 shopt -s nullglob
 files=("${VAGRANT_CORE_FOLDER}"/files/exec-once/*)
