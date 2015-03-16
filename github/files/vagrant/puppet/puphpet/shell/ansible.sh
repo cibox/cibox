@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo 'Installing base packages for ansible'
+export "DEBIAN_FRONTEND=noninteractive"
 # ansible needs python.
 apt-get -y install python-simplejson sudo curl >/dev/null
 
