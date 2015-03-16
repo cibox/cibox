@@ -23,7 +23,7 @@ if [ "${FOUND_GIT}" -ne '0' ] && [ ! -f /.puphpet-stuff/r10k-installed ]; then
         yum -q -y makecache
         yum -q -y install git
     else
-        apt-get -q -y install git-core >/dev/null
+        DEBIAN_FRONTEND=noninteractive apt-get -q -y install git-core >/dev/null
     fi
 
     echo 'Finished installing git'
@@ -40,7 +40,7 @@ echo "Copied Puppetfile"
 if [ "${OS}" == 'debian' ] || [ "${OS}" == 'ubuntu' ]; then
     if [[ ! -f /.puphpet-stuff/r10k-base-packages ]]; then
         echo 'Installing base packages for r10k'
-        apt-get install -y build-essential ruby-dev >/dev/null
+        DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential ruby-dev >/dev/null
         gem install json >/dev/null
         echo 'Finished installing base packages for r10k'
 
@@ -51,7 +51,7 @@ fi
 if [ "${OS}" == 'ubuntu' ]; then
     if [[ ! -f /.puphpet-stuff/r10k-libgemplugin-ruby ]]; then
         echo 'Updating libgemplugin-ruby (Ubuntu only)'
-        apt-get install -y libgemplugin-ruby >/dev/null
+        DEBIAN_FRONTEND=noninteractive apt-get install -y libgemplugin-ruby >/dev/null
         echo 'Finished updating libgemplugin-ruby (Ubuntu only)'
 
         touch /.puphpet-stuff/r10k-libgemplugin-ruby
