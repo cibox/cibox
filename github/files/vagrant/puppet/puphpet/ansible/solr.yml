@@ -1,0 +1,11 @@
+---
+# This playbook installs Apache Solr based on Jetty webserver with drupal settings.
+
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: yes
+
+  roles:
+    - { role: cibox-jetty-solr }
+
+  # See ansible-jetty-solr/default/main.yml file with variable to configure Solr schema and module settings.
