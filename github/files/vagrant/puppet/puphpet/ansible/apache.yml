@@ -14,12 +14,12 @@
     apache_vhosts:
       - {
         servername: "drupal.192.168.56.132.xip.io",
-        documentroot: "/var/www/docroot"
+        documentroot: "/var/www/drupal"
       }
     apache_vhosts_ssl:
       - {
         servername: "drupal.192.168.56.132.xip.io",
-        documentroot: "/var/www/docroot",
+        documentroot: "/var/www/drupal",
         certificate_file: "/var/www/ssl_certificate/example.crt",
         certificate_key_file: "/var/www/ssl_certificate/example.key",
       }
