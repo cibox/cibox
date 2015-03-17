@@ -11,7 +11,7 @@
     php_xdebug_remote_connect_back: '1'
     php_xdebug_remote_enable: '1'
     php_xdebug_remote_port: '9000'
-    php_xdebug_max_nesting_level: 200
+    php_xdebug_max_nesting_level: 1000
 
   roles:
     - { role: ansible-role-php-xdebug }
