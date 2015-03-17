@@ -6,7 +6,7 @@
   gather_facts: no
 
   roles:
-    - { role: ansible-drush }
+    - { role: cibox-drush }
 
   vars:
     drushrc:
