@@ -7,4 +7,31 @@
     tags:
       - mysql
       - php-stack
-    notify: Restart mysql
+    notify: restart mysql
+
+  - name: Move mysql tmp folder to tmpfs(RAM)
+    lineinfile: dest=/etc/apparmor.d/usr.sbin.mysqld regexp="^/run/mysqld/mysqld.sock" insertafter=yes line=" /run/shm/mysql/* rw,"
+    sudo: yes
+    tags:
+      - mysql
+      - php-stack
+    notify: Restart apparmor
+
+  - name: Prepare mysql tmpdir - step 1
+    sudo: yes
+    shell: "rm -rf {{ mysql_tmpdir }}"
+
+  - name: Prepare mysql tmpdir - step 2
+    sudo: yes
+    shell: "mkdir {{ mysql_tmpdir }} && chown mysql:mysql /run/shm/mysql && chmod -R 777 /run/shm/mysql"
+    tags:
+      - mysql
+      - php-stack
+    notify: restart mysql
+
+  - name: Adding tmpdir preparation to rc.local
+    lineinfile: dest=/etc/rc.local regexp="^exit 0" insertbefore=yes line="rm -rf /run/shm/mysql && mkdir /run/shm/mysql || true && chown mysql:mysql /run/shm/mysql && chmod -R 777 /run/shm/mysql"
+    sudo: yes
+    tags:
+      - mysql
+      - php-stack
