@@ -36,14 +36,11 @@ if [[ ! -d "${PUPPET_DIR}" ]]; then
     echo "Created directory ${PUPPET_DIR}"
 fi
 
-cp "${VAGRANT_CORE_FOLDER}/puppet/Puppetfile" "${PUPPET_DIR}"
-echo "Copied Puppetfile"
-
 if [ "${OS}" == 'debian' ] || [ "${OS}" == 'ubuntu' ]; then
     if [[ ! -f /.puphpet-stuff/r10k-base-packages ]]; then
         echo 'Installing base packages for r10k'
-        apt-get install -y build-essential ruby-dev >/dev/null
-        gem install json >/dev/null
+        #apt-get install -y build-essential ruby-dev >/dev/null
+        #gem install json >/dev/null
         echo 'Finished installing base packages for r10k'
 
         touch /.puphpet-stuff/r10k-base-packages
@@ -76,12 +73,12 @@ if [[ ! -f /.puphpet-stuff/r10k-puppet-installed ]]; then
     echo 'Finished installing r10k'
 
     echo 'Running initial r10k'
-    cd "${PUPPET_DIR}" && r10k puppetfile install >/dev/null
+    #cd "${PUPPET_DIR}" && r10k puppetfile install >/dev/null
     echo 'Finished running initial r10k'
 
     touch /.puphpet-stuff/r10k-puppet-installed
 else
     echo 'Running update r10k'
-    cd "${PUPPET_DIR}" && r10k puppetfile install >/dev/null
+    #cd "${PUPPET_DIR}" && r10k puppetfile install >/dev/null
     echo 'Finished running update r10k'
 fi
