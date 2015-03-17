@@ -6,4 +6,10 @@
   gather_facts: no
 
   roles:
-    - { role: ansible-drush }
+    - { role: cibox-drush }
+
+  vars:
+    drushrc:
+      drush_usage_log: 1
+      drush_usage_send: 1
+      php-notices: warning
