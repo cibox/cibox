@@ -1,0 +1,4 @@
+---
+php_xdebug_module_path: /usr/lib64/php/modules
+php_extension_conf_path: /etc/php.d
+__php_webserver_daemon: "httpd"

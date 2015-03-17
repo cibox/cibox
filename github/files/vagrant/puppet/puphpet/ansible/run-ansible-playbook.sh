@@ -5,6 +5,7 @@ export PYTHONUNBUFFERED=1
 playbooks=(
 /vagrant/puphpet/ansible/apache.yml \
 /vagrant/puphpet/ansible/php.yml \
+/vagrant/puphpet/ansible/php-xdebug.yml \
 /vagrant/puphpet/ansible/mysql.yml \
 /vagrant/puphpet/ansible/memcached.yml \
 /vagrant/puphpet/ansible/composer.yml \
