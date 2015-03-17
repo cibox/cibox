@@ -32,3 +32,4 @@
 
   roles:
     - { role: ansible-role-mysql }
+    - { role: cibox-mysql-config }

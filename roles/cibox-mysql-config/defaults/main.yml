@@ -1,5 +1,5 @@
 ---
-
+mysql_tmpdir: "/run/shm/mysql"
 my_cnf:
   - { section: 'mysqld', option: 'innodb_file_per_table', value: '1' }
   - { section: 'mysqld', option: 'tmp_table_size', value: '160M' }
@@ -11,4 +11,6 @@ my_cnf:
   - { section: 'mysqld', option: 'table_cache', value: '800' }
   - { section: 'mysqld', option: 'innodb_change_buffering', value: 'inserts' }
   - { section: 'mysqld', option: 'sort_buffer_size', value: '8000000' }
+  - { section: 'mysqld', option: 'tmpdir', value: '{{ mysql_tmpdir }}' }
+
 
