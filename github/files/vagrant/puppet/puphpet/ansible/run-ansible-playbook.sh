@@ -8,6 +8,10 @@ echo 'Install php'
 ansible-playbook /vagrant/puphpet/ansible/php.yml
 echo 'Finished installing php'
 
+echo 'Install php xdebug'
+ansible-playbook /vagrant/puphpet/ansible/php-xdebug.yml
+echo 'Finished installing php xdebug'
+
 echo 'Install mysql'
 ansible-playbook /vagrant/puphpet/ansible/mysql.yml
 echo 'Finished installing mysql'
