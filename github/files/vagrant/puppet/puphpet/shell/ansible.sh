@@ -16,7 +16,7 @@ echo 'Finished installing base packages for ansible'
 echo 'Installing ansible'
 
 # install ansible and python mysql extension.
-apt-add-repository ppa:ansible/ansible >/dev/null
+apt-add-repository -y ppa:ansible/ansible &>/dev/null
 apt-get update >/dev/null
 apt-get -y install ansible >/dev/null
 apt-get -y install python-mysqldb >/dev/null
