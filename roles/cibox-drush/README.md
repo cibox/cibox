@@ -1,4 +1,4 @@
-ansible-drush
+cibox-drush
 =============
 
 Ansible role to configure [Drush](https://github.com/drush-ops/drush).
