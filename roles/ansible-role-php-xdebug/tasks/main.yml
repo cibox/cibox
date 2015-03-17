@@ -1,0 +1,57 @@
+---
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Download Xdebug.
+  get_url:
+    url: "http://xdebug.org/files/xdebug-{{ php_xdebug_version }}.tgz"
+    dest: "{{ workspace }}"
+
+- name: Untar Xdebug.
+  command: >
+    tar -C {{ workspace }} -xvzf {{ workspace }}/xdebug-{{ php_xdebug_version }}.tgz
+    creates={{ workspace }}/xdebug-{{ php_xdebug_version }}/README
+
+- name: Build Xdebug.
+  shell: >
+    {{ item }}
+    chdir={{ workspace }}/xdebug-{{ php_xdebug_version }}
+    creates={{ workspace }}/xdebug-{{ php_xdebug_version }}/modules/xdebug.so
+  with_items:
+    - phpize
+    - ./configure
+    - make
+
+- name: Ensure Xdebug module path exists.
+  file:
+    path: "{{ php_xdebug_module_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Move Xdebug module into place.
+  shell: >
+    cp {{ workspace }}/xdebug-{{ php_xdebug_version }}/modules/xdebug.so {{ php_xdebug_module_path }}/xdebug.so
+    creates={{ php_xdebug_module_path }}/xdebug.so
+
+- name: Copy xdebug INI into php.d folder.
+  template:
+    src: xdebug.ini.j2
+    dest: "{{ php_extension_conf_path }}/xdebug.ini"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart webserver
+
+- name: Check for separate cli php conf.d directory.
+  stat: path=/etc/php5/cli/conf.d
+  register: php_cli_path
+  when: php_xdebug_cli_enable
+
+- name: Symlink xdebug.ini into separate cli directory if it exists.
+  file:
+    src: "{{ php_extension_conf_path }}/xdebug.ini"
+    dest: /etc/php5/cli/conf.d/xdebug.ini
+    state: link
+  when: php_xdebug_cli_enable and php_cli_path.stat.isdir is defined and php_cli_path.stat.isdir
