@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PYTHONUNBUFFERED=1
+
 echo 'Install apache'
 ansible-playbook /vagrant/puphpet/ansible/apache.yml
 echo 'Finished installing apache'
