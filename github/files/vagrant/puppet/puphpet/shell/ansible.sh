@@ -3,7 +3,7 @@
 echo 'Installing base packages for ansible'
 export "DEBIAN_FRONTEND=noninteractive"
 # ansible needs python.
-apt-get -y install python-simplejson sudo curl make rsync >/dev/null
+apt-get -y install python-simplejson sudo curl make rsync git >/dev/null
 
 # because basic ubuntu is too stripped down we need to add logging.
 apt-get --reinstall install -y bsdutils >/dev/null
