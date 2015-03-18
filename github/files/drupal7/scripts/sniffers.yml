@@ -104,7 +104,7 @@
 
   - name: Install composer global requires
     sudo: yes
-    shell: "cd {{ composer_dir }} && composer require {{ item }}"
+    shell: "cd {{ composer_dir }} && composer require --prefer-dist {{ item }}"
     with_items: composer_global_require
     tags:
       - sniffers
@@ -200,4 +200,5 @@
     with_items: scsslint_folders
 
   - name: Website credentials
-    lineinfile: dest={{ workspace_root }}/{{ artifacts_file }} line="Build site installed at {{ webroot }}"
+    sudo: yes
+    lineinfile: dest={{ workspace_root }}/{{ artifacts_file }} line="Build site installed at {{ webroot }}" create=yes state=present
