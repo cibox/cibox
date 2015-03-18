@@ -67,6 +67,11 @@ Vagrant.configure("2") do |config|
   # Install ansible playbooks inside the box.
   config.vm.provision :shell, :path => "puphpet/ansible/run-ansible-playbook.sh"
 
+  # Install drupal within vm for testing.
+    if !ENV['VAGRANT_CI'].empty?
+      config.vm.provision :shell, :path => "puphpet/ansible/run-drupal-playbook.sh"
+    end
+
   config.ssh.username = "vagrant"
   config.ssh.password = "vagrant"
   config.ssh.shell = "sh"
