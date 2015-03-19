@@ -12,6 +12,7 @@
     - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
     - { role: ansible-php-pear, tags: ["ansible-php-pear", "php-stack"] }
     - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
+    - { role: ansible-role-mysql, tags: ["mysql", "php-stack"] }
     - { role: cibox-jenkins, tags: ["cibox-jenkins"] }
     - { role: cibox-jetty-solr, tags: ["cibox-jetty-solr"] }
     - { role: cibox-sniffers, tags: ["cibox-sniffers", "php-stack"] }
@@ -59,12 +60,12 @@
     apt_packages:
       - software-properties-common
       - python-software-properties
+      - apparmor-utils
+      - make
+      - rsync
       - libssl-dev
       - zlib1g-dev
       - apache2
-      - mysql-server
-      - mysql-client
-      - python-mysqldb
       - php5
       - php5-gd
       - php5-mcrypt
@@ -250,9 +251,4 @@
     tags:
       - mysql
       - apache
-      - php-stack
-  - name: Restart mysql
-    service: name=mysql state=restarted
-    tags:
-      - mysql
       - php-stack
