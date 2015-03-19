@@ -1,22 +1,5 @@
 ---
 
-  - name: Add preconfigured settings to my.cnf file
-    ini_file: dest=/etc/mysql/my.cnf section={{ item.section }} option={{ item.option }} value={{ item.value }}
-    sudo: yes
-    with_items: my_cnf
-    tags:
-      - mysql
-      - php-stack
-    notify: restart mysql
-
-  - name: Move mysql tmp folder to tmpfs(RAM)
-    lineinfile: dest=/etc/apparmor.d/usr.sbin.mysqld regexp="^/run/mysqld/mysqld.sock" insertafter=yes line=" /run/shm/mysql/* rw,"
-    sudo: yes
-    tags:
-      - mysql
-      - php-stack
-    notify: Restart apparmor
-
   - name: Prepare mysql tmpdir - step 1
     sudo: yes
     shell: "rm -rf {{ mysql_tmpdir }}"
@@ -35,3 +18,20 @@
     tags:
       - mysql
       - php-stack
+
+  - name: Move mysql tmp folder to tmpfs(RAM)
+    lineinfile: dest=/etc/apparmor.d/usr.sbin.mysqld regexp="^/run/mysqld/mysqld.sock" insertafter=yes line=" /run/shm/mysql/* rw,"
+    sudo: yes
+    tags:
+      - mysql
+      - php-stack
+    notify: Restart apparmor
+
+  - name: Add preconfigured settings to my.cnf file
+    ini_file: dest=/etc/mysql/my.cnf section={{ item.section }} option={{ item.option }} value={{ item.value }}
+    sudo: yes
+    with_items: my_cnf
+    tags:
+      - mysql
+      - php-stack
+    notify: restart mysql
