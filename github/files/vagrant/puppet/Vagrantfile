@@ -9,7 +9,7 @@ if !data['vm']['provider']['virtualbox'].empty?
   ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 end
 
-if !ENV['VAGRANT_CI'].empty?
+if !ENV['VAGRANT_CI'].nil?
   ENV['VAGRANT_DEFAULT_PROVIDER'] = 'lxc'
 end
 
@@ -17,7 +17,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "#{data['vm']['box']}"
   config.vm.box_url = "#{data['vm']['box_url']}"
 
-  if !ENV['VAGRANT_CI'].empty?
+  if !ENV['VAGRANT_CI'].nil?
     config.vm.box = "#{data['vm']['provider']['lxc']['box']}"
     config.vm.box_url = "#{data['vm']['provider']['lxc']['box_url']}"
   end
@@ -68,7 +68,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, :path => "puphpet/ansible/run-ansible-playbook.sh"
 
   # Install drupal within vm for testing.
-    if !ENV['VAGRANT_CI'].empty?
+    if !ENV['VAGRANT_CI'].nil?
       config.vm.provision :shell, :path => "puphpet/ansible/run-drupal-playbook.sh"
     end
 
