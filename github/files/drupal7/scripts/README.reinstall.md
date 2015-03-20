@@ -76,6 +76,11 @@ Keep in mind we are talking about reinstall.yml playbook only.
  ```source_database``` variable. There is a ```make_backup``` boolean variable for setting ability to
  create backups alongside processing playbook.
  
+- backup_user, backup_pass and source_database: - these variables should be used on Jenkins server for
+pointing out to right place where sql dump archive stored by Jenkins by cron or any other background app.
+ Keep in mind that backup should be accessible for webserver via url, injected by ```source_database```
+ variable.
+ 
 Best Practices and rules.
 ====
 

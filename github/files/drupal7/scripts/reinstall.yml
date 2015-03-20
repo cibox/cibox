@@ -25,8 +25,11 @@
     # This variable allows make backup before processing. Can be overridden by CI server.
     # true, false.
     make_backup: false
+    # htpasswd protection for securing backups.
+    backup_user: propeople
+    backup_pass: givemebackup
     # URL to the source database. Can be overridden by CI server.
-    source_database: http://192.168.56.132/backup/stage_x_dump.sql.gz
+    source_database: http://{{ backup_user }}:{{ backup_pass }}@192.168.56.132/backup/stage_x_dump.sql.gz
 
   tasks:
 
