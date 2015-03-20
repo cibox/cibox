@@ -85,7 +85,7 @@ Optional features
 =====
 
 There are memcache and solr features, disabled by default but shipped within reinstall.yml.
-Search for ```CHANGE_ME``` to see how they was implemented for past projects and change them to meet
+Search for ```CHANGE_ME``` to see how they were implemented for past projects and change them to meet
 your project needs.
  
 Best Practices and rules.
