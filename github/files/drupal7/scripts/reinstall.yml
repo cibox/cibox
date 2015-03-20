@@ -21,7 +21,7 @@
     pp_environment: 'default'
     # This variable allows select type of installation. Can be overridden by CI server.
     # From installation profile = 'profile', from sql dump = 'sql'.
-    workflow_type: 'sql'
+    workflow_type: 'profile'
     # This variable allows make backup before processing. Can be overridden by CI server.
     # true, false.
     make_backup: false
