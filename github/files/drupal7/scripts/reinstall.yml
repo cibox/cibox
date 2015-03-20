@@ -3,7 +3,7 @@
 # Developed for ansible version >= 1.7
 - hosts: localhost
   connection: local
-  gather_facts: no
+  gather_facts: yes
 
   vars:
     drupal_user: admin
@@ -14,24 +14,183 @@
     mysql_db: drupal
     cache_folder: /var/www/cache
     backup_folder: /var/www/backup
+    php_env_vars: 'APP_ENV=dev' # APP_ENV=dev - this varible will be set at PR_BUILDER from CI shell executor.
+    site_url: 'http://drupal.192.168.56.132.xip.io/'
+    # This variable will be used for variable_get('environment'). Can be overridden by CI server.
+    # development = 'default', demo = 'demo', staging = 'staging', production = 'production'.
+    pp_environment: 'default'
+    # This variable allows select type of installation. Can be overridden by CI server.
+    # From installation profile = 'profile', from sql dump = 'sql'.
+    workflow_type: 'profile'
+    # This variable allows make backup before processing. Can be overridden by CI server.
+    # true, false.
+    make_backup: false
+    # htpasswd protection for securing backups.
     backup_user: propeople
     backup_pass: givemebackup
-    php_env_vars: '' # APP_ENV=dev - this varible will be set at PR_BUILDER from CI shell executor.
+    # URL to the source database. Can be overridden by CI server.
+    source_database: http://{{ backup_user }}:{{ backup_pass }}@192.168.56.132/backup/stage_x_dump.sql.gz
 
   tasks:
 
+  - name: Getting timestamp
+    shell: date +'%Y_%m_%d_%M_%S'
+    register: backup_name_raw
+    when: pp_environment == "staging" or make_backup
+
+  - name: Getting name for backup
+    set_fact: backup_name={{ backup_name_raw.stdout }}
+    when: pp_environment == "staging" or make_backup
+
+  - name: Creating backup folder
+    sudo: yes
+    file: path={{ backup_folder }} state=directory recurse=yes
+
+  - name: Making regular backup
+    sudo: yes
+    mysql_db: name=staging state=dump target={{ backup_folder }}/{{ backup_name }}.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
+    when: pp_environment == "staging" or make_backup
+
+  - name: Check if latest backup exists
+    stat: path={{ backup_folder }}/latest.sql.gz
+    register: latest_backup_exists
+    when: workflow_type == "sql"
+
+  - name: Create initial backup from staging
+    mysql_db: name=staging state=dump target={{ backup_folder }}/latest.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
+    when: workflow_type == "sql" and latest_backup_exists.stat.exists == false and ansible_env.SUDO_USER == "jenkins"
+
+  - name: Downloading latest backup
+    get_url: url={{ source_database }} dest={{ backup_folder }}/latest_remote.sql.gz force=yes
+    when: workflow_type == "sql" and pp_environment == "default" and ansible_env.SUDO_USER != "jenkins"
+
   - name: Droping drupal database
     mysql_db: name={{ mysql_db }} state=absent login_user={{ mysql_user }} login_password={{ mysql_pass }}
+    when: pp_environment == "demo" or pp_environment == "default" or workflow_type == "profile"
 
   - name: Creating drupal database
     mysql_db: name={{ mysql_db }} state=present login_user={{ mysql_user }} login_password={{ mysql_pass }}
-    
+
+  - name: Importing from remote backup
+    mysql_db: name={{ mysql_db }} state=import target={{ backup_folder }}/latest_remote.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
+    sudo: yes
+    when: workflow_type == "sql" and pp_environment == "default" and ansible_env.SUDO_USER != "jenkins"
+
+  - name: Copy local backup to build folder
+    sudo: yes
+    copy: src={{ backup_folder }}/latest.sql.gz dest=./latest.sql.gz force=yes mode=0644
+    when: workflow_type == "sql" and (pp_environment == "default" or pp_environment == "demo") and ansible_env.SUDO_USER == "jenkins"
+
+  - name: Importing from local backup
+    mysql_db: name={{ mysql_db }} state=import target=./latest.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
+    sudo: yes
+    when: workflow_type == "sql" and (pp_environment == "default" or pp_environment == "demo") and ansible_env.SUDO_USER == "jenkins"
+
+  - name: Remove local backup from build folder
+    sudo: yes
+    file: name=./latest.sql.gz state=absent
+    when: workflow_type == "sql" and (pp_environment == "default" or pp_environment == "demo") and ansible_env.SUDO_USER == "jenkins"
+
   - name: Creating cache folder
     sudo: yes
     file: path={{ cache_folder }} state=directory recurse=yes
 
   - name: Installing drupal
     sudo: yes
-    shell: "{{ php_env_vars }} drush -y si {{ installation_profile_name }} --db-url=mysql://{{ mysql_user }}:{{ mysql_pass }}@127.0.0.1:/{{ mysql_db }} --account-name={{ drupal_user }} --account-pass={{ drupal_pass }}"
+    shell: "{{ php_env_vars }} drush -y si {{ installation_profile_name }} --db-url=mysql://{{ mysql_user }}:{{ mysql_pass }}@127.0.0.1:/{{ mysql_db }} --account-name={{ drupal_user }} --account-pass={{ drupal_pass }} --uri={{ site_url }}"
+    when: workflow_type == "profile"
 
-  handlers:
+  - name: Remove settings.php
+    file: name=sites/default/settings.php state=absent
+    sudo: yes
+
+  - name: Changing permissions for sites/default
+    sudo: yes
+    file: name=sites/default state=directory mode=777
+
+  - name: Creating settings.php
+    sudo: yes
+    shell: "sudo cp sites/default/default.settings.php sites/default/settings.php"
+
+  - name: Adding database variable to settings.php
+    sudo: yes
+    lineinfile: dest='sites/default/settings.php' line='$databases = array(\"default\" => array (\"default\" => array (\"database\" => \"{{ mysql_db }}\", \"username\" => \"{{ mysql_user }}\", \"password\" => \"{{ mysql_pass }}\", \"host\" => \"127.0.0.1\", \"port\" => \"\", \"driver\" => \"mysql\", \"prefix\" => \"\", ), ), );'
+
+  - name: Random prefix for memcache to settings.php
+    sudo: yes
+    lineinfile: dest='sites/default/settings.php' line='$conf[\"memcache_key_prefix\"] = \"{{ pp_environment }}\";'
+    when: pp_environment == "CHANGE_ME"
+
+  - name: Memcache settings to settings.php
+    sudo: yes
+    lineinfile: dest='sites/default/settings.php' line='$conf[\"cache_backends\"][] = \"sites/all/modules/contrib/memcache/memcache.inc\";'
+    when: pp_environment == "CHANGE_ME"
+
+  - name: Memcache settings to settings.php
+    sudo: yes
+    lineinfile: dest='sites/default/settings.php' line='$conf[\"cache_default_class\"] = \"MemCacheDrupal\";'
+    when: pp_environment == "CHANGE_ME"
+
+  - name: Adding environment variable to settings.php
+    sudo: yes
+    lineinfile: dest='sites/default/settings.php' line='$conf[\"pp_environment\"] = \"{{ pp_environment }}\";'
+
+  - name: Check if registry_rebuild is installed
+    shell: "{{ php_env_vars }} drush | grep -c registry_rebuild"
+    register: registry_rebuild_installed
+    ignore_errors: True
+
+  - name: Downloading registry_rebuild
+    sudo: yes
+    shell: "{{ php_env_vars }} drush -y dl registry_rebuild"
+    when: workflow_type == "sql" and registry_rebuild_installed.stdout == "0"
+
+  - name: Clear drush cache
+    sudo: yes
+    shell: "{{ php_env_vars }} drush cc drush"
+    when: workflow_type == "sql" and registry_rebuild_installed.stdout == "0"
+
+  - name: Rebuilding drupal registry
+    sudo: yes
+    shell: "{{ php_env_vars }} drush -y rr -l {{ site_url }} || true && {{ php_env_vars }} drush -y rr -l {{ site_url }} || true"
+    when: workflow_type == "sql"
+
+  - name: Updating database
+    sudo: yes
+    shell: "{{ php_env_vars }} drush -dvy updb -l {{ site_url }}"
+    when: workflow_type == "sql"
+    
+  - name: Enable module Stage File Proxy
+    sudo: yes
+    shell: "{{ php_env_vars }} drush -y en stage_file_proxy"
+    when: pp_environment == "demo" or pp_environment == "default"
+
+  - name: Stage File Proxy settings
+    sudo: yes
+    lineinfile: dest='sites/default/settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"http://steptoe-johnson.com";'
+    when: pp_environment == "demo" or pp_environment == "default"
+
+  - name: Creating latest staging backup
+    sudo: yes
+    mysql_db: name=staging state=dump target={{ backup_folder }}/latest.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
+    when: pp_environment == "staging" or make_backup
+
+  - name: Solr - clearing index
+    sudo: yes
+    shell: "{{ php_env_vars }} drush -y search-api-clear -l {{ site_url }}"
+    when: pp_environment == "CHANGE_ME"
+
+  - name: Solr - reindexing
+    sudo: yes
+    shell: "{{ php_env_vars }} drush -y search-api-index -l {{ site_url }}"
+    when: pp_environment == "CHANGE_ME"
+
+  - name: Error messages to display settings
+    sudo: yes
+    shell: "{{ php_env_vars }} drush vset error_level 2"
+    when: pp_environment == "default"
+
+  - name: Set writable files dir
+    sudo: yes
+    shell: "chmod -R 777 sites/default/files"
+
