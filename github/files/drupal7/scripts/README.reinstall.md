@@ -48,7 +48,7 @@ Keep in mind we are talking about reinstall.yml playbook only.
 
 - mysql_db: - This variable stores name of database, been used in a project for drupal site.
  This variable can be changed only when you need to enpower your Jenkins instance with more than
- one PR/DEMO/STAGE builders. You'll need this if the project contain 2,3 or even more sites and
+ one PR/DEMO/STAGE builders. You'll need this if the project contains 2,3 or even more sites and
  you need to split sites for been used unique databases for avoiding conflicts.
  
 - php_env_vars: - should be used when you need pass to your server's environment variable for 
@@ -71,6 +71,7 @@ Keep in mind we are talking about reinstall.yml playbook only.
  
  Profile based workflow will do reinstall drupal site from scratch using predefined
  profile from ```installation_profile_name``` variable. 
+ 
  Sql based workflow will prepare the site from database dump, that is obtained during process from 
  ```source_database``` variable. There is a ```make_backup``` boolean variable for setting ability to
  create backups alongside processing playbook.
