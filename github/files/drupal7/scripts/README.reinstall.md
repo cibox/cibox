@@ -80,6 +80,13 @@ Keep in mind we are talking about reinstall.yml playbook only.
 pointing out to right place where sql dump archive stored by Jenkins by cron or any other background app.
  Keep in mind that backup should be accessible for webserver via url, injected by ```source_database```
  variable.
+
+Optional features
+=====
+
+There are memcache and solr features, disabled by default but shipped within reinstall.yml.
+Search for ```CHANGE_ME``` to see how they was implemented for past projects and change them to meet
+your project needs.
  
 Best Practices and rules.
 ====

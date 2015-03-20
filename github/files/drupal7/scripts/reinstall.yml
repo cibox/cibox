@@ -116,17 +116,20 @@
     sudo: yes
     lineinfile: dest='sites/default/settings.php' line='$databases = array(\"default\" => array (\"default\" => array (\"database\" => \"{{ mysql_db }}\", \"username\" => \"{{ mysql_user }}\", \"password\" => \"{{ mysql_pass }}\", \"host\" => \"127.0.0.1\", \"port\" => \"\", \"driver\" => \"mysql\", \"prefix\" => \"\", ), ), );'
 
-#  - name: Random prefix for memcache to settings.php
-#    sudo: yes
-#    lineinfile: dest='sites/default/settings.php' line='$conf[\"memcache_key_prefix\"] = \"{{ pp_environment }}\";'
+  - name: Random prefix for memcache to settings.php
+    sudo: yes
+    lineinfile: dest='sites/default/settings.php' line='$conf[\"memcache_key_prefix\"] = \"{{ pp_environment }}\";'
+    when: pp_environment == "CHANGE_ME"
 
-#  - name: Memcache settings to settings.php
-#    sudo: yes
-#    lineinfile: dest='sites/default/settings.php' line='$conf[\"cache_backends\"][] = \"sites/all/modules/contrib/memcache/memcache.inc\";'
+  - name: Memcache settings to settings.php
+    sudo: yes
+    lineinfile: dest='sites/default/settings.php' line='$conf[\"cache_backends\"][] = \"sites/all/modules/contrib/memcache/memcache.inc\";'
+    when: pp_environment == "CHANGE_ME"
 
-#  - name: Memcache settings to settings.php
-#    sudo: yes
-#    lineinfile: dest='sites/default/settings.php' line='$conf[\"cache_default_class\"] = \"MemCacheDrupal\";'
+  - name: Memcache settings to settings.php
+    sudo: yes
+    lineinfile: dest='sites/default/settings.php' line='$conf[\"cache_default_class\"] = \"MemCacheDrupal\";'
+    when: pp_environment == "CHANGE_ME"
 
   - name: Adding environment variable to settings.php
     sudo: yes
