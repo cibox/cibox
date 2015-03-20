@@ -3,7 +3,7 @@ How to reinstall your site
 
 "Re-installation" here means not only using profile and installations site from scratch
 but this means that you may use the reinstall.yml playbook as a tool for obtaining
-dev or stage or possible production environment locally.
+dev or stage or even production environment locally.
 
 Keep in mind that this script used by Jenkins server for getting Pull Request builds.
 By overriding variables, that you can find within current playbook you can run it
