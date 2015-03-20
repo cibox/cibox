@@ -12,7 +12,7 @@
     - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
     - { role: ansible-php-pear, tags: ["ansible-php-pear", "php-stack"] }
     - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
-    - { role: ansible-role-mysql, tags: ["mysql", "php-stack"] }
+    - { role: ansible-role-mysql, tags: ["mysql", "php-stack", "ansible-role-mysql"] }
     - { role: cibox-jenkins, tags: ["cibox-jenkins"] }
     - { role: cibox-jetty-solr, tags: ["cibox-jetty-solr"] }
     - { role: cibox-sniffers, tags: ["cibox-sniffers", "php-stack"] }
