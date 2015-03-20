@@ -15,7 +15,7 @@
     cache_folder: /var/www/cache
     backup_folder: /var/www/backup
     php_env_vars: 'APP_ENV=dev' # APP_ENV=dev - this varible will be set at PR_BUILDER from CI shell executor.
-    site_url: 'http://nas.192.168.56.132.xip.io/'
+    site_url: 'http://drupal.192.168.56.132.xip.io/'
     # This variable will be used for variable_get('environment'). Can be overridden by CI server.
     # development = 'default', demo = 'demo', staging = 'staging', production = 'production'.
     pp_environment: 'default'
@@ -26,7 +26,7 @@
     # true, false.
     make_backup: false
     # URL to the source database. Can be overridden by CI server.
-    source_database: http://104.131.17.206/backup/stage_x_dump.sql.gz
+    source_database: http://192.168.56.132/backup/stage_x_dump.sql.gz
 
   tasks:
 
