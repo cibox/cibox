@@ -175,12 +175,12 @@
   - name: Solr - clearing index
     sudo: yes
     shell: "{{ php_env_vars }} drush -y search-api-clear -l {{ site_url }}"
-    when: pp_environment == "demo" or pp_environment == "staging"
+    when: pp_environment == "CHANGE_ME"
 
   - name: Solr - reindexing
     sudo: yes
     shell: "{{ php_env_vars }} drush -y search-api-index -l {{ site_url }}"
-    when: pp_environment == "demo" or pp_environment == "staging"
+    when: pp_environment == "CHANGE_ME"
 
   - name: Error messages to display settings
     sudo: yes
@@ -191,7 +191,3 @@
     sudo: yes
     shell: "chmod -R 777 sites/default/files"
 
-  handlers:
-#    - name: import livedb
-#      mysql_db: name=livedrupal state=import target=livedb.sql.gz
-#      ignore_errors: yes
