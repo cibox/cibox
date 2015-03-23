@@ -18,7 +18,7 @@
   <builders>
     <hudson.tasks.Shell>
       <command>
-mysql -uroot -e &quot;show databases;&quot; -s | egrep &quot;^drupal&quot; | xargs -I &quot;@@&quot; mysql -uroot -e &quot;DROP DATABASE @@&quot;
+mysql -uroot -proot -e &quot;show databases;&quot; -s | egrep &quot;^drupal&quot; | xargs -I &quot;@@&quot; mysql -uroot -proot -e &quot;DROP DATABASE @@&quot;
 
 cd /var/www/
 sudo rm -rf build*
