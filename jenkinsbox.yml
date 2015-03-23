@@ -83,6 +83,7 @@
       - php5-imagick
       - rng-tools
       - python-passlib
+      - cgroup-bin
     apache2_modules:
       - rewrite
     jenkins_configs:
