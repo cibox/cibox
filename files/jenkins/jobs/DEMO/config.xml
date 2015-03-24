@@ -45,6 +45,7 @@
   <builders>
     <hudson.tasks.Shell>
       <command>
+export PYTHONUNBUFFERED=1
 cd new_pull_request
 sudo git log -1 --stat > drupal/git-status.txt
 sudo rsync --delete -ra drupal/ /var/www/demo
