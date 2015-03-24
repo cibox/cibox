@@ -64,6 +64,7 @@
     <builders>
         <hudson.tasks.Shell>
             <command>
+export PYTHONUNBUFFERED=1
 echo "===============" > ${WORKSPACE}/commentinfo.md
 cd new_pull_request
 sudo rsync -avz drupal/ /var/www/build${BUILD_NUMBER}
