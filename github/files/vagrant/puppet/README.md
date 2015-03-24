@@ -46,8 +46,9 @@ For approaching lxc, please install vagrant plugin
 
 ```sh
 vagrant plugin install vagrant-lxc
-apt-get install redir lxc
+apt-get install redir lxc cgroup-bin
 ```
+also you may need to apply this patch https://github.com/fgrehm/vagrant-lxc/pull/354
 
 When your system is enpowered by apparmor, you should enable nfs mounts for your host
 machine
