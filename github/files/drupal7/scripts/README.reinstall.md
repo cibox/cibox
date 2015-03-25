@@ -87,7 +87,7 @@ Switching from profile to sql flow
 Typically every new project, developed from scratch starts from Drupal profile creation.
 This means teams should use ```workflow_type: profile``` variable state for reinstalling a site by
 using profile, predefined in ```installation_profile_name``` variable.
-But every project has a phase, where content managers start ading content and reinstall from profile
+But every project has a phase, where content managers start adding content and reinstall from profile
 becomes non convenient for developers. Thats why there is ```sql``` flow predefined within reinstall.yml
 playbook.
 For switching to ```sql``` flow type, there are steps to be done for making it working.
