@@ -58,11 +58,11 @@
 
   - name: Create initial backup from staging
     mysql_db: name=staging state=dump target={{ backup_folder }}/latest.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
-    when: workflow_type == "sql" and latest_backup_exists.stat.exists == false and ansible_env.SUDO_USER == "jenkins"
+    when: make_backup == true and workflow_type == "sql" and latest_backup_exists.stat.exists == false
 
   - name: Downloading latest backup
     get_url: url={{ source_database }} dest={{ backup_folder }}/latest_remote.sql.gz force=yes
-    when: workflow_type == "sql" and pp_environment == "default" and ansible_env.SUDO_USER != "jenkins"
+    when: workflow_type == "sql" and pp_environment == "default"
 
   - name: Droping drupal database
     mysql_db: name={{ mysql_db }} state=absent login_user={{ mysql_user }} login_password={{ mysql_pass }}
@@ -74,22 +74,22 @@
   - name: Importing from remote backup
     mysql_db: name={{ mysql_db }} state=import target={{ backup_folder }}/latest_remote.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
     sudo: yes
-    when: workflow_type == "sql" and pp_environment == "default" and ansible_env.SUDO_USER != "jenkins"
+    when: workflow_type == "sql" and pp_environment == "default"
 
   - name: Copy local backup to build folder
     sudo: yes
     copy: src={{ backup_folder }}/latest.sql.gz dest=./latest.sql.gz force=yes mode=0644
-    when: workflow_type == "sql" and (pp_environment == "default" or pp_environment == "demo") and ansible_env.SUDO_USER == "jenkins"
+    when: make_backup == true and workflow_type == "sql" and (pp_environment == "default" or pp_environment == "demo")
 
   - name: Importing from local backup
     mysql_db: name={{ mysql_db }} state=import target=./latest.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
     sudo: yes
-    when: workflow_type == "sql" and (pp_environment == "default" or pp_environment == "demo") and ansible_env.SUDO_USER == "jenkins"
+    when: make_backup == true and workflow_type == "sql" and (pp_environment == "default" or pp_environment == "demo")
 
   - name: Remove local backup from build folder
     sudo: yes
     file: name=./latest.sql.gz state=absent
-    when: workflow_type == "sql" and (pp_environment == "default" or pp_environment == "demo") and ansible_env.SUDO_USER == "jenkins"
+    when: workflow_type == "sql" and (pp_environment == "default" or pp_environment == "demo")
 
   - name: Creating cache folder
     sudo: yes
@@ -167,13 +167,13 @@
 
   - name: Stage File Proxy settings
     sudo: yes
-    lineinfile: dest='sites/default/settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"http://steptoe-johnson.com";'
+    lineinfile: dest='sites/default/settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"{{ site_url }}";'
     when: pp_environment == "demo" or pp_environment == "default"
 
   - name: Creating latest staging backup
     sudo: yes
     mysql_db: name=staging state=dump target={{ backup_folder }}/latest.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
-    when: pp_environment == "staging" or make_backup
+    when: make_backup == true and pp_environment == "staging" or make_backup
 
   - name: Solr - clearing index
     sudo: yes
@@ -192,5 +192,4 @@
 
   - name: Set writable files dir
     sudo: yes
-    shell: "chmod -R 777 sites/default/files"
-
+    file: dest=sites/default/files mode=777 state=directory
