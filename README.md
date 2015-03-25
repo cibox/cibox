@@ -3,9 +3,6 @@ CIBox (Continuous Integration Box)
 
 [RoadMap for CIBOX](https://github.com/propeoplemd/cibox/wiki/RoadMap)
 
-Current repo powered with https://github.com/willthames/ansible-lint checker for making playbooks closer to standard.
-Feel free to check your code before creating PRs for increasing speed of code review.
-
 Wiki https://github.com/propeoplemd/cibox/wiki
 
 Introduction video http://youtu.be/EJZcqTcycf0
