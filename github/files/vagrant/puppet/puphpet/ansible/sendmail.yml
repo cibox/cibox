@@ -1,0 +1,14 @@
+---
+# This playbook fix problem with sendmail.
+# @TODO should be replaced with MailCatcher.
+
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: no
+
+  tasks:
+    - name: Sendmail symlink
+      file:
+        src: "/bin/true"
+        dest: "/usr/sbin/sendmail"
+        state: link
