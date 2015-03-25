@@ -7,7 +7,7 @@
   gather_facts: no
 
   tasks:
-    - name: Sendmail link
+    - name: Sendmail symlink
       file:
         src: "/bin/true"
         dest: "/usr/sbin/sendmail"
