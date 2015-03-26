@@ -11,6 +11,7 @@
     apache_listen_port_ssl: 443
     apache_create_vhosts: true
     apache_vhosts_filename: "vhosts.conf"
+    cibox_ssl_folder: /etc/apache/ssl
     apache_vhosts:
       - {
         servername: "drupal.192.168.56.132.xip.io",
@@ -20,8 +21,8 @@
       - {
         servername: "drupal.192.168.56.132.xip.io",
         documentroot: "/var/www/drupal",
-        certificate_file: "/etc/apache2/ssl/apache.crt",
-        certificate_key_file: "/etc/apache2/ssl/apache.key",
+        certificate_file: "{{ cibox_ssl_folder }}/apache.crt",
+        certificate_key_file: "{{ cibox_ssl_folder }}/apache.key",
       }
     apache_mods_enabled:
       - rewrite.load
