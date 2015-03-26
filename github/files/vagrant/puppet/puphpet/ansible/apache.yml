@@ -20,12 +20,13 @@
       - {
         servername: "drupal.192.168.56.132.xip.io",
         documentroot: "/var/www/drupal",
-        certificate_file: "/var/www/ssl_certificate/example.crt",
-        certificate_key_file: "/var/www/ssl_certificate/example.key",
+        certificate_file: "/etc/apache2/ssl/apache.crt",
+        certificate_key_file: "/etc/apache2/ssl/apache.key",
       }
     apache_mods_enabled:
       - rewrite.load
       - ssl.load
 
   roles:
+    - { role: cibox-ssl-config }
     - { role: ansible-role-apache }

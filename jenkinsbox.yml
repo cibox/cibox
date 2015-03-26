@@ -93,6 +93,7 @@
     backup_folder: /var/www/backup
     backup_folder_user: propeople
     backup_folder_pass: givemebackup
+    cibox_ssl_enable_host: true
 
   pre_tasks:
   - name: Setup initial packages onto clean system for ansible
