@@ -6,7 +6,7 @@
 
   - name: Create self-signed SSL cert
     sudo: yes
-    command: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "/C=US" -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt
+    command: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "/C=US" -keyout {{ cibox_ssl_folder }}/apache.key -out {{ cibox_ssl_folder }}/apache.crt
 
   # @TODO should be used apache template and apache role. Currently used only for CI server.
   - name: Copy SSL apache vhost file
