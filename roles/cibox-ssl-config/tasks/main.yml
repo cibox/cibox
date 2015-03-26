@@ -8,6 +8,7 @@
     sudo: yes
     command: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "/C=US" -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt
 
+  # @TODO should be used apache template and apache role. Currently used only for CI server.
   - name: Copy SSL apache vhost file
     synchronize: src=files/sites-enabled/default-ssl.conf dest=/etc/apache2/sites-enabled/default-ssl.conf
     sudo: yes
@@ -16,12 +17,4 @@
       - php-stack
       - ssl
     notify: Restart apache
-
-  - name: Enable Apache2 SSL module
-    sudo: yes
-    apache2_module: state=present name=ssl
-    tags:
-      - apache
-      - php-stack
-      - ssl
-    notify: Restart apache
+    when: cibox_ssl_enable_host == true
