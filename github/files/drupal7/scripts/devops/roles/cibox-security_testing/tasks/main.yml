@@ -1,6 +1,6 @@
 ---
 - name: Install Security Testing (todo - speedup it a bit)
-  shell: "drush dl -y securitytesting-7.x-1.x-dev; drush en -y securitytesting;"
+  shell: "drush dl -y securitytesting-7.x-1.x-dev; drush en -y security_testing"
 
 - name: Run Security Testing
   shell: "drush -y sec-test sites/all/modules/custom"
