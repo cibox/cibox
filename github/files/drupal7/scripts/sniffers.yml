@@ -68,6 +68,9 @@
     scsslint_folders:
       - { name: 'themes', path: 'sites/all/themes/custom' }
 
+  roles:
+    - { role: /var/www/drupal/devops/roles/cibox-security_testing, when: scan_security == true }
+
   pre_tasks:
 
   - name: Was composer downloaded
@@ -199,10 +202,6 @@
     ignore_errors: yes
     shell: 'if [ -s {{ build_reports_dir }}/scsslint{{ item.name }}.txt ]; then echo "<strong>`wc -l < {{ build_reports_dir }}/scsslint{{ item.name }}.txt`</strong> " && echo "SCSS-lint: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/scsslint{{ item.name }}.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
     with_items: scsslint_folders
-
-  - name: Run Security Testing scans
-    when: scan_security == true
-    include: devops/security.yml
 
   - name: Website credentials
     sudo: yes

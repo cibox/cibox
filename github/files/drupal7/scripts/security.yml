@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    scan_security: true
+
+  roles:
+    - { role: /var/www/drupal/devops/roles/cibox-security_testing, when: scan_security == true }
