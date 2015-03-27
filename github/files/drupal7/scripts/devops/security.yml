@@ -1,3 +1,9 @@
 ---
-- name: Security Testing
-  roles: cibox-security_testing
+# This playbook runs security scans
+
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: yes
+
+  roles:
+    - { role: cibox-security_testing }
