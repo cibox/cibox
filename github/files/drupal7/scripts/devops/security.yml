@@ -1,5 +1,0 @@
----
-# This playbook runs security scans
-
-  roles:
-    - { role: cibox-security_testing }

@@ -1,5 +1,5 @@
 ---
-- name: Install Security Testing
+- name: Install Security Testing (todo: speedup it a bit)
   shell: "drush dl -y securitytesting-7.x-1.x-dev; drush en -y securitytesting;"
 
 - name: Run Security Testing
