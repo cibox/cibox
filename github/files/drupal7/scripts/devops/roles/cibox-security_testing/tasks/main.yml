@@ -1,0 +1,6 @@
+---
+- name: Install Security Testing
+  shell: "drush dl -y securitytesting-7.x-1.x-dev; drush en -y securitytesting;"
+
+- name: Run Security Testing
+  shell: "drush -y sec-test sites/all/modules/custom"
