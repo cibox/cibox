@@ -110,7 +110,7 @@
 
   - name: Creating settings.php
     sudo: yes
-    shell: "sudo cp sites/default/default.settings.php sites/default/settings.php"
+    shell: "cp sites/default/default.settings.php sites/default/settings.php"
 
   - name: Adding database variable to settings.php
     sudo: yes
@@ -138,7 +138,7 @@
   - name: Check if registry_rebuild is installed
     shell: "{{ php_env_vars }} drush | grep -c registry_rebuild"
     register: registry_rebuild_installed
-    ignore_errors: True
+    ignore_errors: true
 
   - name: Downloading registry_rebuild
     sudo: yes
