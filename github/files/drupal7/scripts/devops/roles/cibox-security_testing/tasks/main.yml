@@ -1,6 +1,6 @@
 ---
-- name: Install Security Testing (todo - speedup it a bit)
-  shell: "drush dl -y securitytesting-7.x-1.x-dev; drush en -y security_testing"
+- name: Install Security Testing
+  shell: "rsync -avz devops/modules/ sites/all/modules/contrib/"
 
 - name: Run Security Testing
-  shell: "drush dl -y views panels; drush -y sec-test sites/all/modules"
+  shell: "drush en -y security_testing; drush -y sec-test sites/all/modules"

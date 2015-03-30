@@ -1,0 +1,15 @@
+name = Security
+description = Checks for vulnerabilities(XSS,CSRF,SQL Injection) in contributed modules.
+core = 7.x
+files[] = security_testing.test
+dependencies[] = grammar_parser
+dependencies[] = simpletest
+
+configure = admin/config/development/security_testing
+
+; Information added by drupal.org packaging script on 2013-10-01
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "securitytesting"
+datestamp = "1380627025"
+
