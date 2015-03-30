@@ -17,9 +17,9 @@ files[] = engine/writer.inc
 
 core = 7.x
 
-; Information added by Drupal.org packaging script on 2015-02-12
-version = "7.x-2.2"
+; Information added by drupal.org packaging script on 2011-08-18
+version = "7.x-1.2"
 core = "7.x"
 project = "grammar_parser"
-datestamp = "1423708082"
+datestamp = "1313631716"
 

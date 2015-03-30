@@ -476,7 +476,7 @@ function security_testing_get_all_callbacks($security_testing_all_func_list, &$s
 
   // Search for the function hook_menu.
   for ($i = 0; $i < $count; $i++) {
-    if (strlen($security_testing_all_func_list['node']['name'][$i]) > 5) {
+    if (is_string($security_testing_all_func_list['node']['name'][$i]) && strlen($security_testing_all_func_list['node']['name'][$i]) > 5) {
       $hook = substr($security_testing_all_func_list['node']['name'][$i], -5);
       if ($hook == '_menu') {
         // Getting hook_menu node.

@@ -1,9 +1,6 @@
-Grammar Parser 2.x, 2012-xx-xx (development version)
-------------------------------
-- This file is no longer maintained. Use "git log" command to see details.
 
-Grammar Parser 1.x, 2009-xx-xx (development version)
-------------------------------
+pgp (grammar parser) 7.x-1.x, 2009-xx-xx (development version)
+----------------------------------------
 - Changes (2011-01-31):
   * editor.inc
   * - change debugPrint2() calls to debugPrint()
