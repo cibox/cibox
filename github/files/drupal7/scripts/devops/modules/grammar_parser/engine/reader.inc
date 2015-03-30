@@ -37,37 +37,51 @@
  *   // Do something with $grammar.
  * @endcode
  *
- * This reader will handle a code snippet that:
- * - is based on PHP 5.4 syntax
- * - includes a mixture of inline HTML and PHP code
- * - begins with either HTML or PHP code
- *
- * The whitespace preservation settings to this reader (and companion writer)
- * enable preservation or disregard of whitespace from the source snippet. With
- * preservation enabled, the rewritten source snippet will be formatted to match
- * the input. Otherwise, the output snippet will follow a coding style standard.
- * Currently, the coding style standard used is that defined by the open source
- * project Drupal.
- *
- * @link http://drupal.org/coding-standards
+ * This reader will not handle a code snippet that does not start with a php
+ * open tag. Also, template files with inline HTML and multiple php open and
+ * close tags are not supported.
  *
  * Tokens not handled:
+ * - [311] => T_INLINE_HTML (this one messes up the flow)
  * - [312] => T_CHARACTER
  * - [313] => T_BAD_CHARACTER (anything below ASCII 32 except \t (0x09), \n (0x0a) and \r (0x0d))
+ * - [339] => T_USE (namespace-related)
  * - [351] => T_HALT_COMPILER (__halt_compiler())
+ *
+ * - [xxx] => T_NS_C (Also defined as T_NAMESPACE (available since PHP 5.3.0))
  *
  * @link http://php.net/manual/en/tokens.php
  *
  * Grammar elements not handled:
+ * - nop (no operation, just a semi-colon)
  * - a '`' character (execute code)
  *
  * [Non-standard] Formatting that is modified:
+ * - array items inline as opposed to multi-line
+ *   - not Drupal standard or standard is unclear
+ *   - inline array code is retained if $preserveArrayFormat == TRUE
+ * - array done inline in code (not a function or function call)
+ *   - not Drupal standard or standard is unclear
+ * - no comma after last array element (not Drupal standard) (adds a comma)
+ * - whitespace before a ';' (whitespace is removed)
+ * - a statement enclosed in parentheses, e.g. "($var = $xx - $yy);"
+ *   - parentheses are retained (DELETE)
+ * - a one-line block not enclosed in braces, e.g. "if (!$data) continue;"
+ *   - braces and new lines are added
+ * - a nop block (i.e. ';'), e.g. "if (!$data);"
+ *   - braces and new lines are added
+ * - no whitespace around operators (a space is added)
  * - braces '{}' used to indicate index of string variable (e.g. $string{0})
  *   - braces are replaced by brackets '[]'
+ * - in a statement block outside of its parenthesized element or body
+ *   - additional whitespace is removed
+ *   - inline comments are dropped
+ *   - function /*goodbye*\/ foo() {}
+ *   - if /*hello*\/(TRUE) {}
  */
 class PGPReader extends PGPParser {
 
-  /**
+  /*
    * Singleton instance of this class.
    */
   private static $reader;
@@ -82,13 +96,11 @@ class PGPReader extends PGPParser {
   private $expressions = 0;
 
   /**
-   * Count of array expression depth during recursive calls to buildArray.
+   * Whether to build an array inline or on multiple lines.
    *
-   * Determines whether global or array preservation settings are used.
-   *
-   * @var integer
+   * @var boolean
    */
-  private $arrayExpressions = 0;
+  private $isMultiline = TRUE; // Deprecated.
 
   /**
    * Whether the current item is an interface definition.
@@ -98,13 +110,6 @@ class PGPReader extends PGPParser {
   private $isInterface = FALSE;
 
   /**
-   * Whether the current item is an anonymous function.
-   *
-   * @var boolean
-   */
-  private $isAnonymous = FALSE;
-
-  /**
    * Whether the current item is an inline if expression.
    *
    * @var boolean
@@ -112,36 +117,11 @@ class PGPReader extends PGPParser {
   private $isInlineIf = FALSE; // Used only once.
 
   /**
-   * Whether the current token should be considered a return token.
-   *
-   * This is used to prevent a chain reaction of returns when encountering
-   * T_ELSE or T_ELSEIF tokens in the alternative syntax for which these
-   * tokens serve both as block end and block begin tokens.
-   *
-   * @var boolean
-   */
-  private $isReturnToken = TRUE;
-
-  /**
-   * Whether the current item is part of a function name.
-   *
-   * @var boolean
-   */
-  private $inFunctionName = FALSE;
-
-  /**
    * Whether the current item is part of a function (call) parameter list.
    *
    * @var boolean
    */
   private $inFunctionOrCall = FALSE;
-
-  /**
-   * Whether the current block is part of the body of a use statement.
-   *
-   * @var boolean
-   */
-  private $inUseBody = FALSE;
 
   /**
    * Whether to save whitespace information with the current item.
@@ -158,53 +138,11 @@ class PGPReader extends PGPParser {
   private $addNewLineToWhitespace = FALSE;
 
   /**
-   * Whether to duplicate the input whitespace in the array expression.
+   * Whether to duplicate the input array format.
    *
    * @var boolean
    */
-  private $preserveArrayWhitespace = FALSE;
-
-  /**
-   * Whether to duplicate the input newlines in the array expression.
-   *
-   * @var boolean
-   */
-  private $preserveArrayNewline = FALSE;
-
-  /**
-   * Whether to duplicate the input whitespace.
-   *
-   * @var boolean
-   */
-  private $preserveWhitespace = FALSE;
-
-  /**
-   * Whether to duplicate the input whitespace as in 1.2 release.
-   *
-   * @var boolean
-   */
-  private $preserveWhitespaceLikeOriginal = FALSE;
-
-  /**
-   * Whether to duplicate the input newlines in a [non-array] expression.
-   *
-   * @var boolean
-   */
-  private $preserveNewline = FALSE;
-
-  /**
-   * Whether newlines have been moved to whitespace tokens.
-   *
-   * @var boolean
-   */
-  private $conformWhitespaceInTokens = FALSE;
-
-  /**
-   * Whether to include whitespace with the preceding document comment.
-   *
-   * @var boolean
-   */
-  private $includeWhitespaceWithDocComment = FALSE;
+  private $preserveArrayFormat = FALSE;
 
   /**
    * The current unary operator.
@@ -267,13 +205,13 @@ class PGPReader extends PGPParser {
    *
    * @var unknown_type
    */
-  private $buildFunctionCall = FALSE; // @todo This is the same name as a function - change this.
+  private $buildFunctionCall = FALSE; // TODO This is the same name as a function - change this.
 
   /**
    * Class constructor.
    *
    * @param string $snippet
-   *   (optional) A code snippet string.
+   *   A code snippet string.
    */
   public function __construct($snippet = NULL) {
     parent::__construct();
@@ -301,47 +239,112 @@ class PGPReader extends PGPParser {
   }
 
   /**
-   * @defgroup gp_builder Grammar parser builder functions
+   * @defgroup pgp_builder Grammar parser builder functions
    * @{
    */
 
   /**
    * Builds grammar statements from code snippet tokens.
    *
-   * The snippet may include inline HTML and PHP code, and need not begin with a
-   * PHP open tag. All tags are included in the generated grammar statements.
+   * The tokenizer expects a snippet starting with a PHP open tag.
+   * The open tag is included in the generated grammar statements.
    *
    * @param string $snippet
-   *   (optional) A code snippet string.
+   *   A code snippet string.
    */
   public function buildGrammar(&$snippet = NULL) {
-    // Prepare the tokens for parsing.
-    if (!$this->prepareTokens($snippet)) {
+    if ($snippet) {
+      $this->setSnippet($snippet);
+    }
+    if (empty($this->tokens)) {
+      $this->statements = new PGPBody();
       return;
     }
 
-    // Build grammar statements.
-    $this->statements = $this->buildBody();
+    // Global items.
+    $this->resetOthers();
+
+    /*
+     * TODO
+     * Can we eliminate this switch statement by using a while(current()) { ... next() } format?
+     * There is not a way to always do while (next($this->tokens)) and get the first token.
+     * Changing to current will require revisions to several methods that now do while (next($this->tokens)).
+     *
+     * In a template file, the first item may not be php code. Don't use the parser on those files!!!
+     */
+
+    // Process first token.
+    reset($this->tokens);
+
+//    $this->statements = $this->buildBody();
+    switch ($this->tokenType()) {
+      case T_OPEN_TAG:
+      case T_OPEN_TAG_WITH_ECHO:
+        // The open tags include a new line character.
+        // For now, we do not handle multiple open and close tags. So we can
+        // eliminate the new line character to make our printing simpler.
+        $token = $this->cleanToken();
+        $token['value'] = str_replace("\n", '', $token['value']);
+        // If followed by T_WHITESPACE, then add the number of new line characters.
+        $first_statement = $token;
+        $this->previousTokenIncludesNewLine = ($this->nextTokenType() == T_WHITESPACE);
+
+        // Set the parent object reference for recursive calls.
+        $parent = NULL;
+        $this->parents[] = &$parent; // JB 2010-06-03
+//        $this->parentExpressions[] = &$parent;
+
+        // Build grammar statements.
+        $this->statements = $this->buildBody();
+        $this->statements->insertFirst($first_statement);
+        break;
+/*
+      case T_INLINE_HTML: // Only intended for info files.
+        $token = $this->cleanToken();
+        $first_statement = $token;
+
+        // Set the parent object reference for recursive calls.
+        $parent = NULL;
+        $this->parents[] = &$parent;
+//        $this->parentExpressions[] = &$parent;
+
+        // Build grammar statements.
+        $this->statements = $this->buildBody();
+        $this->statements->insertFirst($first_statement);
+        break;
+*/
+      default:
+        // The file is not valid.
+        // If first token is not T_OPEN_TAG, then return error?
+        break;
+    }
   }
 
   /**
    * Builds grammar statements from code snippet tokens.
    *
-   * This function enables the editor to parse expressions on the fly. It is
-   * intended for PHP code expressions without any inline HTML. As such, the
-   * snippet should begin with a PHP open tag. The open tag is not included in
-   * the generated grammar statements.
+   * This function enables the editor to parse expressions on the fly.
+   * The snippet needs to have a PHP open tag for the tokenizer to work.
+   * The open tag is not included in the generated grammar statements.
+   * Thus, the open tag is swallowed (i.e. not returned) by this function.
    *
    * @param string $snippet
-   *   (optional) A code snippet string.
+   *   A code snippet string.
    */
   public function buildSnippet(&$snippet = NULL) {
-    // Prepare the tokens for parsing.
-    if (!$this->prepareTokens($snippet, FALSE)) {
+    if ($snippet) {
+      $this->setSnippet($snippet);
+      $this->debugPrint($this->tokens);
+    }
+    if (empty($this->tokens)) {
       return;
     }
 
-    // Build grammar statements.
+    // Global items.
+    $this->resetOthers();
+
+    // Process tokens.
+    reset($this->tokens);
     $this->statements = $this->buildExpression(array(';'));
   }
 
@@ -351,32 +354,37 @@ class PGPReader extends PGPParser {
    * This function only parses statements of a specific type (currently only
    * functions) whose name is in the list of values.
    *
-   * The snippet may include inline HTML and PHP code, and need not begin with a
-   * PHP open tag. All tags related to the specific statements are included in
-   * the generated grammar statements.
+   * The snippet needs to have a PHP open tag for the tokenizer to work.
+   * The open tag is not included in the generated grammar statements.
+   * Thus, the open tag is swallowed (i.e. not returned) by this function.
    *
-   * @param integer $type
-   *   Token type of statements to build grammar for. Expected to be one of:
-   *   T_INTERFACE, T_CLASS, T_TRAIT, or T_FUNCTION.
-   * @param array $values
-   *   A list of values to match as the name of the statement.
    * @param string $snippet
-   *   (optional) A code snippet string.
+   *   A code snippet string.
    */
   public function buildSpecific($type, $values, &$snippet = NULL) {
     if (!$type) {
       return;
     }
-    // Prepare the tokens for parsing.
-    if (!$this->prepareTokens($snippet)) {
+    if ($snippet) {
+      $this->setSnippet($snippet);
+      $this->debugPrint($this->tokens);
+    }
+    if (empty($this->tokens)) {
       return;
     }
 
+    // Global items.
+    $this->resetOthers();
+
+    // Process tokens.
+    reset($this->tokens);
+
     // Local items.
     $body = new PGPBody();
+    $modifiers = array();
 
     // Loop on tokens.
-    while (next($this->tokens) !== FALSE) {
+    while (next($this->tokens) !== FALSE) { // while (current($this->tokens) !== FALSE) {
       if ($this->tokenType() != $type) {
         continue;
       }
@@ -385,14 +393,14 @@ class PGPReader extends PGPParser {
         case T_FUNCTION:
           $next_token = $this->nextRealToken('value');
           if (in_array($next_token, $values)) {
-            $modifiers = new PGPList('modifiers', $this->getSettings());
-            // Use an empty node as parent object reference for recursive calls.
+            // Create an empty node as parent object reference for recursive calls.
             $dummy = NULL;
             $node = &$body->insertLast($dummy);
             $node->line = $this->tokenLine();
+
             $node->data = $this->buildFunction($modifiers);
-            // Store the node so we can insert statements around the function.
-            $this->functions[] = &$node;
+            $this->functions[] = &$node; // Store node not data so we can insert statements around the function.
+            $modifiers = array();
           }
           break;
       }
@@ -408,11 +416,7 @@ class PGPReader extends PGPParser {
    * class, function, conditional, for, foreach, case, etc.
    *
    * @param array $return_tokens
-   *   (optional) An array of tokens marking the end of the expression.
-   * @param array $statements_to_return
-   *   (optional) Number of statements to return. Used when parsing a block body
-   *   with a single statement.
-   *
+   *   An array of tokens marking the end of the expression.
    * @return PGPList
    *   A list of grammar statements.
    */
@@ -423,38 +427,31 @@ class PGPReader extends PGPParser {
     // Local items.
     $body = new PGPBody();
     $previousStatementIsComment = FALSE;
-    $modifiers = new PGPList('modifiers', $this->getSettings());
-    $cache = new PGPExpression();
+    $modifiers = array();
     $statements = 0;
-    $omit_from_statement_count = FALSE;
-    $in_detached_or_nested_body = FALSE;
-    list($preserveWhitespace, , ) = $this->getSettings($body);
 
     // Set the list parent to the current parent node.
     $body->parent = &$this->currentParent();
 
     // Loop on tokens.
-    while (next($this->tokens) !== FALSE) {
+    while (next($this->tokens) !== FALSE) { // while (current($this->tokens) !== FALSE) {
       $this->debugPrint("statements_to_return = $statements_to_return in buildBody");
-      $this->debugPrint('while buildBody');
+      $this->debugPrint("while buildBody");
       $this->printToken();
 
       // Return if a return token is encountered.
       if (in_array($this->tokenType(), $return_tokens) || ($statements_to_return && $statements == $statements_to_return)) {
-        $this->debugPrint('checking for appended comment before leaving buildBody');
+        $this->debugPrint("checking for appended comment before leaving buildBody");
         $this->debugPrint($this->nextRealToken('type', TRUE));
         $this->debugPrint($this->nextTokenType());
         $this->debugPrint($this->nextTokenValue());
         if (in_array($this->tokenType(), array('}', ';')) && $this->nextRealToken('type', TRUE) == T_COMMENT && $this->nextTokenType() == T_WHITESPACE && strpos($this->nextTokenValue(), "\n") === FALSE) {
           // Include an appended comment.
+//           substr_count($this->previousTokenValue(), "\n");
           $statements--;
         }
-        elseif (!$this->isReturnToken) {
-          // Do not leave.
-          $this->isReturnToken = TRUE;
-        }
         else {
-          $this->debugPrint('leaving buildBody');
+          $this->debugPrint("leaving buildBody");
           $this->printToken();
           prev($this->tokens);
           array_pop($this->parents);
@@ -462,51 +459,31 @@ class PGPReader extends PGPParser {
         }
       }
       // Add this for stacked regular comments.
-      if ($this->tokenType() != T_COMMENT) { // @todo Should this be previousTokenType()? No.
+      if ($this->tokenType() != T_COMMENT) {
         $previousStatementIsComment = FALSE;
       }
 
-      // Use an empty node as parent object reference for recursive calls.
+      // Create an empty node as parent object reference for recursive calls.
       $dummy = NULL;
       $node = &$body->insertLast($dummy);
       $node->line = $this->tokenLine();
-      $this->parents[] = &$node;
+      $this->parents[] = &$node; // JB 2010-06-03
 
       // Build expression based on token type.
       switch ($this->tokenType()) {
         case T_WHITESPACE:
-          $omit_from_statement_count = TRUE;
-          $newlines = substr_count($this->tokenValue(), "\n");
-          if ($preserveWhitespace) {
-            if ($this->includeWhitespaceWithDocComment) {
-              $this->comment['whitespace'] = $this->tokenValue();
-              $this->includeWhitespaceWithDocComment = FALSE;
-              break;
-            }
-            $prepend = $newlines == 0;
+          // We will automatically add a blank line in most situations.
+          // Only save a whitespace token if more than one blank is present.
+          // But subtract one (unless a blank is included in previous token).
+          $blankLines = substr_count($this->tokenValue(), "\n");
+          if ($blankLines > 0 && !$this->previousTokenIncludesNewLine) {
+            $blankLines--;
+          }
+          if ($blankLines > 0) {
             $node->data = array(
               'type' => $this->tokenType(),
-              'value' => $this->tokenValue(),
-              'prepend' => $prepend,
+              'value' => $blankLines,
             );
-          }
-          else {
-            // When not set to preserve whitespace, we automatically insert a
-            // newline between body statements.
-            // Only save a whitespace token if more than one newline is present.
-            // But subtract one (unless a newline is included in previous token).
-            // As we conform newlines in whitespace tokens (to overcome this
-            // inconsistency in the PHP tokenizer), the need to check for a
-            // newline in the prior token should be eliminated.
-            if ($newlines > 0 && !$this->previousTokenIncludesNewLine) {
-              $newlines--;
-            }
-            if ($newlines > 0) {
-              $node->data = array(
-                'type' => $this->tokenType(),
-                'lines' => $newlines,
-              );
-            }
           }
           $this->previousTokenIncludesNewLine = FALSE;
           // Add this for stacked regular comments.
@@ -515,77 +492,15 @@ class PGPReader extends PGPParser {
           }
           break;
 
-        case T_COMMENT:
-          // A regular comment (with "//") includes a new line character. If
-          // followed by whitespace, then add the number of newline characters.
-          // T_WHITESPACE includes the spaces at the beginning of the next line
-          // (may only be relevant for code comments that are in first column).
-
-          // If previous token is ';' or whitespace without a return,
-          // then the comment is appended to the line.
-          // @todo Could also be a ',' in an array expression.
-          // @todo If a '/**/' comment is followed by whitespace with a new line,
-          // then save the comment as a line. Otherwise cache the comment and
-          // lookahead until we can positively identify the statement type.
-          $append = 0;
-          if ($this->previousTokenType() == ';') {
-            // @todo What other tokens qualify for this treatment?
-            // ',' in array, '}' in block
-            $append = 1;
-          }
-          elseif ($previousStatementIsComment) {
-            ;
-          }
-          elseif ($this->previousTokenType() == T_WHITESPACE) {
-            $newlines = substr_count($this->previousTokenValue(), "\n");
-            if ($newlines == 0) {
-              $append = 1;
-            }
-          }
-          // A comment only includes a newline if its style is '//' or '#'.
-          $value = $this->tokenValue();
-          $value = $preserveWhitespace ? $value : $this->cleanComment($value);
-          $node->data = array(
-            'type' => $this->tokenType(),
-            'value' => $value,
-            'append' => $append,
-          );
-          if ($this->includesNewline($this->tokenValue())) {
-            // This ends a statement or is a stand-alone comment.
-            if ($this->nextTokenType() == T_WHITESPACE) {
-              // With conformed whitespace tokens, this is harmful.
-              $this->previousTokenIncludesNewLine = TRUE;
-            }
-            break;
-          }
-
-          if ($append) {
-            // Prepend detection is weak, but both states should not occur.
-            break;
-          }
-          if ($this->nextTokenType() == T_WHITESPACE && substr_count($this->nextTokenValue(), "\n") > 0) {
-            // This is a stand-alone comment.
-            break;
-          }
-          else {
-            // This comment is on a line before an identifying token.
-            $node->data['prepend'] = 1;
-          }
-          break;
-
         case T_STRING:
-          // @todo This would incorrectly classify a class method named define.
+//          echo "HITTING T_STRING!!!\n";
+          // TODO This would incorrectly classify a class method named define.
           // To catch this, check for existence of modifiers and in a function.
           $is_define = $this->tokenValue() == 'define';
-          if ($this->inUseBody) {
-            // Build a use statement without 'use' at the beginning.
-            prev($this->tokens);
-            $node->data = $this->buildUse(TRUE);
-          }
-          elseif ($is_define) {
+          if ($is_define) {
             $node->data = $this->buildFunctionCall();
             $node->data->type = T_DEFINE;
-            $this->defines[] = &$node;
+            $this->defines[] = &$node->data;
           }
           else {
             // Class references like parent are good examples of places where
@@ -594,17 +509,9 @@ class PGPReader extends PGPParser {
             if ($next_token == '(') {
               prev($this->tokens);
               $node->data = $this->buildAssignment($modifiers);
-              $this->functionCalls[] = &$node;
+              $this->functionCalls[] = &$node/*->data*/;
             }
-            elseif ($next_token == ':') {
-              // A label for a goto statement.
-              prev($this->tokens);
-              $node->data = $this->buildExpression(array(':'));
-              $node->data->type = T_LABEL;
-              next($this->tokens);
-              $node->data->insertLast($this->tokenValue(), 'operator2');
-            }
-            else {
+            else { // TODO Added 2010-01-27
               prev($this->tokens);
               $node->data = $this->buildAssignment($modifiers);
             }
@@ -612,11 +519,11 @@ class PGPReader extends PGPParser {
           break;
 
         case T_VARIABLE:
-          // This could be an array.
+          // This could be an array
           $next_token = $this->nextRealToken();
           if ($next_token == '(') {
             $node->data = $this->buildFunctionCall();
-            $this->functionCalls[] = &$node;
+            $this->functionCalls[] = &$node/*->data*/;
           }
           /*
            * As of PHP 5.3.0, it's possible to reference the class using a variable.
@@ -625,31 +532,10 @@ class PGPReader extends PGPParser {
           else {
             prev($this->tokens);
             $node->data = $this->buildAssignment($modifiers);
-            $modifiers = new PGPList('modifiers', $this->getSettings());
-            $this->debugPrint('LEAVING case T_VARIABLE after buildAssignment call from buildBody');
+            $modifiers = array();
+            $this->debugPrint("LEAVING case T_VARIABLE after buildAssignment call from buildBody");
           }
           break;
-
-        case ';':
-          // @todo Are there other tokens we should simply swallow?
-          break;
-
-        case '}':
-          if ($in_detached_or_nested_body) {
-            $in_detached_or_nested_body = FALSE;
-            break;
-          }
-          // Automatically return on this token.
-          prev($this->tokens);
-          array_pop($this->parents);
-          // Remove an empty node created before reading the token.
-          if ($node->data == NULL) {
-            $body->delete($node);
-          }
-          return $body;
-          break;
-
-        // Control structures.
 
         case T_DO:
         case T_IF:
@@ -673,89 +559,94 @@ class PGPReader extends PGPParser {
           $node->data = $this->buildForEach();
           break;
 
-        case T_DECLARE:
-          $node->data = $this->buildDeclare();
-          $modifiers = new PGPList('modifiers', $this->getSettings());
+        case T_COMMENT:
+          // If previous token is ';' or whitespace without a return,
+          // then the comment is appended to the line.
+          // TODO Could also be a ',' in an array expression.
+          $append = 0;
+          if ($this->previousTokenType() == ';') {
+            $append = 1;
+          }
+          elseif ($previousStatementIsComment) {
+            ;
+          }
+          elseif ($this->previousTokenType() == T_WHITESPACE) {
+            $blankLines = substr_count($this->previousTokenValue(), "\n");
+            if ($blankLines == 0) {
+              $append = 1;
+            }
+          }
+          // A comment only includes a newline if its style is '//' or '#'.
+          $node->data = array(
+            'type' => $this->tokenType(),
+            'value' => $this->cleanComment($this->tokenValue()),
+            'append' => $append,
+          );
+          if ($this->includesNewline($this->tokenValue()) && $this->nextTokenType() == T_WHITESPACE) {
+            $this->previousTokenIncludesNewLine = TRUE;
+          }
           break;
 
-        // Language constructs not functions (parens required).
-
-        case T_EXIT:
-        case T_EVAL:
-        case T_EMPTY:
-        case T_ISSET:
-        case T_UNSET:
-          // With exit (or die), parentheses are not optional with a parameter.
-          prev($this->tokens);
-          $node->data = $this->buildAssignment($modifiers);
-          $this->functionCalls[] = &$node;
+        case T_ML_COMMENT:
+        case T_DOC_COMMENT:
+          // NOTE: A regular comment (with a double slash) includes a new line character.
+          // If followed by T_WHITESPACE, then add the number of new line characters.
+          // T_WHITESPACE includes the spaces at the beginning of the next line
+          // (may only be relevant for code comments that are in first column).
+          if (($temp = $this->buildComment()) != array()) {
+            $node->data = $temp;
+            $this->comments[] = &$node->data;
+          }
           break;
 
-        // Language constructs not functions (parens optional).
-
-        // These are only allowed as statements.
         case T_BREAK:
         case T_CONTINUE:
         case T_ECHO:
         case T_RETURN:
-
-        // These may be statements or expressions.
-        case T_REQUIRE:
-        case T_REQUIRE_ONCE:
-        case T_INCLUDE:
-        case T_INCLUDE_ONCE:
-
-        case T_PRINT:
-        case T_THROW:
-          // Echo may have multiple parameters only if NOT surrounded by
-          // parentheses.
-          $save = current($this->tokens);
-          $node->data = $this->buildAssignment($modifiers);
-          $node->data->type = $save[0];
-          $node->data->name = $save[1];
-          $modifiers = new PGPList('modifiers', $this->getSettings());
-          $this->functionCalls[] = &$node;
+        case T_EXIT:
+          // TODO Could call buildAssignment like next group of tags.
+          // This would replace the 'value' key with 'values'.
+          /// We print all 7 tokens using PGPAssignment::toString().
+          // TODO All but continue can be used with parentheses.
+          // With exit (exit or die), parentheses may not be optional.
+          // PHP lists echo and exit under functions in the manual.
+          // Echo may have multiple parameters only if surrounded by parentheses.
+          // Use function call builder.
+          $type = $this->tokenType();
+//          $temp = new PGPAssignment();
+//          $temp->type = $type;
+//          $temp->value = $this->buildExpression(array(';'));
+//          $node->data = $temp;
+          $node->data = $this->buildFunctionCall(TRUE);
+          $node->data->type = $type;
+          $this->functionCalls[] = &$node/*->data*/;
           break;
 
-        // Language constructs not functions (no parens).
-
-        // These are only allowed as statements.
         case T_CONST:
         case T_GLOBAL:
         case T_VAR:
-        case T_GOTO:
-
-        // These may be statements or expressions.
-        case T_NEW: // Example: new Exception(..);
-          $save = current($this->tokens);
-          $node->data = $this->buildAssignment($modifiers);
-          $node->data->type = $save[0];
-          $node->data->name = $save[1];
-          $modifiers = new PGPList('modifiers', $this->getSettings());
-          if ($save[0] == T_GLOBAL) {
-            $this->globals[] = &$node;
+          $type = $this->tokenType();
+          $temp = $this->buildAssignment($modifiers);
+          $temp->type = $type;
+          $node->data = $temp;
+          $modifiers = array();
+          if ($type == T_GLOBAL) {
+            $this->globals[] = &$node->data;
           }
           break;
-
+/*
+        case T_BREAK:
+          $node->data = $this->cleanToken();
+          break;
+*/
         case T_INC:
         case T_DEC:
 //          $node->setData('operator2', $this->tokenValue());
           $this->unary = $this->tokenValue();
           break;
 
-        case '+':
-        case '-':
-        case '~':
-        case '!':
-          prev($this->tokens);
-          $node->data = $this->buildAssignment($modifiers);
-          break;
-
-        case '@':
-          // The warning suppression operator works only on expressions:
-          // variables, function and include calls, constants, and so forth.
-          // Ex: @$$var = function();
-          // Ex: @list($column, $value, $operator) = $condition;
+        case '@': // 2010-01-30
+          // Warning suppression operator, e.g. @$$var = function().
           // This is similar to a unary operator as is '&'.
 //          if ($this->nextTokenType() == T_VARIABLE) {
             $this->suppress = $this->tokenValue();
@@ -776,96 +667,29 @@ class PGPReader extends PGPParser {
           }
           break;
 
-        case T_STATIC:
-          if ($this->nextRealToken() == T_DOUBLE_COLON) {
-            // Ex: static::initializeFormats();
-            prev($this->tokens);
-            $node->data = $this->buildAssignment($modifiers);
-            break;
-          }
         case T_PUBLIC:
         case T_PRIVATE:
         case T_PROTECTED:
+        case T_STATIC:
         case T_ABSTRACT:
         case T_FINAL: // Properties cannot be declared final, only classes and methods may be declared as final.
-          $data = array(
-            'type' => $this->tokenType(),
-            'value' => $this->cleanComment($this->tokenValue()),
-          );
-          $cache->insertLast($data, 'operand');
-          // Include T_VARIABLE for a static variable declaration.
-          $return_tokens2 = array(T_PUBLIC, T_PRIVATE, T_PROTECTED, T_STATIC, T_ABSTRACT, T_FINAL, T_INTERFACE, T_CLASS, T_FUNCTION, T_VARIABLE);
-          $cache = $this->buildExpression($return_tokens2, $cache);
-          $modifiers->insertLast($cache, 'modifier');
-          $cache = new PGPExpression();
+          $modifiers[] = $this->tokenValue();
           break;
 
         case T_FUNCTION:
           $node->data = $this->buildFunction($modifiers);
-          // Store the node so we can insert statements around the function.
-          $this->functions[] = &$node;
-          $modifiers = new PGPList('modifiers', $this->getSettings());
+          $this->functions[] = &$node; // Store node not data so we can insert statements around the function.
+          $modifiers = array();
           break;
 
         case T_INTERFACE:
           $this->isInterface = TRUE;
         case T_CLASS:
-        case T_TRAIT:
-          // Store the node so we can insert statements around the class.
-          $items = strtolower($this->tokenValue()) . ($this->tokenType() == T_CLASS ? 'es' : 's');
-          $this->{$items}[] = &$node;
-          // Build the statement block.
           $node->data = $this->buildClass($modifiers);
-          $modifiers = new PGPList('modifiers', $this->getSettings());
+          $this->classes[] = &$node;
+          $modifiers = array();
           $this->isInterface = FALSE;
           break;
-
-        case T_TRY:
-        case T_CATCH:
-          $node->data = $this->buildTryCatch();
-          break;
-
-        case T_LIST:
-          $node->data = $this->buildList();
-          break;
-
-        case T_NAMESPACE:
-          if ($this->nextRealToken() == T_NS_SEPARATOR) {
-            // This is not a namespace declaration, but an assignment or
-            // function call statement (assuming a namespace declaration does
-            // not begin with a back slash, although lint allows it).
-            // Should not be an assignment as namespace syntax does not include
-            // variables, nor assignments to constants.
-            // To determine which requires a big token lookahead.
-            prev($this->tokens);
-            $node->data = $this->buildAssignment($modifiers);
-            break;
-          }
-          $node->data = $this->buildNamespace();
-          break;
-
-        case T_USE:
-          $node->data = $this->buildUse();
-          break;
-          // @see http://www.php.net/manual/en/language.namespaces.definitionmultiple.php
-          // Can be surrounded by brackets, global namespace has no name.
-          // @see http://www.php.net/manual/en/language.namespaces.basics.php
-          // Statement may begin with a back slash.
-          // Seems like it would make sense to concatenate the namespace as a single item.
-          // Add another item to function call being the namespace along with name.
-          $node->data = $this->buildFunctionCall();
-          $this->functionCalls[] = &$node;
-          break;
-
-        case T_NS_SEPARATOR:
-          // @todo If the expression starts with the separator, then it seems to
-          // be limited to being a function call.
-          prev($this->tokens);
-          $node->data = $this->buildAssignment($modifiers);
-          $this->functionCalls[] = &$node;
-          break;
-
-        // Alternative syntax for control structures.
 
         case T_ENDIF:
         case T_ENDWHILE:
@@ -873,7 +697,7 @@ class PGPReader extends PGPParser {
         case T_ENDFOR:
         case T_ENDFOREACH:
         case T_ENDDECLARE:
-          // Automatically return on this token.
+        case '}':
           prev($this->tokens);
           array_pop($this->parents);
           // Remove an empty node created before reading the token.
@@ -883,61 +707,92 @@ class PGPReader extends PGPParser {
           return $body;
           break;
 
+        case T_TRY:
+        case T_CATCH:
+          $node->data = $this->buildTryCatch();
+          break;
+
+        case T_REQUIRE:
+        case T_REQUIRE_ONCE:
+        case T_INCLUDE:
+        case T_INCLUDE_ONCE:
+          $node->data = $this->buildFunctionCall(TRUE);
+          $this->functionCalls[] = &$node/*->data*/;
+          break;
+
+        case T_EVAL:
+        case T_EMPTY:
+        case T_UNSET:
+          $node->data = $this->buildFunctionCall();
+          $this->functionCalls[] = &$node/*->data*/;
+          break;
+
+        case T_PRINT:
+        case T_THROW:
+          $node->data = $this->buildFunctionCall(TRUE);
+          $this->functionCalls[] = &$node/*->data*/;
+          break;
+
+        case T_DECLARE:
+          $node->data = $this->buildDeclare();
+          $modifiers = array();
+          break;
+
+        case T_LIST:
+          $node->data = $this->buildList();
+          break;
+
+        case T_ISSET: // 2010-02-23 Added.
+          prev($this->tokens);
+          $node->data = $this->buildAssignment($modifiers);
+          break;
+
+        case T_NEW: // 2010-03-02 Added. Example: new Exception(..);
+          prev($this->tokens);
+          $node->data = $this->buildAssignment($modifiers);
+          break;
+
         case T_INLINE_HTML:
-          $omit_from_statement_count = TRUE;
+          // 2009-06-13 Inline html
+//          echo "INLINE HTML in " . __FUNCTION__ . "\n";
+//          echo $this->tokenValue() . "\n";
           $node->data = $this->cleanToken();
           break;
 
         case T_OPEN_TAG:
         case T_OPEN_TAG_WITH_ECHO:
         case T_CLOSE_TAG:
-          $omit_from_statement_count = TRUE;
-          // These tags include a newline character.
-          if (!$this->conformWhitespaceInTokens) {
-            $token = $this->cleanToken();
-            if (!$preserveWhitespace) {
-              $token['value'] = str_replace("\n", '', $token['value']);
-              // With conformed whitespace tokens, this is harmful.
-              $this->previousTokenIncludesNewLine = ($this->nextTokenType() == T_WHITESPACE);
-            }
-          }
+          // The open tags include a new line character.
+          // For now, we do not handle multiple open and close tags. So we can
+          // eliminate the new line character to make our printing simpler.
+          $token = $this->cleanToken();
+          $token['value'] = str_replace("\n", '', $token['value']);
+          // If followed by T_WHITESPACE, then add the number of new line characters.
           $node->data = $this->cleanToken();
-          break;
-
-        case T_ML_COMMENT:
-        case T_DOC_COMMENT:
-          if (($temp = $this->buildComment()) != array()) {
-            $node->data = $temp;
-            $this->comments[] = &$node;
-          }
+          $this->previousTokenIncludesNewLine = ($this->nextTokenType() == T_WHITESPACE);
           break;
 
         case '(':
-          // Ex: ($some_var) ? print 'true' : print 'false';
-          // Ex: ($var = $xx - $yy);
-          // Callling buildExpression leaves the toString method hanging as an
-          // expression is not expected. Calling buildAssignment used to leave
-          // that routine up in arms as the left paren signalled it to build a
-          // function call.
-          $this->debugPrint('Hitting left paren in ' . __METHOD__);
+          /*
+           * TODO Need a way to handle this. Ex: ($some_var) ? print 'true' : print 'false';
+           * Callling buildExpression leaves the toString method hanging as an expression
+           * is not expected. Calling buildAssignment leaves that routine up in arms as the
+           * left paren signals it to build a function call.
+           */
+          $this->debugPrint("Hitting left paren in " . __METHOD__);
           prev($this->tokens);
-          $node->data = $this->buildAssignment($modifiers);
+          $node->data = $this->buildAssignment($modifiers); // $node->data = $this->buildExpression(array(';'));
           break;
 
-        case '{':
-          // This is a detached body block at top level of source or nested in
-          // another body. Most likely this is a typo, but it is allowed syntax.
-          // Ex: { foo(); print 'bar'; }
-          // Ex: function stuff() { { foo(); print 'bar'; } }
-          $node->data = $this->buildBody(array('}'));
-          $node->data->type = T_BODY;
-          $in_detached_or_nested_body = TRUE;
+        // Are there other tokens we should simply swallow!!!
+        case '{': // When does this tag hit here???
+        case ';':
+          $this->debugPrint("Hitting semi-colon in " . __METHOD__);
           break;
 
         default:
-//           $body['warning'] = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
-//           $body->extra = $this->cleanToken();
-//           return $body;
+//          $body['warning'] = 'unexected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
+//          return $body;
           break;
       } // end switch
 
@@ -945,13 +800,308 @@ class PGPReader extends PGPParser {
       if ($node->data == NULL) {
         $body->delete($node);
       }
-      elseif ($statements_to_return && !$omit_from_statement_count) {
+      elseif ($statements_to_return) {
         $statements++;
       }
-      $omit_from_statement_count = FALSE;
+
+//      next($this->tokens);
     } // end while
 
     return $body;
+  }
+
+  /**
+   * Builds a class or interface statement block.
+   *
+   * @param array $modifiers
+   *   An array of modifiers (e.g. public, private) for the statement block.
+   * @return PGPClass
+   *   An object of the statement block.
+   */
+  private function buildClass($modifiers) {
+    $this->debugPrint(__FUNCTION__);
+
+    // Create object.
+    $class = new PGPClass();
+    $class->comment = $this->comment;
+    $class->modifiers = $modifiers;
+    $class->type = $this->tokenType();
+
+    // Global items.
+    $this->comment = array();
+
+    // Local items.
+    $extends = 0;
+    $implements = 0;
+
+    while (next($this->tokens) !== FALSE) {
+      switch ($this->tokenType()) {
+        case T_STRING:
+          if ($extends) {
+            $class->extends[] = $this->tokenValue();
+          }
+          elseif ($implements) {
+            $class->implements[] = $this->tokenValue();
+          }
+          else {
+            $class->name = $this->tokenValue();
+          }
+          break;
+
+        case '{':
+          $class->bodyComment = $this->buildBodyComment();
+          $class->body = $this->buildBody();
+          break;
+
+        case '}':
+          return $class;
+          break;
+
+        case T_EXTENDS:
+          // Interfaces may extend multiple interfaces, classes only one class.
+          $extends++;
+          $implements = 0;
+          break;
+
+        case T_IMPLEMENTS:
+          $implements++;
+          $extends = 0;
+          break;
+
+        case ',':
+          // Delimits lists of interfaces implemented or classes extended.
+          if ($implements) {
+            $implements++;
+          }
+          elseif ($extends) {
+            $extends++;
+          }
+          // else error
+          break;
+
+        case T_COMMENT: // TODO Until we can figure a better way to handle embedded comments
+        case T_WHITESPACE:
+          break;
+
+        default:
+          $class->warning = 'unexected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
+          return $class;
+          break;
+      }
+    }
+    $class->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
+    $class->extra = $this->cleanToken();
+    return $class;
+  }
+
+  /**
+   * Builds a function statement block.
+   *
+   * @param array $modifiers
+   *   An array of modifiers (e.g. public, private) for the statement block.
+   * @return PGPClass
+   *   An object of the statement block.
+   */
+  private function buildFunction($modifiers) {
+    $this->debugPrint(__FUNCTION__);
+
+    // Create object.
+    $function = new PGPClass();
+    $function->comment = $this->comment;
+    $function->modifiers = $modifiers;
+    $function->type = $this->tokenType();
+    $function->parameters = new PGPList();
+
+    // Global items.
+    $this->comment = array();
+
+    while (next($this->tokens) !== FALSE) {
+      switch ($this->tokenType()) {
+        case T_STRING:
+          $function->name = $this->tokenValue();
+          break;
+
+        case '(':
+        case ',':
+          $this->inFunctionOrCall = TRUE;
+          $parameter = $this->buildExpression(array(',', ')'));
+          if (!$parameter->isEmpty()) {
+            $function->parameters->insertLast($parameter);
+          }
+          $this->inFunctionOrCall = FALSE;
+          break;
+
+        case ')':
+          $this->debugPrint("Hitting ) in while buildFunction");
+          break;
+
+        case '{':
+          $function->bodyComment = $this->buildBodyComment();
+          $function->body = $this->buildBody();
+          break;
+
+        case '}':
+          return $function;
+          break;
+
+        case '&':
+          $function->reference = $this->tokenValue();
+          break;
+
+        case ';':
+          if ($this->isInterface || in_array('abstract', $modifiers)) {
+            return $function;
+          }
+          $function->warning = 'unexected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
+          break;
+
+        case T_COMMENT: // TODO Until we can figure a better way to handle embedded comments
+        case T_WHITESPACE:
+          break;
+
+        default:
+          $function->warning = 'unexected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
+          return $function;
+          break;
+      }
+    }
+    $function->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
+    $function->extra = $this->cleanToken();
+    return $function;
+  }
+
+  /**
+   * Builds a function call (or other) expression.
+   *
+   * The other expressions built by this routine are: clone, [define,] empty,
+   * eval, include, print, require, throw, or unset. Parentheses are not
+   * required by an include, print, require, or throw expression. Define
+   * expressions may have a T_DOC_COMMENT.
+   *
+   * A function call may occur in several places, such as:
+   * - a separate statement
+   * - a parameter in another function call
+   * - in an assignment statement
+   * - in a return statement.
+   *
+   * @todo Should next parameter be $parens_are_optional described as:
+   *   Indicates whether parentheses are optional around parameters.
+   *   We only set the parameter to TRUE on include, print, require, or
+   *   throw expressions.
+   * @param boolean $require
+   *   Indicates whether parentheses are required around parameters.
+   * @param array $expression
+   *   A partial array of the expression from another builder routine.
+   * @return array
+   *   An array of the expression.
+   */
+  private function buildFunctionCall($require = FALSE, $expression = array()) {
+    $this->debugPrint(__FUNCTION__);
+
+    if (!$expression) {
+      // Set the item order so we can use case block when printing.
+      $parent = &$this->currentParent();
+
+      // Create object.
+      $expression = new PGPFunctionCall();
+      $expression->parent = &$parent;
+      $expression->comment = $this->comment;
+      $expression->type = T_FUNCTION_CALL;
+      $expression->name = $this->cleanToken();
+      $expression->noparens = 0;
+      $expression->parameters = new PGPList();
+//      $expression->expression = array(); // Deprecated.
+
+      // TODO This code is now in 3 places - refactor.
+      if ($this->suppress != '' || $this->reference != '') {
+        // Create object.
+        $name = new PGPOperand();
+        if ($this->suppress != '') {
+          // Ex: @parent::function();
+          $name->insertLast($this->suppress, 'suppress');
+          $this->suppress = '';
+        }
+        if ($this->reference != '') {
+          // Ex: &parent::$tokens
+          $name->insertLast($this->reference, 'reference');
+          $this->reference = '';
+        }
+        $name->insertLast($this->tokenType(), 'type');
+        $name->insertLast($this->tokenValue(), 'value');
+        $expression->name = $name;
+      }
+    }
+    $expression->noparens = 1;
+
+    // Global items.
+    $this->comment = array();
+
+    while (next($this->tokens) !== FALSE) {
+      $this->debugPrint("while buildFunctionCall");
+      $this->printToken();
+      switch ($this->tokenType()) {
+        case T_WHITESPACE:
+          // Intentionally bleed into next case for a require statement.
+          // TODO There could be whitespace even with parentheses.
+          // Check for next non-comment and non-whitespace token.
+          if (!$require || !$expression->parameters->isEmpty()) {
+            break;
+          }
+//          $expression->noparens = 1;
+
+        case '(':
+          if ($this->tokenType() == '(') {
+            $expression->noparens = 0; // 2010-02-08
+          }
+        case ',':
+          $this->inFunctionOrCall = TRUE;
+          $return_tokens = array(',', ';', T_CLOSE_TAG);
+          if ($this->isInlineIf && $expression->noparens) {
+            // Example: $question ? print "foo" : bar();
+            $return_tokens += array(3 => ':'); // @todo Use array_merge
+          }
+          $parameter = $this->buildExpression($return_tokens); // $parameter = $this->buildExpression(array(',', ';', T_CLOSE_TAG)); // 2009-06-13 Inline html
+          if (!$parameter->isEmpty()) {
+            $expression->parameters->insertLast($parameter);
+          }
+          $this->inFunctionOrCall = FALSE;
+          break;
+
+        case ')':
+          return $expression;
+          break;
+
+        case ':':
+          // This applies when an inline if expession has a "function" call without parentheses, e.g. print "foo"
+        case ';': // For a require.
+          $this->debugPrint("Hitting ; in while buildFunctionCall");
+          $this->debugPrint($expression);
+          prev($this->tokens); // Try to catch semi-colons in buildBody!!!
+          return $expression;
+          break;
+
+        case T_COMMENT:
+          // An inline comment outside of the parenthesized element or body.
+          // Drop the comment.
+          break;
+
+        case T_CLOSE_TAG:
+          // 2009-06-13 Inline html
+          $expression->inline = 1; // TODO This property is not defined in the class.
+          prev($this->tokens);
+          return $expression;
+          break;
+
+        default:
+          $expression->warning = 'unexected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
+          $expression->extra = $this->cleanToken();
+          return $expression;
+          break;
+      }
+    }
+    $expression->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
+    $expression->extra = $this->cleanToken();
+    return $expression;
   }
 
   /*
@@ -1073,9 +1223,8 @@ class PGPReader extends PGPParser {
    * @param array $return_tokens
    *   An array of tokens marking the end of the expression.
    * @param PGPExpression (or descendant most likely PGPOperand) $expression
-   *   (optional) An expression to append the new items to.
+   *   An expression to append the new items to.
    *   A partial expression from another builder routine.
-   *
    * @return PGPExpression
    *   A grammar object of the expression.
    */
@@ -1098,16 +1247,14 @@ class PGPReader extends PGPParser {
     // Local items.
     // Whether a left parentheses indicates a function call expression.
     $isLeftParenPartOfExpr = TRUE;
-    // Preservation settings.
-    list($preserveWhitespace, $preserveNewline, $preserveWhitespaceLikeOriginal) = $this->getSettings($expression);
 
     // Initialize counters related to the current expression.
     $lparens = 0;
     $rparens = 0;
     $lbrackets = 0;
     $rbrackets = 0;
-    $lbraces = 0;
-    $rbraces = 0;
+    $lbraces = 0; // NOT set
+    $rbraces = 0; // NOT set
 
     // Loop on tokens.
     while (next($this->tokens) !== FALSE) {
@@ -1120,20 +1267,18 @@ class PGPReader extends PGPParser {
         $this->debugPrint("lparens = $lparens <=> rparens = $rparens <=> lbrackets = $lbrackets <=> rbrackets = $rbrackets <=> lbraces = $lbraces <=> rbraces = $rbraces");
         // If ')' then process it (so added to array) and test after switch.
         // Otherwise test for unbalanced parens.
-        if ($this->tokenType() == ',' ||
-            !in_array($this->tokenType(), array(']', ')', '}')) && ($rbrackets == $lbrackets) && ($rparens == $lparens) && ($rbraces == $lbraces)) {
+        if (!in_array($this->tokenType(), array(']', ')', '}')) && ($rbrackets == $lbrackets) && ($rparens == $lparens) && ($rbraces == $lbraces)) {
           $this->debugPrint("leaving buildExpression $expressions");
           $this->printToken();
           $this->debugPrint($expression);
           prev($this->tokens);
           $this->debugPrint("PREVIOUS in buildExpression $expressions");
-//          array_pop($this->parentExpressions); // @todo The right spot???
-          $this->buildExpressionRemoveLastWhitespace($expression);
+//          array_pop($this->parentExpressions); // TODO The right spot???
           return $expression;
         }
       }
 
-      // Use an empty node as parent object reference for recursive calls.
+      // Create an empty node as parent object reference for recursive calls.
       $dummy = NULL;
       $node = &$expression->insertLast($dummy);
       $node->line = $this->tokenLine();
@@ -1141,35 +1286,47 @@ class PGPReader extends PGPParser {
 
       // Build expression based on token type.
       switch ($this->tokenType()) {
+        case T_COMMENT:
+          // TODO If code is poorly formatted, then there might not be whitespace around any tokens.
+          // It is fairly pointless to check only around comments!
+          // TODO Could insert whitespace using $expression->insertBefore($current, $data, $type)
+          if ($this->previousTokenType() != T_WHITESPACE) {
+            $node->setData('whitespace', '');
+            // Create an empty node as parent object reference for recursive calls.
+            $dummy = NULL;
+            $node = &$expression->insertLast($dummy);
+//            $this->parents[] = &$node;
+          }
+          /*
+           * Remove newline from EOL comment and add it to the whitespace
+           * token that follows, or add one if it doesn't.
+           */
+          // A comment only includes a newline if its style is '//' or '#'.
+          $comment = array(
+            'type' => $this->tokenType(),
+            'value' => $this->cleanComment($this->tokenValue()),
+//            'append' => $append
+          );
+          $node->setData('comment', $comment);
+          if ($this->includesNewline($this->tokenValue())) {
+            if ($this->nextTokenType() == T_WHITESPACE) {
+              $this->addNewLineToWhitespace = TRUE;
+            }
+            else {
+              $data = "\n";
+              $expression->insertLast($data, 'whitespace');
+            }
+          }
+          break;
+
         case T_WHITESPACE:
           if ($this->addNewLineToWhitespace) {
             // Transfer newline from end-of-line comment to whitespace.
-            // Only applies if we disable call to conformWhitespaceInTokens().
             $this->addNewLineToWhitespace = FALSE;
             $token = &$this->tokens[key($this->tokens)];
             $token[1] = "\n" . $token[1];
           }
-          if ($preserveWhitespace) {
-            $whitespace = array(
-              'type' => $this->tokenType(),
-              'value' => $this->tokenValue(),
-            );
-            $node->setData('whitespace', $whitespace);
-            break;
-          }
-          $newlines = substr_count($this->tokenValue(), "\n");
-          if ($preserveNewline && $newlines) {
-            $whitespace = array(
-              'type' => $this->tokenType(),
-              'lines' => $newlines,
-            );
-            $node->setData('whitespace', $whitespace);
-            break;
-          }
-          if (!$preserveWhitespaceLikeOriginal) {
-            break;
-          }
-
+          // 2009-06-16 add this block
           // We need to return once and then add the non-standard whitespace to the expression.
           // The issue is probably due to two ways of adding following tags:
           // With array keys, we do not store an element for the => character, automatically adding it after the key.
@@ -1181,159 +1338,34 @@ class PGPReader extends PGPParser {
             $test = in_array($this->nextRealToken(), array_merge($this->assignReturnTokens(), $this->operatorReturnTokens(), array(')')));
             if ($test && get_class($expression) == 'PGPOperand') {
               $this->addWhitespace = TRUE;
-              $this->debugPrint('setting add_whitespace');
+              $this->debugPrint("setting add_whitespace");
+//              print_r($expression);
               $expression->delete($node);
               prev($this->tokens);
-//              array_pop($this->parentExpressions); // @todo The right spot???
+//              array_pop($this->parentExpressions); // TODO The right spot???
               return $expression;
             }
           }
           $this->addWhitespace = FALSE;
-          // @todo If previous token is a regular comment, then we need to get the line spacing from it
-          // @todo Not consistent on storing whitespace, only do on assignments???
+          // TODO If previous token is a regular comment, then we need to get the line spacing from it
+          // TODO Not consistent on storing whitespace, only do on assignments???
           if ($this->tokenValue() != ' ' ||
              ($this->previousTokenType() == '(' || $this->nextTokenType() == ')')) {
             $node->setData('whitespace', $this->tokenValue());
+//            echo "added whitespace\n";
           }
           break;
 
-        case T_COMMENT:
-          // If we separate regular comments that are the last item in an
-          // operand into their own node, then we would have consistency in our
-          // handling of comments. This will also allow us to be more consistent
-          // in rewriting code. Currently, if the operand is a string, then the
-          // comment is a separate item. But, if the operand is a variable, then
-          // the comment is part of the operand.
-          if ($expression instanceof PGPOperand && in_array($this->nextRealToken(), $return_tokens)) {
-            // We are building an operand and next real token is a return token.
-            // Delete the last node.
-            $expression->delete($node);
-            $count = $this->buildArrayRemoveTrailingItems($expression);
-            if (!$count) {
-              // No whitespace found, but still need to rewind so comment is
-              // handled next time around.
-              prev($this->tokens);
-            }
-            return $expression;
-          }
-
-          if ($preserveWhitespaceLikeOriginal && $this->previousTokenType() != T_WHITESPACE) {
-            // Allow for no whitespace before a comment.
-            $node->setData('whitespace', '');
-            // Use an empty node as parent object reference for recursive calls.
-            $dummy = NULL;
-            $node = &$expression->insertLast($dummy);
-            $node->line = $this->tokenLine();
-//            $this->parents[] = &$node;
-          }
-          $append = 1;
-          if ($this->previousTokenType() == T_WHITESPACE) {
-            $newlines = substr_count($this->previousTokenValue(), "\n");
-            if ($this->nextRealToken('type', TRUE, 'backward') == T_COMMENT && $this->newlineFollows($this->nextRealToken('value', TRUE, 'backward'))) {
-              // Stacked regular comment.
-              $append = 1;
-            }
-            elseif ($newlines > 0) {
-              // @todo Does this incorrectly catch a "/**/" comment that spans
-              // multiple lines? Restrict to regular comments with "//" or "#".
-              $append = 0;
-            }
-          }
-          // A comment only includes a newline if its style is '//' or '#'.
-          $comment = array(
-            'type' => $this->tokenType(),
-            'value' => $this->cleanComment($this->tokenValue()),
-            'append' => $append,
-          );
-          $node->setData('comment', $comment);
-          if ($this->includesNewline($this->tokenValue())) {
-            // Only applies if we disable call to conformWhitespaceInTokens().
-            if ($this->nextTokenType() == T_WHITESPACE) {
-              $this->addNewLineToWhitespace = TRUE;
-            }
-            else {
-              $data = "\n";
-              $expression->insertLast($data, 'whitespace');
-            }
-          }
-          break;
-
-        case T_VARIABLE:
-        case T_STRING_VARNAME:
-          $next_token = $this->nextRealToken();
-          if ($next_token == '(') {
-            $node->setData('operand', $this->buildFunctionCall());
-            $this->functionCalls[] = &$node;
-          }
-          else {
-            $component = $this->buildSpecialOperators();
-            $returnTokens2 = array_merge($return_tokens, $this->assignReturnTokens(), $this->operatorReturnTokens());
-            // Need to merge the two expressions.
-            $component = $this->buildExpression($returnTokens2, $component);
-            $this->debugPrint('component');
-            $this->debugPrint($component);
-            if ($this->buildFunctionCall) {
-              $this->buildFunctionCall = FALSE;
-              $this->debugPrint('YES this->buildFunctionCall');
-              // @todo Make this into a routine of its own.
-              $name = $component;
-              $this->debugPrint('name');
-              $this->debugPrint($name);
-              // Create object.
-              $expression2 = new PGPFunctionCall();
-              $expression2->parent = &$this->currentParent();
-//              $expression2->comment = $expression->comment;
-              $expression2->type = T_FUNCTION_CALL;
-              $expression2->name = $name;
-              $expression2->noparens = 0;
-              $expression2->parameters = new PGPList('parameters', $this->getSettings());
-              unset($component);
-//              prev($this->tokens); // @todo ???
-              $component = $this->buildFunctionCall($expression2); // @todo Add this to functionCalls?
-              $this->functionCalls[] = &$node;
-            }
-
-            // @todo This condition should no longer be encountered.
-            if ($this->unary != '') {
-//              $node->data['unary'] = $this->unary; // @todo How to handle unary following variable expression???
-              $component->insertLast($this->unary, 'unary');
-              $this->unary = '';
-            }
-
-            $node->setData('operand', $component);
-            $this->debugPrint('component');
-            $this->debugPrint($component);
-
-//            $node->setData('operand', $temp);
-            $this->debugPrint("LEAVING case T_VARIABLE $expressions");
-            $this->printToken();
-            $isLeftParenPartOfExpr = FALSE;
-          }
-          break;
-
-        case T_ARRAY:
-          if ($this->nextRealToken() == '(') {
-            $node->setData('operand', $this->buildArray());
-          }
-          else {
-            // @todo Other variable type names fall under T_STRING and are
-            // stored as a PGPOperand object instead of an array. Consistency?
-            $node->setData('operand', $this->cleanToken());
-          }
-          break;
-
-        case T_CALLABLE:
-        case T_STATIC:
         case T_STRING:
           // T_STRING can be function call or name after an object operator.
           // After an object operator, it could have indices inside '[]'.
           // A function name could be followed by white space or comment ('/* */').
-          if (!$this->inFunctionName && $this->nextRealToken() == '(') {
-            $this->debugPrint('ABOUT TO FORK TO FUNCTION CALL');
+          if ($this->nextRealToken() == '(') {
+            $this->debugPrint("ABOUT TO FORK TO FUNCTION CALL");
             $this->debugPrint($expression);
-            // @todo Remove this error catching if!!
+            // TODO Remove this error catching if!!
             if (is_object($expression->first()->data)) { // if (is_a($expression->first()->data, 'PGPOperand')) {
-//              $this->debugPrint('ABOUT TO FORK TO FUNCTION CALL');
+//              $this->debugPrint("ABOUT TO FORK TO FUNCTION CALL");
 //              $this->debugPrint($expression);
             }
             elseif ($expression->first()->data == T_VARIABLE) {
@@ -1343,68 +1375,139 @@ class PGPReader extends PGPParser {
               // This expression was identified as an assignment and needs to be reclassified.
               $node->setData('operand', $this->cleanToken());
               $this->buildFunctionCall = TRUE;
-//              array_pop($this->parentExpressions); // @todo The right spot???
+//              array_pop($this->parentExpressions); // TODO The right spot???
               return $expression;
             }
             // This is a function call.
             $node->setData('operand', $this->buildFunctionCall());
-            $node->data->parentExpression = &$expression;
-            $this->functionCalls[] = &$node;
-            $this->functionCallNames[] = $node->data->printName();
+            $node->data->parentExpression = &$expression; // THIS IS THE SPOT!!! // JB 2010-05-03
+            $this->functionCalls[] = &$node/*->data*/;
             $this->debugPrint("LEAVING case T_STRING $expressions");
           }
           else {
-            $component = $this->buildSpecialOperators();
+            // Create object.
+            $component = new PGPOperand();
+            if ($this->unary != '') {
+              // Ex: ++parent::$tokens;
+              $component->insertLast($this->unary, 'unary');
+              $this->unary = '';
+            }
+            if ($this->suppress != '') {
+              // Ex: @parent::function();
+              $component->insertLast($this->suppress, 'suppress');
+              $this->suppress = '';
+            }
+            if ($this->reference != '') {
+              // Ex: &parent::$tokens
+              $component->insertLast($this->reference, 'reference');
+              $this->reference = '';
+            }
+            $component->insertLast($this->tokenType(), 'type');
+            $component->insertLast($this->tokenValue(), 'value');
             $node->setData('operand', $component);
           }
           break;
 
         // These are equivalent to T_STRING when it is followed by parenthesis.
-        // Language constructs not functions (parens required).
-
-        case T_EXIT:
         case T_EVAL:
         case T_EMPTY:
-        case T_ISSET:
         case T_UNSET:
+        case T_ISSET:
           $node->setData('operand', $this->buildFunctionCall());
-          $this->functionCalls[] = &$node;
+          $this->functionCalls[] = &$node/*->data*/;
           break;
 
-        // Language constructs not functions (parens optional).
-
-        case T_REQUIRE:
-        case T_REQUIRE_ONCE:
-        case T_INCLUDE:
-        case T_INCLUDE_ONCE:
-
         case T_PRINT:
-        case T_THROW:
-          // @todo Do like clone below? The parentheses as an expression not
-          // a delimiter of the parameters will mess up buildFunctionCall().
-          // Print and throw do not seem like they would be embedded in another
-          // function call, whereas require, include, and clone may be.
-          $node->setData('operand', $this->buildFunctionCall());
-          $this->functionCalls[] = &$node;
+          $node->setData('operand', $this->buildFunctionCall(TRUE));
+          $this->functionCalls[] = &$node/*->data*/;
           break;
 
         case T_CLONE:
           if ($this->nextRealToken() == '(') {
-            $node->setData('operand', $this->buildFunctionCall());
-            $this->functionCalls[] = &$node;
+            $node->setData('operand', $this->buildFunctionCall(TRUE));
+            $this->functionCalls[] = &$node/*->data*/;
           }
           else {
             $node->setData('operator', $this->tokenValue());
           }
           break;
 
-        case '"':
-          // Marks the begin and end of a string with variables inside.
-          $node->setData('special', $this->buildString());
-          break;
+        case T_VARIABLE:
+        case T_STRING_VARNAME:
+          $next_token = $this->nextRealToken();
+          if ($next_token == '(') {
+            $node->setData('operand', $this->buildFunctionCall());
+            $this->functionCalls[] = &$node/*->data*/;
+          }
+          else {
+            // Create object.
+            $component = new PGPOperand();
+            // Unary and indirect are handled differently than reference only
+            // because they can be encountered in buildBody or here. It would
+            // seem odd for an '&' to begin a statement. If it did, then we
+            // could treat all three the same way.
+            if ($this->unary != '') {
+              $component->insertLast($this->unary, 'unary');
+              $this->unary = '';
+            }
+            // Order is important as the reference would go before the indirect operator.
+            if ($this->reference != '') {
+              $component->insertLast($this->reference, 'reference');
+              $this->reference = '';
+            }
+            if ($this->suppress != '') {
+              // Ex: @parent::function();
+              $component->insertLast($this->suppress, 'suppress');
+              $this->suppress = '';
+            }
+            if ($this->indirect != '') {
+              $component->insertLast($this->indirect, 'indirect');
+              $this->indirect = '';
+            }
+            $component->insertLast($this->tokenType(), 'type');
+            $component->insertLast($this->tokenValue(), 'value');
+            $returnTokens2 = array_merge($return_tokens, $this->assignReturnTokens(), $this->operatorReturnTokens());
+            // Need to merge the two expressions.
+            $component = $this->buildExpression($returnTokens2, $component);
+            $this->debugPrint("component");
+            $this->debugPrint($component);
+            if ($this->buildFunctionCall) {
+              $this->buildFunctionCall = FALSE;
+              $this->debugPrint("YES this->buildFunctionCall");
+              // TODO Make this into a routine of its own.
+              $name = $component;
+              $this->debugPrint("name");
+              $this->debugPrint($name);
+              // Create object.
+              $expression2 = new PGPFunctionCall();
+              $expression2->parent = &$this->currentParent();
+//              $expression2->comment = $expression->comment;
+              $expression2->type = T_FUNCTION_CALL;
+              $expression2->name = $name;
+              $expression2->noparens = 0;
+              $expression2->parameters = new PGPList();
+              unset($component);
+//              prev($this->tokens); // TODO ???
+              $component = $this->buildFunctionCall(FALSE, $expression2); // TODO Add this to functionCalls?
+              $this->functionCalls[] = &$node/*&$component*/; // 2010-02-19
+            }
 
-        case T_LIST:
-          $node->setData('operand', $this->buildList());
+            // TODO This condition should no longer be encountered. 2010-03-31.
+            if ($this->unary != '') {
+//              $node->data['unary'] = $this->unary; // TODO How to handle unary following variable expression???
+              $component->insertLast($this->unary, 'unary');
+              $this->unary = '';
+            }
+
+            $node->setData('operand', $component);
+            $this->debugPrint("component");
+            $this->debugPrint($component);
+
+//            $node->setData('operand', $temp);
+            $this->debugPrint("LEAVING case T_VARIABLE $expressions");
+            $this->printToken();
+            $isLeftParenPartOfExpr = FALSE;
+          }
           break;
 
         case T_CONSTANT_ENCAPSED_STRING:
@@ -1414,7 +1517,25 @@ class PGPReader extends PGPParser {
         case T_OBJECT_OPERATOR:
           $node->setData('operator2', $this->tokenValue());
           break;
-
+/*
+          // TODO This could be followed by just about anything, eg. T_INC, operator or assign tokens
+          $specialReturns = array('[', ']', '(', ')', ' ', '"', T_INC, T_DEC, /*T_VARIABLE,*\/ T_ENCAPSED_AND_WHITESPACE, T_CLOSE_TAG); // 2009-06-13 Inline html // 2009-06-13 added T_CLOSE_TAG -- need a better way to handle these!!!
+          $returnTokens2 = array_merge($specialReturns, array(T_OBJECT_OPERATOR), $this->assignReturnTokens(), $this->operatorReturnTokens());
+          $temp = $this->buildExpression($returnTokens2);
+          $node->setData('object', $temp);
+          $this->debugPrint("LEAVING case T_OBJECT_OPERATOR $expressions");
+          break;
+*/
+        case T_ARRAY:
+          if ($this->nextRealToken() == '(') {
+            $this->debugPrint("isMultiline = $this->isMultiline");
+            $node->setData('operand', $this->buildArray(array(')', ';')));
+          }
+          else {
+            $node->setData('operand', $this->cleanToken());
+          }
+          break;
+// 2010-02-25
         case '{':
           $isLeftParenPartOfExpr = TRUE;
           $this->debugPrint("LEFT  lbraces = $lbraces <=> rbraces = $rbraces in $expressions next token value = " . $this->nextTokenValue());
@@ -1423,8 +1544,8 @@ class PGPReader extends PGPParser {
           // also delimit an expression.
           // The return tokens on a variable include the right bracket. So we
           // need to test the next character here for '->' or '[' and continue.
-          // @todo Convert '{}' used to access a character of a string to '[]'.
-          $lbraces++;
+          // TODO Convert '{}' used to access a character of a string to '[]'.
+          $lbraces++; // TODO Use $lbraces for '{'
           $node->setData('curly', $this->buildExpression(array('}')));
           break;
 
@@ -1434,7 +1555,7 @@ class PGPReader extends PGPParser {
           // Right side count = left side count = 0 when this is a nested call.
           // The left side count was incremented in the parent call.
           if ($rbraces < $lbraces) {
-            $rbraces++;
+            $rbraces++; // TODO Use $rbraces for '}'
           }
           // Unbalanced braces.
           elseif ($rbraces == $lbraces) {
@@ -1443,29 +1564,25 @@ class PGPReader extends PGPParser {
           break;
 
         case '[':
-          if ($isLeftParenPartOfExpr) {
-            // This left bracket indicates the start of a "short syntax" array
-            // introduced in PHP 5.4.
-            $this->debugPrint('hitting left square bracket in buildExpression');
-            prev($this->tokens);
-            $node->setData('operand', $this->buildArray(TRUE));
-            return $expression;
-          }
+//        case '{':
           $isLeftParenPartOfExpr = TRUE;
           $this->debugPrint("LEFT  lbrackets = $lbrackets <=> rbrackets = $rbrackets in $expressions next token value = " . $this->nextTokenValue());
+          // '{}' braces may delimit character positions in strings (deprecated
+          // in PHP 5.3 or 6.0). They may also delimit an expression.
           // The return tokens on a variable include the right bracket. So we
           // need to test the next character here for '->' or '[' and continue.
-          $lbrackets++;
+          $lbrackets++; // TODO Use $lbraces for '{'
           $node->setData('index', $this->buildExpression(array(']'/*, '}'*/)));
           break;
 
         case ']':
+//        case '}':
           $isLeftParenPartOfExpr = FALSE;
           $this->debugPrint("RIGHT lbrackets = $lbrackets <=> rbrackets = $rbrackets in $expressions next token value = " . $this->nextTokenValue());
           // Right side count = left side count = 0 when this is a nested call.
           // The left side count was incremented in the parent call.
           if ($rbrackets < $lbrackets) {
-            $rbrackets++;
+            $rbrackets++; // TODO Use $rbraces for '}'
           }
           // Unbalanced brackets.
           elseif ($rbrackets == $lbrackets) {
@@ -1476,11 +1593,11 @@ class PGPReader extends PGPParser {
         case '(':
           if (!$isLeftParenPartOfExpr) {
             // This left parenthesis indicates a function call if the previous token is not an operator or logical
-            $this->debugPrint('hitting left p in buildExpression');
+            $this->debugPrint("hitting left p in buildExpression");
             $expression->delete($node);
             prev($this->tokens);
             $this->buildFunctionCall = TRUE;
-//            array_pop($this->parentExpressions); // @todo The right spot???
+//            array_pop($this->parentExpressions); // TODO The right spot???
             return $expression;
           }
           $lparens++;
@@ -1538,7 +1655,7 @@ class PGPReader extends PGPParser {
           $isLeftParenPartOfExpr = TRUE;
           break;
 
-        // @todo Split these into two groups: logical and comparison.
+        // TODO Split these into two groups: logical and comparison.
         // The latter include <, >, <=, >=, ==, !=, ===, !==
         case T_BOOLEAN_AND:
         case T_BOOLEAN_OR:
@@ -1564,32 +1681,35 @@ class PGPReader extends PGPParser {
         case '|': // Bitwise or.
         case '>':
         case '<':
-        case T_INSTANCEOF:
+        case T_INSTANCEOF: // 2010-02-23
           $isLeftParenPartOfExpr = TRUE;
           $node->setData('operator', $this->tokenValue());
 //          $this->debugPrint("== OPERATOR =='" .  $expression['operator'] . "'");
           break;
 
         case '-':
-          $isLeftParenPartOfExpr = TRUE;
+          $isLeftParenPartOfExpr = TRUE; // TODO Will this mess up anthing here?
         case '~':
         case '!':
-          // Handle numeric, bitwise, and logical negation operators.
-          $operator = $this->nextTokenType() == T_WHITESPACE ? 'operator' : 'operator3';
-          $node->setData($operator, $this->tokenValue());
+          $node->setData('operator', $this->tokenValue());
+          // Handle numeric and logical negation operators.
+          if ($this->nextTokenType() != T_WHITESPACE) {
+            // Create an empty node as parent object reference for recursive calls.
+            $dummy = NULL;
+            $node = &$expression->insertLast($dummy);
+            $node->setData('whitespace', ''); // This will remove the space otherwise added.
+          }
           break;
 
         case '&':
           // References or logical and expressions.
           if ($this->previousTokenValue() == '=') {
             // Example: $foo =& $bar().
-            // Store as operator to avoid issue with "=& " style.
-//             $this->reference = $this->tokenValue();
-            $node->setData('operator3', $this->tokenValue());
+            $this->reference = $this->tokenValue();
           }
-          elseif ($this->nextTokenType() == T_WHITESPACE) { // @todo Should this be nextRealToken != T_VARIABLE?
+          elseif ($this->nextTokenType() == T_WHITESPACE) { // TODO Should this be nextRealToken != T_VARIABLE?
             $node->setData('operator', $this->tokenValue());
-            $isLeftParenPartOfExpr = TRUE;
+            $isLeftParenPartOfExpr = TRUE; // 2011-01-31
           }
           else {
 //            $node->setData('reference', $this->tokenValue());
@@ -1597,7 +1717,7 @@ class PGPReader extends PGPParser {
           }
           break;
 
-        case '@':
+        case '@': // 2010-01-30
           // Warning suppression operator, e.g. $var = @function().
           // This is similar to a unary operator as is '&'.
 //          if ($this->nextTokenType() == T_VARIABLE) {
@@ -1617,7 +1737,23 @@ class PGPReader extends PGPParser {
             $node->setData('operator2', $this->tokenValue());
           }
           break;
+/*
+        case '?':
+          $this->isInlineIf = TRUE;
+          $node->setData('inlineif', $this->buildExpression(array(':'))); // $node->setData('operator', $this->tokenValue());
+          $isLeftParenPartOfExpr = TRUE;
+          break;
 
+        case ':':
+          if ($this->isInlineIf) {
+            // Add '=>' for an expression like array($is_https ? 'ssid' : 'sid' => session_id())
+            // Add 'as' for an expression like foreach ($condition ? $true : $false as $item) { }
+            $node->setData('inlineelse', $this->buildExpression(array(T_AS, T_DOUBLE_ARROW, ',', ';'))); // $node->setData('operator', $this->tokenValue());
+            $this->isInlineIf = FALSE;
+          }
+          $isLeftParenPartOfExpr = TRUE;
+          break;
+*/
         case '?':
         case ':':
           $this->isInlineIf = $this->tokenValue() == '?';
@@ -1642,32 +1778,25 @@ class PGPReader extends PGPParser {
           $node->setData('operator', $this->tokenValue());
           break;
 
+        case '"':
+          // Marks the begin and end of a string with variables inside.
+          $node->setData('special', $this->buildString());
+          break;
+
         case T_NUM_STRING:
           $node->setData('operand', $this->cleanToken());
           break;
 
-        // Anonymous functions.
-
-        case T_FUNCTION:
-          $this->isAnonymous = TRUE;
-          $modifiers = new PGPList('modifiers', $this->getSettings());
-          $node->setData('operand', $this->buildFunction($modifiers));
-          // Do not store in function list as it has no name.
-//           $this->functions[] = &$node;
-          $this->isAnonymous = FALSE;
-          break;
-
-        case T_USE:
-          $node->setData('operand', $this->cleanToken());
+        case T_LIST: // Added 2010-02-23.
+          $node->setData('operand', $this->buildList());
           break;
 
         case T_CLASS_C:
-        case T_DIR:
+//        case T_DIR: (Added in PHP 5.3.0.)
         case T_FILE:
         case T_FUNC_C:
         case T_LINE:
         case T_METHOD_C:
-        case T_TRAIT_C:
           $node->setData('operand', $this->tokenValue());
           break;
 
@@ -1679,31 +1808,6 @@ class PGPReader extends PGPParser {
 //        case T_END_HEREDOC:
 //          $node->setData('operand', $this->tokenValue());
 //          break;
-
-        case T_NAMESPACE:
-          $node->setData('operator3', $this->tokenValue());
-          break;
-
-        case T_NS_SEPARATOR:
-          // @todo If the expression starts with the separator, then add a leading space.
-          if ($this->previousTokenType() == T_WHITESPACE) {
-            $node->setData('operator3', $this->tokenValue());
-          }
-          else {
-            $node->setData('operator2', $this->tokenValue());
-          }
-          break;
-
-        case T_NS_C:
-          $node->setData('operand', $this->tokenValue());
-          break;
-
-        case T_PUBLIC:
-        case T_PRIVATE:
-        case T_PROTECTED:
-          // Occurs in use statement inside class or trait.
-          $node->setData('modifier', $this->tokenValue());
-          break;
 
         default:
 //          prev($this->tokens); // This would be the ';' character???
@@ -1727,568 +1831,12 @@ class PGPReader extends PGPParser {
 //          $this->debugPrint($expression);
           prev($this->tokens);
           $this->debugPrint("NEW ==== bye bye from buildExpression AT END $expressions");
-//          array_pop($this->parentExpressions); // @todo The right spot???
-          $this->buildExpressionRemoveLastWhitespace($expression);
+//          array_pop($this->parentExpressions); // TODO The right spot???
           return $expression;
         }
       }
 
     } // end while
-    $expression->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
-    $expression->extra = $this->cleanToken();
-    return $expression;
-  }
-
-  /**
-   * Removes a whitespace element at end of a PGPOperand expression.
-   *
-   * If trailing whitespace in an operand is consistently moved to its own node
-   * in the parent expression, then we would have consistency in our handling of
-   * whitespace. This in turn will allow us to be more consistent in rewriting
-   * the code.
-   *
-   * Before this change, if the operand is a string, then the whitespace was
-   * already a separate item. If the operand is a variable, then the whitespace
-   * was part of the operand.
-   *
-   * @param PGPExpression $expression
-   *   Expression object to scan for last element being whitespace.
-   */
-  private function buildExpressionRemoveLastWhitespace($expression) {
-    if ($expression instanceof PGPOperand && $expression->last()->type == 'whitespace') {
-      // Delete the last node.
-      $expression->deleteLast();
-      // Rewind tokens so whitespace is handled next time around.
-      prev($this->tokens);
-    }
-  }
-
-  /**
-   * Builds an operand with special operators.
-   *
-   * @return PGPOperand
-   *   An object of the expression.
-   */
-  private function buildSpecialOperators() {
-    // Unary and indirect are handled differently than reference only because
-    // they can be encountered in buildBody or buildExpression. It would seem
-    // odd for an '&' to begin a statement. If it did, then we could treat all
-    // three the same way.
-    // Is the order important? Assume the reference would go before the indirect
-    // operator.
-    // @todo To handle whatever order these operators appear in, create a global
-    // $special and insert operators as they are encountered. Then simply set
-    // type and value from the current token, and reset $special.
-
-    // Create object.
-    $operand = new PGPOperand();
-    if ($this->unary != '') {
-      $operand->insertLast($this->unary, 'unary');
-      $this->unary = '';
-    }
-    if ($this->reference != '') {
-      // Ex: $foo = &$bar;
-      $operand->insertLast($this->reference, 'reference');
-      $this->reference = '';
-    }
-    if ($this->suppress != '') {
-      // Ex: @parent::function();
-      $operand->insertLast($this->suppress, 'suppress');
-      $this->suppress = '';
-    }
-    if ($this->indirect != '') {
-      // Ex: $$foo = $bar;
-      $operand->insertLast($this->indirect, 'indirect');
-      $this->indirect = '';
-    }
-    $operand->insertLast($this->tokenType(), 'type');
-    $operand->insertLast($this->tokenValue(), 'value');
-    return $operand;
-  }
-
-  /**
-   * Builds an array expression.
-   *
-   * @param boolean $short_syntax
-   *   (optional) Whether the short syntax was found in tokens.
-   *
-   * @return PGPAssignment
-   *   A grammar object of the expression.
-   */
-  private function buildArray($short_syntax = FALSE) {
-    $this->debugPrint(__FUNCTION__);
-
-    // Create object.
-    $expression = new PGPArray();
-    $expression->type = $short_syntax ? T_ARRAY : $this->tokenType();
-    $expression->multiline = FALSE;
-    $expression->original = FALSE;
-    $expression->short_syntax = $short_syntax;
-    $expression->count = 0;
-    $expression->values = new PGPList();
-
-    // Local items.
-    $lparens = 0;
-    $rparens = 0;
-    $assigns = 0;
-    $values = 0;
-    $commas = 0;
-    $in_function_or_call = $this->inFunctionOrCall;
-    $original = FALSE;
-    $temp = NULL;
-
-    // Use array settings in expression builder.
-    ++$this->arrayExpressions; // @todo Is this used?
-    // TEMP to test.
-//     static $count = 0;
-//     $count++;
-//     $this->preserveArrayWhitespace = $count % 3 == 1;
-//     $this->preserveArrayNewline = $count % 3 == 2;
-    $this->getSettings($expression);
-
-    while (next($this->tokens) !== FALSE) {
-      $this->debugPrint('while buildArray');
-      $this->printToken();
-
-      switch ($this->tokenType()) {
-        case ',':
-          // Remove trailing whitespace from operand.
-          $this->buildArrayRemoveLastWhitespace($temp);
-          $expression->values->insertLast($temp, 'value');
-          $temp = NULL;
-          // Possibly store whitespace to left of this token.
-          $this->buildArrayWhitespace($expression->values, $original);
-          $values++;
-          $expression->values->insertLast($this->tokenValue(), 'comma');
-          $this->buildArrayLineEnd($expression->values, $original);
-          $commas++;
-          $temp = $this->buildExpression(array(T_DOUBLE_ARROW, ',', ')'));
-          break;
-
-        case T_DOUBLE_ARROW:
-          // Remove trailing whitespace from operand.
-          $this->buildArrayRemoveLastWhitespace($temp);
-          $expression->values->insertLast($temp, 'key');
-          $temp = NULL;
-          // Possibly store whitespace to left of this token.
-          $this->buildArrayWhitespace($expression->values, $original);
-          $assigns++;
-          $expression->values->insertLast($this->tokenValue(), 'assign');
-          // Possibly store whitespace to right of this token.
-          $this->buildArrayWhitespace($expression->values, $original, 'right');
-          $temp = $this->buildExpression(array(T_DOUBLE_ARROW, ',', ')'));
-          break;
-
-        case '(':
-        case '[': // PHP 5.4 syntax
-          // This is the left parenthesis following 'array'.
-          // Possibly store whitespace to left of this token.
-          $lparens++;
-          $expression->values->insertLast($this->tokenType(), 'lparens');
-          $this->buildArrayLineEnd($expression->values, $original);
-          $temp = $this->buildExpression(array(T_DOUBLE_ARROW, ',', ')'));
-          break;
-
-        case ')':
-        case ']': // PHP 5.4 syntax
-          if (!is_null($temp) && !$temp->isEmpty()) {
-            // Case 1: Last thing is a value not followed by comma.
-            // Case 2: Last thing is only a comment and/or whitespace.
-            // As the expression delimiter is the right parenthesis, the
-            // expression may end with whitespace, a regular comment and more
-            // whitespace (depending on preservation settings).
-            // Successively remove each item from the value expression and
-            // add them as independent items.
-            $items = $this->buildArrayExtractTrailingItems($temp);
-            if (!is_null($temp) && !$temp->isEmpty()) {
-              $expression->values->insertLast($temp, 'value');
-              $values++;
-            }
-            $temp = NULL;
-            if (!$items->isEmpty()) {
-              $expression->values->insertListAfter($expression->values->last(), $items);
-            }
-          }
-          $this->debugPrint("while buildArray lparens = $lparens rparens = $rparens");
-          $rparens++;
-          $expression->values->insertLast($this->tokenType(), 'rparens');
-          if ($rparens == $lparens) {
-            $this->debugPrint('Hitting ) in while buildArray');
-            // Set object properties.
-            $expression->multiline = $this->setMultiline($original, $assigns, $values, $in_function_or_call);
-            $expression->original = $original;
-            $expression->count = $values;
-            $expression->commaCount = $commas;
-
-            // Restore global settings to expression builder.
-            --$this->arrayExpressions;
-
-            return $expression;
-          }
-          break;
-
-        default:
-//          $expression['warning'] = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
-//          $expression['extra'] = $this->cleanToken();
-//          return $expression;
-          break;
-      }
-    }
-    $expression->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
-    $expression->extra = $this->cleanToken();
-    return $expression;
-  }
-
-  /**
-   * Inspects tokens for comment and whitespace and notes whether a newline
-   * character is present in whitespace tokens.
-   *
-   * @param PGPExpression $expression
-   *   Array object to insert comment element.
-   * @param boolean $original
-   *   Will be set to TRUE if a newline character is found.
-   */
-  private function buildArrayLineEnd($expression, &$original) {
-    // Add flag to restrict this to comment followed by newline.
-    // An inline comment would not automatically apply.
-    // Enhance routine to look for series of inline comments followed by regular
-    // comment or newline.
-    // If no "body comment," then omit the newline check and simply store the
-    // whitespace if needed.
-    if ($temp = $this->buildBodyComment(FALSE, TRUE)) {
-      $expression->insertLast($temp, 'comment');
-    }
-    $this->buildArrayWhitespace($expression, $original, 'right');
-  }
-
-  /**
-   * Inserts whitespace element based on settings.
-   *
-   * @param PGPExpression $expression
-   *   Array object to insert whitespace element.
-   * @param boolean $original
-   *   Will be set to TRUE if a newline character is found.
-   * @param string $side
-   *   (optional) The side of current token to inspect for whitespace.
-   */
-  private function buildArrayWhitespace($expression, &$original, $side = 'left') {
-    // @todo This checking will not handle inline comments mucking up the order.
-    if ($side == 'left') {
-      $type = $this->previousTokenType();
-      $value = $this->previousTokenValue();
-    }
-    else {
-      $type = $this->nextTokenType();
-      $value = $this->nextTokenValue();
-    }
-
-    if ($type != T_WHITESPACE) {
-      return;
-    }
-
-    $newlines = substr_count($value, "\n");
-    if ($newlines > 0) {
-      $original = TRUE;
-    }
-
-    list($preserveWhitespace, $preserveNewline, ) = $this->getSettings();
-    if (!$preserveWhitespace && !$preserveNewline) {
-      // Pretty format the output based on multiline setting.
-      return;
-    }
-
-    if ($preserveWhitespace) {
-      // Store whitespace as is.
-      $whitespace = array(
-        'type' => $type,
-        'value' => $value,
-      );
-      $expression->insertLast($whitespace, 'whitespace');
-    }
-    else {
-      // Preserve array newlines.
-      // Store newlines, but not indention.
-      // If not dealing with newline, then add a space?
-      if ($newlines > 0) {
-        $whitespace = array(
-          'type' => $type,
-          'lines' => $newlines,
-        );
-        $expression->insertLast($whitespace, 'whitespace');
-      }
-    }
-
-    if ($side == 'right') {
-      // Advance tokens (is this necessary?).
-      next($this->tokens);
-    }
-  }
-
-  /**
-   * Removes a whitespace element at end of an expression.
-   *
-   * @param PGPExpression $expression
-   *   Expression object to scan for last element being whitespace.
-   */
-  private function buildArrayRemoveLastWhitespace($expression) {
-    list($preserveWhitespace, $preserveNewline, ) = $this->getSettings();
-    if (!$preserveWhitespace && !$preserveNewline) {
-      // Pretty format the output based on multiline setting.
-      return;
-    }
-
-    if ($expression->last()->type == 'whitespace') {
-      $expression->deleteLast();
-    }
-  }
-
-  /**
-   * Removes whitespace and regular comment elements at end of an expression.
-   *
-   * @todo Rename to buildExpression... since expression is the only caller.
-   *
-   * @param PGPExpression $expression
-   *   Expression object to scan for trailing elements being whitespace or
-   *   regular comment.
-   *
-   * @return integer
-   *   Number of tokens rewound.
-   */
-  private function buildArrayRemoveTrailingItems($expression) {
-    $count = 0;
-    $current = $expression->last();
-    while ($current->previous != NULL) {
-      if ($current->type == 'whitespace' || $current->type == 'comment') {
-        $expression->deleteLast();
-        prev($this->tokens);
-        $count++;
-      }
-      else {
-        break;
-      }
-      $current = $current->previous;
-    }
-    if ($count) {
-      // Rewind one more so next token will be whitespace or comment.
-      prev($this->tokens);
-      $count++;
-      return $count;
-    }
-    else {
-      return $count;
-    }
-  }
-
-  /**
-   * Extracts whitespace and regular comment elements from end of an expression.
-   *
-   * @param PGPExpression $expression
-   *   Expression object to scan for trailing elements being whitespace or
-   *   regular comment.
-   *
-   * @return PGPExpression
-   *   Expression object with trailing elements.
-   */
-  private function buildArrayExtractTrailingItems($expression) {
-    $items = new PGPExpression();
-    $current = $expression->last();
-    while ($current->previous != NULL) {
-      if ($current->type == 'whitespace' || $current->type == 'comment') {
-        $items->insertFirst($current->data, $current->type);
-        $expression->deleteLast();
-      }
-      else {
-        break;
-      }
-      $current = $current->previous;
-    }
-    return $items;
-  }
-
-  /**
-   * Returns boolean indicating whether array is to be treated as multiline.
-   *
-   * This only applies if all of the following are FALSE:
-   * - preserveWhitespace
-   * - preserveArrayWhitespace
-   * - preserveArrayNewline
-   *
-   * @param boolean $original
-   *   Whether a newline character was found in whitespace tokens.
-   * @param integer $assigns
-   *   Number of values with a key.
-   * @param integer $values
-   *   Number of values.
-   * @param integer $in_function_or_call
-   *   Whether the array expression is a parameter to a function or function
-   *   call statement.
-   *
-   * @return boolean
-   *   Whether array is to be treated as multiline.
-   */
-  private function setMultiline($original, $assigns, $values, $in_function_or_call) {
-    /*
-     * Multiline (true) vs inline (false)
-     * Precedence order
-     * - if original has newlines, then true
-     * - if original is in a function parameter list, then false
-     * - if original is in a function call parameter list, then false
-     * - if original has only one 'value', then false
-     * - if original has multiple 'keys', then true
-     * - if original has multiple 'values', then maybe???
-     *
-     * Reasoning: if original has newlines, then we are recording whitespace
-     * and need to have it dictate. This is an issue if the spacing is not
-     * nice. Need to remove extraneous whitespace (indent spaces and extra
-     * newlines) and indent on our own.
-     *
-     * We now ignore whitespace when preserveArrayWhitespace == FALSE. So return
-     * TRUE here if original has newlines (when we might otherwise not). But we
-     * control the spacing.
-     */
-    $this->debugPrint("setMultiline: '$original', $assigns, $values, '$in_function_or_call'");
-    list($preserveWhitespace, $preserveNewline, ) = $this->getSettings();
-    if ($preserveWhitespace) return FALSE;
-    if ($preserveNewline) return FALSE;
-    if ($original) return TRUE;
-    if ($in_function_or_call) return FALSE;
-    if ($values < 2) return FALSE;
-    if ($assigns > 1) return TRUE;
-//    if ($values) return TRUE;
-    // Drupal standard is based on total line length, not length of array expression.
-    // It would seem it should be more related to the array expression only.
-    if ($values > 4) return TRUE;
-    return FALSE;
-  }
-
-  /**
-   * Builds a function call (or other) expression.
-   *
-   * The other expressions built by this routine are: clone, [define,] empty,
-   * eval, include, isset, print, require, throw, or unset. Parentheses are not
-   * required by a clone, include, print, require, or throw expression. Define
-   * expressions may have a T_DOC_COMMENT.
-   *
-   * A function call may occur in several places, such as:
-   * - a separate statement
-   * - a parameter in another function call
-   * - in an assignment statement
-   * - in a return statement.
-   *
-   * @param PGPFunctionCall $expression
-   *   (optional) A partial expression from another builder routine. Only called
-   *   once from buildExpression().
-   *
-   * @return PGPFunctionCall
-   *   An object of the expression.
-   */
-  private function buildFunctionCall($expression = NULL) {
-    $this->debugPrint(__FUNCTION__);
-
-    // @todo Passing an $expression appears to be deprecated.
-    if (!$expression) {
-      // Set the item order so we can use case block when printing.
-      $parent = &$this->currentParent();
-
-      // Create object.
-      $expression = new PGPFunctionCall();
-      $expression->parent = &$parent;
-      $expression->comment = $this->comment;
-      $expression->type = T_FUNCTION_CALL;
-      $expression->name = new PGPExpression();
-      $expression->parameters = new PGPList('parameters', $this->getSettings());
-
-      $name = $this->buildSpecialOperators();
-      $expression->name->insertLast($name, 'operand');
-    }
-    $expression->noparens = 1;
-    $this->getSettings($expression);
-
-    // Global items.
-    $this->comment = array();
-
-    // Local items.
-    $name = 0;
-    $pre = 0;
-
-    while (next($this->tokens) !== FALSE) {
-      $this->debugPrint('while buildFunctionCall');
-      $this->printToken();
-      switch ($this->tokenType()) {
-        case '(':
-          if ($this->tokenType() == '(') {
-            $expression->noparens = 0;
-          }
-        case ',':
-          $this->inFunctionOrCall = TRUE;
-          $return_tokens = array(',', ';', T_CLOSE_TAG);
-          if ($this->isInlineIf && $expression->noparens) {
-            // Example: $question ? print "foo" : bar();
-            $return_tokens += array(3 => ':'); // @todo Use array_merge
-          }
-          $parameter = $this->buildExpression($return_tokens);
-          if (!$parameter->isEmpty()) {
-            $expression->parameters->insertLast($parameter);
-          }
-          $this->inFunctionOrCall = FALSE;
-          break;
-
-        case ')':
-          // If this function call does not begin with parens, then this right
-          // parens belongs to parent expression.
-          $expression->noparens ? prev($this->tokens) : '';
-          return $expression;
-          break;
-
-        case ':':
-          // This applies when an inline if expession has a "function" call without parentheses, e.g. print "foo"
-        case ';': // For a require.
-          $this->debugPrint('Hitting ; in while buildFunctionCall');
-          $this->debugPrint($expression);
-          prev($this->tokens); // Try to catch semi-colons in buildBody!!!
-          return $expression;
-          break;
-
-        default:
-          // @todo Order of if blocks differs from buildFunction(): should it?
-          if (!$name++) {
-            prev($this->tokens);
-            if ($this->nextRealToken() == '(') {
-              // @todo This could omit the name and be assigned as the "pre" property.
-              $this->inFunctionName = TRUE;
-              $expression->name = $this->buildExpression(array('('), $expression->name);
-              $this->inFunctionName = FALSE;
-            }
-            else {
-              $this->inFunctionOrCall = TRUE;
-              $return_tokens = array(',', ';', T_CLOSE_TAG);
-              if ($this->isInlineIf && $expression->noparens) {
-                // Example: $question ? print "foo" : bar();
-                $return_tokens += array(3 => ':'); // @todo Use array_merge
-              }
-              $parameter = $this->buildExpression($return_tokens);
-              if (!$parameter->isEmpty()) {
-                $expression->parameters->insertLast($parameter);
-              }
-              $this->inFunctionOrCall = FALSE;
-            }
-          }
-          elseif (!$pre++ && $this->nextRealToken() == '(') {
-            prev($this->tokens);
-            // Capture anything before parameters.
-            $stuff = $this->buildExpression(array('('));
-            if (!$stuff->isEmpty()) {
-              $expression->pre = $stuff;
-            }
-          }
-          else {
-            $expression->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
-            $expression->extra = $this->cleanToken();
-            return $expression;
-          }
-          break;
-      }
-    }
     $expression->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
     $expression->extra = $this->cleanToken();
     return $expression;
@@ -2307,23 +1855,12 @@ class PGPReader extends PGPParser {
    * build a portion of the statement (even if there is not an actual assignment
    * signified by an assignment operator).
    *
-   * Those that use this routine to build their argument list include:
-   * - break, continue, echo, return
-   * - const, global, var, goto, static
-   * - require, require_once, include, include_once
-   * - print, throw
-   *
-   * Those that are passed along to buildFunctionCall() include:
-   * - exit, eval, empty, isset, unset (no longer use this builder)
-   * - new, namespace
-   *
-   * @param PGPList $modifiers
-   *   (optional) A list of modifiers (e.g. public, private) for the statement block.
-   *
-   * @return PGPAssignment
-   *   A grammar object of the expression.
+   * @param array $modifiers
+   *   An array of modifiers (e.g. public, private, static) for the expression.
+   * @return array
+   *   An array of the expression.
    */
-  private function buildAssignment($modifiers = NULL) {
+  private function buildAssignment($modifiers = array()) {
     $this->debugPrint(__FUNCTION__);
 
     // Create object.
@@ -2331,9 +1868,7 @@ class PGPReader extends PGPParser {
     $expression->comment = $this->comment;
     $expression->modifiers = $modifiers;
     $expression->type = T_ASSIGNMENT;
-    $expression->semicolon = TRUE;
-    $expression->values = new PGPList('values', $this->getSettings());
-    $this->getSettings($expression);
+    $expression->values = new PGPList();
 
     // Global items.
     $this->comment = array();
@@ -2341,28 +1876,25 @@ class PGPReader extends PGPParser {
     $this->debugPrint("XXXXXX type = $type");
 
     while (next($this->tokens) !== FALSE) {
-      $this->debugPrint('while buildAssignment');
+      $this->debugPrint("while buildAssignment");
       $this->printToken();
       switch ($this->tokenType()) {
         case ',':
-          $expression->values->insertLast($this->buildExpression(array(',', ';', T_CLOSE_TAG)));
+          $expression->values->insertLast($this->buildExpression(array(',', ';')));
           break;
 
         case '(':
           if (!$expression->values->count()) {
             // Example: ($directory = '.');
             // Example: ($directory == '.') ? $directory = '' : '';
-            // @todo The prev() on next line causes failure to parse a list of
-            // values if list is enclosed in parens. See return token checking
-            // in buildExpression (now modified).
             prev($this->tokens);
-            $assignment = $this->buildExpression(array(',', ';', T_CLOSE_TAG));
+            $assignment = $this->buildExpression(array(',', ';'));
             $expression->values->insertLast($assignment);
             break;
           }
-          // @todo Will this code ever be hit now that we catch the function call in buildExpression???
+          // TODO Will this code ever be hit now that we catch the function call in buildExpression???
           // This is a function call not an assignment (or similar).
-          $this->debugPrint('hitting left p in buildAssign');
+          $this->debugPrint("hitting left p in buildAssign");
           $this->debugPrint($expression);
           $name = $expression->values->first()->data->first()->data;
           // Create object.
@@ -2372,57 +1904,44 @@ class PGPReader extends PGPParser {
           $expression2->type = T_FUNCTION_CALL;
           $expression2->name = $name;
           $expression2->noparens = 0;
-          $expression2->parameters = new PGPList('parameters', $this->getSettings());
+          $expression2->parameters = new PGPList();
           unset($expression);
           prev($this->tokens);
-          return $this->buildFunctionCall($expression2); // @todo Add this to functionCalls?
+          return $this->buildFunctionCall(FALSE, $expression2); // TODO Add this to functionCalls?
           break;
 
         case ')':
           // To catch an assignment statement beginning with parentheses.
           // The parentheses are not stored.
           // Example: ($var++);
-          // Above case no longer occurs.
-          // Example: echo ($a < $b ? 'foo1' : 'bar1', 'foo2', 'bar2');
-          // @todo If this token is encountered, then it would be part of a list
-          // of values and should be stored on last item in values list.
-          $expression2 = $expression->values->last()->data;
-          $expression2->insertLast($this->tokenType(), 'rparens');
-          if (in_array($this->nextRealToken(), array(';'))) {
-            // Capture anything after enclosing parentheses.
-            $stuff = $this->buildExpression(array(';'));
-            if (!$stuff->isEmpty()) {
-              $expression->post = $stuff;
-            }
-          }
           break;
 
-        case T_CLOSE_TAG:
-          $expression->semicolon = FALSE;
         case ';':
           if ($expression->values->count() == 1) {
-            $this->debugPrint('ONE expression in buildAssign');
-            // @todo This is a hack!
+            $this->debugPrint("ONE expression in buildAssign");
+            // TODO This is a hack!
             if (!in_array($type, array(T_CONTINUE, T_ECHO, T_RETURN, T_EXIT, T_CONST, T_GLOBAL, T_VAR))) {
-              $operand = $expression->values->first()->data->first()->data; // @todo Do we need '&'?
+              $operand = $expression->values->first()->data->first()->data; // TODO Do we need '&'?
               if ($operand instanceof PGPFunctionCall) {
                 // This is a function call not an assignment (or similar).
 //                return $operand;
               }
             }
-            $this->debugPrint('hitting funky type check in buildAssign');
+            $this->debugPrint("hitting funky type check in buildAssign");
           }
           // The prev() is needed for a conditional where the body is a single
           // statement not surrounded by brackets.
-          prev($this->tokens); // Try to catch semi-colons in buildBody!!!
+          prev($this->tokens); // Try to catch semi-colons in buildBody!!! 2009-09-29
           return $expression;
           break;
 
+        case T_WHITESPACE:
+          break;
+
         default:
-          // @todo Does this make sense to do?
           prev($this->tokens);
-          $expression->values->insertLast($this->buildExpression(array(',', ';', T_CLOSE_TAG)));
-//          $expression->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
+          $expression->values->insertLast($this->buildExpression(array(',', ';')));
+//          $expression->warning = 'unexected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
 //          $expression->extra = $this->cleanToken();
 //          return $expression;
           break;
@@ -2434,216 +1953,358 @@ class PGPReader extends PGPParser {
   }
 
   /**
-   * Builds an interface, class, or trait statement block.
+   * Builds an array expression.
    *
-   * @param PGPList $modifiers
-   *   A list of modifiers (e.g. public, private) for the statement block.
-   *
-   * @return PGPClass
-   *   An object of the statement block.
+   * @param array $return_tokens
+   *   An array of tokens marking the end of the expression.
+   * @return array
+   *   An array of the expression.
    */
-  private function buildClass($modifiers) {
+  private function buildArray($return_tokens = array(')')) {
     $this->debugPrint(__FUNCTION__);
 
     // Create object.
-    $class = new PGPClass();
-    $class->comment = $this->comment;
-    $class->modifiers = $modifiers;
-    $class->type = $this->tokenType();
-    $class->nobraces = 0;
-    $this->getSettings($class);
-
-    // Global items.
-    $this->comment = array();
+    $expression = new PGPArray();
+    $expression->type = $this->tokenType();
+    $expression->multiline = FALSE;
+    $expression->original = FALSE;
+    $expression->count = 0;
+    $expression->values = new PGPList();
 
     // Local items.
-    $name = 0;
-    $extends = 0;
-    $implements = 0;
+    $lparens = 0;
+    $rparens = 0;
+    $assigns = 0;
+    $values = 0;
+    $commas = 0;
+    $in_function_or_call = $this->inFunctionOrCall;
+    $original = FALSE;
+
+    /*
+     * Multiline (true) vs inline (false)
+     * Precedence order
+     * - if original has newlines, then true (Move this down to after 'keys'?)
+     * - if original is in a function parameter list, then false
+     * - if original is in a function call parameter list, then false
+     * - if original has only one 'value', then false
+     * - if original has multiple 'keys', then true
+     * - if original has multiple 'values', then maybe???
+     *
+     * Other (NOT DONE)
+     * - if return occurrences (a single whitespace with multiple returns counts as one)
+     *   are not equal to values, then assume non-standard newline, set
+     *   newline = FALSE, and follow the whitespace characters.
+     * - if return occurrences = values, then ignore whitespace characters.
+     *
+     * Handle T_COMMENT tokens in the array expression.
+     */
 
     while (next($this->tokens) !== FALSE) {
+      $this->debugPrint("while buildArray");
+      $this->printToken();
+
       switch ($this->tokenType()) {
-        case T_STRING:
-          if (!$name++) {
-            prev($this->tokens);
-            $class->name = $this->buildExpression(array(/*';',*/ '{', T_EXTENDS, T_IMPLEMENTS));
-          }
-          break;
-
-        case '{':
-          $class->bodyComment = $this->buildBodyComment();
-          $class->body = $this->buildBody();
-          break;
-
-        case '}':
-          return $class;
-          break;
-
-        case T_EXTENDS:
-          // Interfaces may extend multiple interfaces, classes only one class.
-          $extends++;
-          $implements = 0;
-          $class->extends = new PGPList('extends', $this->getSettings());
-          $class->extends->insertLast($this->buildExpression(array(',', T_IMPLEMENTS, '{')));
-          break;
-
-        case T_IMPLEMENTS:
-          $implements++;
-          $extends = 0;
-          $class->implements = new PGPList('implements', $this->getSettings());
-          $class->implements->insertLast($this->buildExpression(array(',', T_EXTENDS, '{')));
-          break;
-
-        case ',':
-          // Delimits lists of interfaces implemented or classes extended.
-          if ($implements) {
-            $implements++;
-            $class->implements->insertLast($this->buildExpression(array(',', T_EXTENDS, '{')));
-          }
-          elseif ($extends) {
-            $extends++;
-            $class->extends->insertLast($this->buildExpression(array(',', T_IMPLEMENTS, '{')));
-          }
-          // else error
-          break;
-
-        default:
-          if (!$name++) {
-            prev($this->tokens);
-            $class->name = $this->buildExpression(array(/*';',*/ '{', T_EXTENDS, T_IMPLEMENTS));
-          }
-          else {
-            $class->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
-            $class->extra = $this->cleanToken();
-            return $class;
-          }
-          break;
-      }
-    }
-    $class->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
-    $class->extra = $this->cleanToken();
-    return $class;
-  }
-
-  /**
-   * Builds a regular or anonymous function statement block.
-   *
-   * @param PGPList $modifiers
-   *   A list of modifiers (e.g. public, private) for the statement block.
-   *
-   * @return PGPClass
-   *   An object of the statement block.
-   */
-  private function buildFunction($modifiers) {
-    $this->debugPrint(__FUNCTION__);
-
-    // Create object.
-    $function = new PGPClass();
-    $function->comment = $this->comment;
-    $function->modifiers = $modifiers;
-    $function->type = $this->tokenType();
-    $function->nobraces = 1;
-    $this->getSettings($function);
-
-    // Global items.
-    $this->comment = array();
-
-    // Local items.
-    $reference = 0;
-    $name = 0;
-    $pre = 0;
-    $item_to_set = 0;
-    $items = array('parameters', 'variables');
-    $posts = array('post', 'post2');
-    $parameters = $items[$item_to_set];
-    $post = $posts[$item_to_set];
-
-    while (next($this->tokens) !== FALSE) {
-      switch ($this->tokenType()) {
-        case '(':
-          $function->$parameters = new PGPList('parameters', $this->getSettings());
-        case ',':
-          $this->inFunctionOrCall = TRUE;
-          $parameter = $this->buildExpression(array(',', ')'));
-          if (!$parameter->isEmpty()) {
-            $function->$parameters->insertLast($parameter);
-          }
-          $this->inFunctionOrCall = FALSE;
-          break;
+//        case '(':
+//          $lparens++;
+//          $expression->values->insertLast($this->tokenType(), 'lparens');
+//          break;
 
         case ')':
-          $this->debugPrint('Hitting ) in while buildFunction');
-          if ($this->isAnonymous && !$item_to_set) {
-            if ($this->nextRealToken() == T_USE) {
-              // Capture stuff after parameters and before inherited variables.
-              $stuff = $this->buildExpression(array('('));
-              if (!$stuff->isEmpty()) {
-                $function->use = $stuff;
-              }
-              $item_to_set++;
-              $parameters = $items[$item_to_set];
-              $post = $posts[$item_to_set];
-              break;
+          $this->debugPrint("while buildArray lparens = $lparens rparens = $rparens");
+          $rparens++;
+          // TODO Why not just add the rparens??? We handle it in PGPWriter.
+          // TODO Is this condition check necessary? Should it be TRUE always?
+          if ($rparens < $lparens) {
+            $expression->values->insertLast($this->tokenType(), 'rparens');
+          }
+          if ($rparens == $lparens) {
+            $this->debugPrint("Hitting ) in while buildArray");
+            $expression->multiline = $this->setMultiline($original, $assigns, $values, $in_function_or_call);
+            $expression->original = $original;
+            $expression->preserve = $this->preserveArrayFormat;
+            $expression->count = $values;
+            $expression->commaCount = $commas;
+            return $expression;
+          }
+          break;
+
+        case ',':
+          $commas++;
+          break;
+
+        case T_DOUBLE_ARROW:
+          $assigns++;
+          $expression->values->insertLast($this->tokenValue(), 'assign');
+          break;
+
+        case T_WHITESPACE:
+          if ($this->addNewLineToWhitespace) {
+            // Transfer newline character from an end-of-line comment.
+            $this->addNewLineToWhitespace = FALSE;
+            $token = &$this->tokens[key($this->tokens)];
+            $token[1] = "\n" . $token[1];
+          }
+          $blankLines = substr_count($this->tokenValue(), "\n");
+          if ($blankLines > 0) {
+            $original = TRUE;
+          }
+          // 2010-03-24
+          if (!$this->preserveArrayFormat) {
+            break;
+          }
+          if ($this->tokenValue() != ' ') {
+            // Add whitespace.
+            $expression->values->insertLast($this->tokenValue(), 'whitespace');
+          }
+          break;
+
+          /*
+           * It would be preferable to have the whitespace token include the
+           * newline that Zend includes on an end-of-line comment. This would
+           * seem to be consistent. The EOL comment and the open tag are the
+           * only two tags that include the newline. Why?
+           *
+           * If we stored the newline with the whitespace and stripped off the
+           * indent spaces, then we could indent ourselves. This would ensure
+           * the rewritten file is formatted nicely. With upgrade routines, if
+           * we needed to write the array at a different level of indention,
+           * then we could do so. Storing the indent eliminates this flexibility.
+           * This applies to expressions other than arrays.
+           *
+           * The question is identifying when we want to store the whitespace
+           * information at all. If an array is inline and drupal standard is
+           * multiline, then we don't care about storing the whitespace. If
+           * there are no EOL comments embedded in the array, then we also
+           * don't care.
+           */
+
+        case T_COMMENT:
+          /*
+           * Reasoning: if previous token is whitespace, then it determines
+           * whether the comment is appended. If previous token is not
+           * whitespace, then the comment must be appended.
+           */
+          $append = 1;
+          if ($this->previousTokenType() == T_WHITESPACE) {
+            $blankLines = substr_count($this->previousTokenValue(), "\n");
+            if ($blankLines > 0) {
+              $append = 0;
             }
           }
-          // Capture anything after parameters (or variables) and before body.
-          $stuff = $this->buildExpression(array('{', ';'));
-          if (!$stuff->isEmpty()) {
-            $function->$post = $stuff;
+          // Remove newline character from an end-of-line comment.
+          $comment = array(
+            'type' => $this->tokenType(),
+            'value' => $this->cleanComment($this->tokenValue()),
+            'append' => $append,
+          );
+          // Add the comment.
+          $expression->values->insertLast($comment, 'comment');
+          // Transfer newline (if one) to next whitespace token.
+          if ($this->includesNewline($this->tokenValue())) {
+            if ($this->nextTokenType() == T_WHITESPACE) {
+              $this->addNewLineToWhitespace = TRUE;
+            }
+            elseif ($this->preserveArrayFormat) { // else { // 2010-03-24
+              $whitespace = "\n";
+              $expression->values->insertLast($whitespace, 'whitespace');
+            }
           }
           break;
 
-        case '{':
-          $function->nobraces = 0;
-          $function->bodyComment = $this->buildBodyComment();
-          $function->body = $this->buildBody();
-          break;
-
-        case '}':
-          return $function;
-          break;
-
-        case ';':
-          if ($this->isInterface || $modifiers->search('PGPExpression', 'operand', 'value', 'abstract')) {
-            $function->semicolon = TRUE;
-            return $function;
+        case '(':
+          if ($lparens == 0) {
+            // This is the left parenthesis following 'array'.
+            $lparens++;
+            $expression->values->insertLast($this->tokenType(), 'lparens');
+            break;
           }
-          $function->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
-          break;
+          // All other parentheses mark the start of an expression.
+          // Bleed into next case so buildExpression handles the parentheses.
 
         default:
-          if (!$reference++ && $this->nextRealToken() == '&') {
-            prev($this->tokens);
-            $function->reference = $this->buildExpression(array(T_STRING, '(', '{', ';'));
-            // @todo We could omit this property and it would be included with the name.
-            $function->reference->insertLast($this->reference, 'reference');
-            $this->reference = '';
-          }
-          elseif (!$pre++ && $this->isAnonymous && in_array($this->nextRealToken(), array('('))) {
-            prev($this->tokens);
-            // Capture anything before parameters.
-            $stuff = $this->buildExpression(array('('));
-            if (!$stuff->isEmpty()) {
-              $function->pre = $stuff;
+          prev($this->tokens);
+          /*
+           * This would be cleaner if the tokens distinguished between comment
+           * styles, embedded ('/**\/') vs. end of line ('//').
+           * Set flag, do prev(), and save the $temp for reuse on next loop.
+           */
+          $temp = $this->buildExpression(array(T_DOUBLE_ARROW, ',', ')'));
+          $type = $this->nextRealToken('type', TRUE);
+
+          /*
+           * Comma use cases
+           * If next token = T_DOUBLE_ARROW, then insert the key expression, $temp = NULL.
+           * If next token = T_COMMA, then insert the value expression and set $has_comma, $temp = NULL.
+           *
+           * No comma use cases
+           * If current token = T_WHITESPACE with a newline, then insert the expression, $temp = NULL.
+           * If current token = T_WHITESPACE, then save the expression ($temp) and cycle.
+           *
+           * If next token = end-of-line comment (add a helper function), then insert the expression and the comment with append, $temp = NULL.
+           * If next token = inline comment (add a helper function), then insert the expression and the comment with append, $temp = NULL. (RETHINK)
+           */
+
+          $this->debugPrint("inside default case return from buildExpression");
+
+          $comment = NULL;
+          if ($type == T_DOUBLE_ARROW) {
+            $whitespace = '';
+            $key = $temp->last()->type;
+            if ($key == 'whitespace') {
+              // Separate the whitespace item so the subsequent double arrow is
+              // printed to match the input.
+              $whitespace = $temp->last()->data;
+              $temp->deleteLast();
+              $this->debugPrint("ELSEIF deleteLast on T_DOUBLE_ARROW");
+            }
+            $expression->values->insertLast($temp, 'key');
+            $temp = NULL;
+            if ($whitespace && $this->preserveArrayFormat) { // if ($whitespace) { // 2010-03-24
+              $expression->values->insertLast($whitespace, 'whitespace');
+              $whitespace = NULL;
             }
           }
-          elseif (!$name++) {
-            $this->inFunctionName = TRUE;
-            prev($this->tokens);
-            $function->name = $this->buildExpression(array('(', '{', /*'&',*/ ';'));
-            $this->inFunctionName = FALSE;
+          elseif ($type == ',') {
+            $values++;
+            $expression->values->insertLast($temp, 'value');
+            $temp = NULL;
           }
+          elseif ($type == ')') {
+            /*
+             * The last item in the value expression can be an expression
+             * (e.g. inlineelse) in which case we need to look inside the
+             * expression.
+             */
+            // Find the last expression in $temp.
+            $last = $temp;
+            while (TRUE) {
+              if ($last instanceof PGPExpression && $last->last()->data instanceof PGPExpression) {
+                $last = $last->last()->data;
+              }
+              else {
+                break;
+              }
+            }
+            // Check for whitespace.
+            $whitespace = '';
+            $key = $last->last()->type;
+            if ($key == 'whitespace') {
+              $whitespace = $last->last()->data;
+              // Remove the whitespace item so we close the array nicely.
+              $last->deleteLast();
+              $this->debugPrint("ELSEIF deleteLast on ')'");
+            }
+
+            /*
+             * Check last expression item == T_COMMENT
+             * If so, create a separate element for the comment and set append = 1
+             * Use if here not elseif as expression could end in comment followed
+             * by whitespace.
+             */
+            $key = $last->last()->type;
+            if ($key == 'comment') {
+              // Save comment.
+              if ($this->includesNewline($last->last()->data['value'])) {
+                // Only comments starting with '//' need special treatment.
+                // Comment has already had newline removed in buildExpression.
+                $comment = $last->last()->data;
+//                $comment['value'] = $this->cleanComment($comment['value']);
+                $comment['append'] = 1; // TODO Is this correct if preceded by whitespace with newline?
+                // Remove comment from expression.
+                $last->deleteLast();
+                $this->debugPrint("ELSEIF deleteLast with key = comment");
+              }
+            }
+            $values++;
+            $expression->values->insertLast($temp, 'value');
+            $temp = NULL;
+            // Add comment.
+            if ($comment) {
+              $expression->values->insertLast($comment, 'comment');
+            }
+            if ($whitespace && $this->preserveArrayFormat) { // if ($whitespace) { // 2010-03-24
+              $expression->values->insertLast($whitespace, 'whitespace');
+            }
+          }
+            /*
+             * No comma use cases
+             * Implies these are the last entries in the array
+             *
+             * end-of-line comment use cases
+             * If preceded by whitespace with a newline, then insert the comment with append = 0.
+             * If preceded by whitespace, then insert the comment with append = 1.
+             *
+             * inline comment use cases
+             * If preceded by whitespace with a newline, then insert the comment with append = 0.
+             * If preceded by whitespace, then insert the comment with append = 1.
+             *
+             * Could have EOL comments after each item
+             * key
+             * // comment
+             * =>
+             * // comment
+             * value[,\w]
+             * In this case we need to hold key until we see the double arrow or another expression.
+             * What if the expression has operators separated by EOL comments?
+             */
+
+            /*
+             * This code has to do with the buildExpression including the
+             * whitespace with the value operand in an element like
+             * 'pass' => $user->pass_raw which does not end in a comma.
+             * Also happens on a string value that does not have a comma.
+             * However, in this case, the whitespace is its own element in the
+             * expression object. This is probably NOT the place to handle
+             * the whitespace. Should do in buildExpression.
+             *
+             * Does this next if make sense now or did we eliminate the case
+             * by changing the T_STRING from array to PGPOperand?
+             */
           else {
-            $function->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
-            $function->extra = $this->cleanToken();
-            return $function;
+            $this->debugPrint("Array failure");
+            $this->debugPrint($type);
+            $this->debugPrint($temp);
           }
+          break;
+
+//          $expression['warning'] = 'unexected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
+//          $expression['extra'] = $this->cleanToken();
+//          return $expression;
           break;
       }
     }
-    $function->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
-    $function->extra = $this->cleanToken();
-    return $function;
+    $expression->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
+    $expression->extra = $this->cleanToken();
+    return $expression;
+  }
+
+  private function setMultiline($original, $assigns, $values, $in_function_or_call) {
+    /*
+     * Multiline (true) vs inline (false)
+     * Precedence order
+     * - if original has newlines, then false // - if original has newlines, then true
+     * - if original is in a function parameter list, then false
+     * - if original is in a function call parameter list, then false
+     * - if original has only one 'value', then false
+     * - if original has multiple 'keys', then true
+     * - if original has multiple 'values', then maybe???
+     *
+     * Reasoning: if original has newlines, then we are recording whitespace
+     * and need to have it dictate. This is an issue if the spacing is not
+     * nice. Need to remove extraneous whitespace (indent spaces and extra
+     * newlines) and indent on our own.
+     *
+     * We now ignore whitespace when preserveArrayFormat == FALSE. So return
+     * TRUE here if original has newlines (when we might otherwise not). But we
+     * control the spacing.
+     */
+    $this->debugPrint("setMultiline: '$original', $assigns, $values, '$in_function_or_call'");
+    if ($this->preserveArrayFormat) return FALSE;
+    if ($original) return TRUE; // if ($original) return FALSE;
+    if ($in_function_or_call) return FALSE;
+    if ($values < 2) return FALSE;
+    if ($assigns > 1) return TRUE;
+//    if ($values) return TRUE;
   }
 
   /**
@@ -2658,15 +2319,15 @@ class PGPReader extends PGPParser {
     // Create object.
     $block = new PGPConditional();
     $block->type = $this->tokenType();
+    $block->conditions = new PGPList();
     $block->nobraces = 1;
-    $this->getSettings($block);
 
     // Local items.
-    $pre = 0;
+    $conditions = 0;
     $body_captured = FALSE;
 
     while (next($this->tokens) !== FALSE) {
-      $this->debugPrint('while buildConditional');
+      $this->debugPrint("while buildConditional");
       $this->printToken();
       if ($block->nobraces == 1 && $body_captured) {
         // Check here in case a one-line body has an appended comment as the
@@ -2677,8 +2338,6 @@ class PGPReader extends PGPParser {
       }
       switch ($this->tokenType()) {
         case '(':
-          $pre++;
-          $block->conditions = new PGPList('conditions', $this->getSettings());
           $block->conditions->insertLast($this->buildExpression($this->logicalReturnTokens()), 'condition');
           break;
 
@@ -2709,22 +2368,7 @@ class PGPReader extends PGPParser {
 
         case ')':
           if ($block->type == T_DO) {
-            if (in_array($this->nextRealToken(), array(';', T_CLOSE_TAG))) {
-              // Capture anything after conditions.
-              $stuff = $this->buildExpression(array(';', T_CLOSE_TAG));
-              if (!$stuff->isEmpty()) {
-                $block->post2 = $stuff;
-              }
-              $block->semicolon2 = $this->nextRealToken() == ';';
-            }
             return $block;
-          }
-          if (in_array($this->nextRealToken(), array('{', ':'))) {
-            // Capture anything after conditions and before body.
-            $stuff = $this->buildExpression(array('{', ':'));
-            if (!$stuff->isEmpty()) {
-              $block->post = $stuff;
-            }
           }
           break;
 
@@ -2733,75 +2377,45 @@ class PGPReader extends PGPParser {
         case '{':
           $block->nobraces = 0;
           $block->comment = $this->buildBodyComment();
-          // If the alternative syntax is used (and the PHP parser allows the
-          // block to begin with '{'), then the end of the block is delimited by
-          // by T_ELSEIF, T_ELSE, or T_ENDIF, instead of a '}'. The first two
-          // tokens need to be passed as return tokens (the third is automatic).
-          // This is weak grammar as T_ELSEIF and T_ELSE serve as block end tags
-          // and block begin tags. The build routines return on an end tag, and,
-          // absence intervention, would result in a chain reaction of returns.
-          $return_tokens = $this->tokenType() == ':' ? array(T_ELSEIF, T_ELSE) : array();
-          $block->body = $this->buildBody($return_tokens);
-          break;
-
-        case T_ELSEIF:
-        case T_ELSE:
-          $this->isReturnToken = FALSE;
-//           if ($block->colon) {
-            $block->end = '';
-            prev($this->tokens);
-            return $block;
-//           }
+          $block->body = $this->buildBody(array(T_CLOSE_TAG)); // 2009-06-13 Inline html
           break;
 
         case T_ENDIF:
         case T_ENDWHILE:
         case T_ENDSWITCH:
           $block->end = $this->tokenValue();
-          if ($this->nextRealToken() == T_CLOSE_TAG) {
-            // Capture post stuff? It gets picked up in body.
-            $block->semicolon = FALSE;
-            return $block;
-          }
-          elseif ($this->nextRealToken() == ';') {
-            // Capture anything after end tag and before semicolon.
-            $stuff = $this->buildExpression(array(';'));
-            if (!$stuff->isEmpty()) {
-              $block->post3 = $stuff;
-            }
-          }
           break;
 
         case ';':
-          // This case may be hit in regular and alternative syntax.
-          $block->semicolon = TRUE;
+          // TODO if (!isset($block->end) { error }
+          // TODO if (!$block->body) { $block->nop = 1 } // This should result in printing a ';' without braces.
         case '}':
           if ($block->type != T_DO) {
             return $block;
-          }
-          if (in_array($this->nextRealToken(), array(T_WHILE))) {
-            // Capture anything after body and before conditions.
-            $stuff = $this->buildExpression(array(T_WHILE));
-            if (!$stuff->isEmpty()) {
-              $block->post = $stuff;
-            }
           }
           break;
 
         case T_WHILE:
           if ($block->type != T_DO) {
-            // This should be a while block that is the only statement of a
-            // parent if block without braces.
+            // This should be a while block that is the only statement of a parent if without braces.
             prev($this->tokens);
             $block->body = $this->buildBody(array('}', ';'), 1);
             return $block;
           }
-          if (in_array($this->nextRealToken(), array('('))) {
-            // Capture anything after while and before conditions.
-            $stuff = $this->buildExpression(array('('));
-            if (!$stuff->isEmpty()) {
-              $block->pre2 = $stuff;
-            }
+          break;
+
+        case T_COMMENT: // TODO Until we can figure a better way to handle embedded comments
+          if ($block->nobraces == 1 && !$body_captured) {
+            prev($this->tokens);
+            $block->comment = $this->buildBodyComment();
+            $this->debugPrint("after buildBodyComment");
+            $this->printToken();
+            break;
+          }
+        case T_WHITESPACE:
+          if ($block->nobraces == 1 && $body_captured) {
+            prev($this->tokens);
+            return $block;
           }
           break;
 
@@ -2811,53 +2425,36 @@ class PGPReader extends PGPParser {
             $block->type = T_ELSE_IF;
           }
           else {
-            // This should be an if block that is the only statement of a parent
-            // if block without braces.
+            // This should be an if block that is the only statement of a parent if without braces.
             prev($this->tokens);
             $block->body = $this->buildBody(array('}', ';'), 1);
             return $block;
           }
           break;
 
+        case T_CLOSE_TAG:
+          // 2009-06-13 Inline html
+          // For inline html pages
+          if (!$block->body) {
+//            unset($block->body);
+          }
+          $block->inline = 1;
+          prev($this->tokens);
+          return $block;
+          break;
+
         default:
-          if (!$pre && $this->nextRealToken() == T_IF) {
-            // @todo This will not capture any comment or whitespace between the
-            // else and if tokens. Do we care?
-            break;
-            if ($block->type == T_ELSE) {
-              // Handle else if statements.
-              // @todo If not preserveWhitespace, then change to T_ELSEIF?
-              $block->type = T_ELSE_IF;
-            }
-            else {
-              // This should be an if block that is the only statement of a
-              // parent if block without braces.
-              prev($this->tokens);
-              $block->body = $this->buildBody(array('}', ';'), 1);
-              return $block;
-            }
-          }
-          elseif (!$pre++ && in_array($this->nextRealToken(), array('(', '{', ':'))) {
-            prev($this->tokens);
-            // Capture anything before conditions.
-            $stuff = $this->buildExpression(array('(', '{', ':'));
-            if (!$stuff->isEmpty()) {
-              $block->pre = $stuff;
-            }
-          }
-          elseif ($block->nobraces == 1 && !$body_captured) {
+          if ($block->nobraces == 1 && !$body_captured) {
             $statements_to_return = $this->tokenType() == T_TRY ? 2 : 1;
             prev($this->tokens);
-            $block->comment = $this->buildBodyComment();
             $block->body = $this->buildBody(array(';'), $statements_to_return);
             $body_captured = TRUE;
           }
           elseif ($block->nobraces == 1 && $body_captured) {
-            prev($this->tokens);
             return $block;
           }
           else {
-            $block->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
+            $block->warning = 'unexected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
             $block->extra = $this->cleanToken();
             return $block;
           }
@@ -2881,50 +2478,40 @@ class PGPReader extends PGPParser {
     // Create object.
     $block = new PGPFor();
     $block->type = $this->tokenType();
+    $block->initial = new PGPList();
+    $block->condition = new PGPList();
+    $block->increment = new PGPList();
     $block->nobraces = 1;
-    $this->getSettings($block);
 
     // Local items.
-    $pre = 0;
     $body_captured = FALSE;
     $condition_to_set = 0;
     $conditions = array('initial', 'condition', 'increment');
     $condition = $conditions[$condition_to_set];
 
     while (next($this->tokens) !== FALSE) {
-      $this->debugPrint('while buildFor');
+      $this->debugPrint("while buildFor");
       $this->printToken();
       switch ($this->tokenType()) {
         case ';':
           if ($body_captured || isset($block->end)) {
-            $block->semicolon = TRUE;
             return $block;
           }
           elseif ($condition_to_set == 2) {
-            $block->semicolon = TRUE;
+//            $block->nop = 1; // TODO this
             return $block;
           }
           $condition_to_set++;
           $condition = $conditions[$condition_to_set];
         case '(':
-          $pre++;
-          $block->$condition = new PGPList('condition', $this->getSettings());
         case ',':
-          // This handles multiple conditions differently than buildConditional.
-          $expression = $this->buildExpression(array(',', ';'));
+          $expression = $this->buildExpression(array(',', ';')); // TODO This handles multiple conditions differently than buildConditional???
           if (!$expression->isEmpty()) {
             $block->$condition->insertLast($expression);
           }
           break;
 
         case ')':
-          if (in_array($this->nextRealToken(), array('{', ':'))) {
-            // Capture anything after conditions and before body.
-            $stuff = $this->buildExpression(array('{', ':'));
-            if (!$stuff->isEmpty()) {
-              $block->post = $stuff;
-            }
-          }
           break;
 
         case ':':
@@ -2937,45 +2524,32 @@ class PGPReader extends PGPParser {
 
         case T_ENDFOR:
           $block->end = $this->tokenValue();
-          if ($this->nextRealToken() == T_CLOSE_TAG) {
-            // Capture post stuff? It gets picked up in body.
-            $block->semicolon = FALSE;
-            return $block;
-          }
-          elseif ($this->nextRealToken() == ';') {
-            // Capture anything after end tag and before semicolon.
-            $stuff = $this->buildExpression(array(';'));
-            if (!$stuff->isEmpty()) {
-              $block->post3 = $stuff;
-            }
-          }
           break;
 
         case '}':
           return $block;
           break;
 
-        default:
-          if (!$pre++ && in_array($this->nextRealToken(), array('(', '{', ':'))) {
+        case T_COMMENT: // TODO Until we can figure a better way to handle embedded comments
+        case T_WHITESPACE:
+          if ($block->nobraces == 1 && $body_captured) {
             prev($this->tokens);
-            // Capture anything before conditions.
-            $stuff = $this->buildExpression(array('(', '{', ':'));
-            if (!$stuff->isEmpty()) {
-              $block->pre = $stuff;
-            }
+            return $block;
           }
-          elseif ($block->nobraces == 1 && !$body_captured) {
+          break;
+
+        default:
+          if ($block->nobraces == 1 && !$body_captured) {
             $statements_to_return = $this->tokenType() == T_TRY ? 2 : 1;
             prev($this->tokens);
             $block->body = $this->buildBody(array(';'), $statements_to_return);
             $body_captured = TRUE;
           }
           elseif ($block->nobraces == 1 && $body_captured) {
-            prev($this->tokens);
             return $block;
           }
           else {
-            $block->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
+            $block->warning = 'unexected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
             $block->extra = $this->cleanToken();
             return $block;
           }
@@ -3000,17 +2574,14 @@ class PGPReader extends PGPParser {
     $block = new PGPForeach();
     $block->type = $this->tokenType();
     $block->nobraces = 1;
-    $this->getSettings($block);
 
     // Local items.
-    $pre = 0;
     $body_captured = FALSE;
 
     while (next($this->tokens) !== FALSE) {
       $this->debugPrint($this->tokenType());
       switch ($this->tokenType()) {
         case '(':
-          $pre++;
           $block->initial = $this->buildExpression(array(T_AS));
           break;
 
@@ -3026,13 +2597,6 @@ class PGPReader extends PGPParser {
           break;
 
         case ')':
-          if (in_array($this->nextRealToken(), array('{', ':'))) {
-            // Capture anything after conditions and before body.
-            $stuff = $this->buildExpression(array('{', ':'));
-            if (!$stuff->isEmpty()) {
-              $block->post = $stuff;
-            }
-          }
           break;
 
         case ':':
@@ -3045,56 +2609,34 @@ class PGPReader extends PGPParser {
 
         case T_ENDFOREACH:
           $block->end = $this->tokenValue();
-          if ($this->nextRealToken() == T_CLOSE_TAG) {
-            // Capture post stuff? It gets picked up in body.
-            $block->semicolon = FALSE;
-            return $block;
-          }
-          elseif ($this->nextRealToken() == ';') {
-            // Capture anything after end tag and before semicolon.
-            $stuff = $this->buildExpression(array(';'));
-            if (!$stuff->isEmpty()) {
-              $block->post3 = $stuff;
-            }
-          }
           break;
 
         case ';':
-          // @todo if (!isset($block->end) { error }
-          $block->semicolon = TRUE;
+          // TODO if (!isset($block->end) { error }
         case '}':
           return $block;
           break;
-/*
-        case T_COMMENT: // @todo Until we can figure a better way to handle embedded comments
+
+        case T_COMMENT: // TODO Until we can figure a better way to handle embedded comments
         case T_WHITESPACE:
           if ($block->nobraces == 1 && $body_captured) {
             prev($this->tokens);
             return $block;
           }
           break;
-*/
+
         default:
-          if (!$pre++ && in_array($this->nextRealToken(), array('(', '{', ':'))) {
-            prev($this->tokens);
-            // Capture anything before conditions.
-            $stuff = $this->buildExpression(array('(', '{', ':'));
-            if (!$stuff->isEmpty()) {
-              $block->pre = $stuff;
-            }
-          }
-          elseif ($block->nobraces == 1 && !$body_captured) {
+          if ($block->nobraces == 1 && !$body_captured) {
             $statements_to_return = $this->tokenType() == T_TRY ? 2 : 1;
             prev($this->tokens);
             $block->body = $this->buildBody(array(';'), $statements_to_return);
             $body_captured = TRUE;
           }
           elseif ($block->nobraces == 1 && $body_captured) {
-            prev($this->tokens);
             return $block;
           }
           else {
-            $block->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
+            $block->warning = 'unexected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
             $block->extra = $this->cleanToken();
             return $block;
           }
@@ -3118,14 +2660,13 @@ class PGPReader extends PGPParser {
     // Create object.
     $block = new PGPCase();
     $block->type = $this->tokenType();
-    $this->getSettings($block);
 
     while (next($this->tokens) !== FALSE) {
-      $this->debugPrint('while buildCase');
+      $this->debugPrint("while buildCase");
       $this->printToken();
       switch ($this->tokenType()) {
         case ':':
-        case ';': // Allowed delimiter, but not typical (usually a typo).
+        case ';': // Allowed delimiter, but not typical (usually a typo)
           $block->comment = $this->buildBodyComment();
           $block->body = $this->buildBody(array(T_CASE, T_DEFAULT, T_ENDSWITCH, '}'));
           break;
@@ -3140,7 +2681,7 @@ class PGPReader extends PGPParser {
 
         default:
           prev($this->tokens);
-          // A semi-colon is an allowed case delimiter, but usually a typo.
+          // A semi-colon is an allowed case delimiter, but usually a typo
           $block->case = $this->buildExpression(array(':', ';'));
           break;
       }
@@ -3153,8 +2694,6 @@ class PGPReader extends PGPParser {
   /**
    * Builds a declare statement.
    *
-   * @todo This syntax is identical to an anonymous function.
-   *
    * @return PGPDeclare
    *   An object of the statement.
    */
@@ -3163,92 +2702,52 @@ class PGPReader extends PGPParser {
 
     // Create object.
     $block = new PGPDeclare();
-//     $block->comment = $this->comment; // @todo Is this a valid item for this statement? Or a leftover item from copy and paste?
+    $block->comment = $this->comment; // TODO Is this a valid item for this statement? Or a leftover item from copy and paste?
     $block->type = $this->tokenType();
-    $block->nobraces = 1;
-    $this->getSettings($block);
+    $block->parameters = new PGPList();
 
     // Global items.
     $this->comment = array();
 
-    // Local items.
-    $pre = 0;
-    $body_captured = FALSE;
-
     while (next($this->tokens) !== FALSE) {
       switch ($this->tokenType()) {
+        case T_STRING:
+          $block->name = $this->tokenValue(); // TODO Is this a valid item for this statement? Or a leftover item from copy and paste?
+          break;
+
         case '(':
-          $pre++;
-          $block->parameters = new PGPList('parameters', $this->getSettings());
 //        case ',':
+          $this->isMultiline = FALSE;
           $block->parameters->insertLast($this->buildExpression(array(',', ')')));
+          $this->isMultiline = TRUE;
           break;
 
         case ')':
-          $this->debugPrint('Hitting ) in while buildDeclare');
-          if (in_array($this->nextRealToken(), array('{', ':', ';'))) {
-            // Capture anything after parameters and before body.
-            $stuff = $this->buildExpression(array('{', ':', ';'));
-            if (!$stuff->isEmpty()) {
-              $block->post = $stuff;
-            }
-          }
+          $this->debugPrint("Hitting ) in while buildDeclare");
           break;
 
         case ':':
           $block->colon = 1;
         case '{':
-          $block->comment = $this->buildBodyComment();
           $block->body = $this->buildBody();
           break;
 
         case T_ENDDECLARE:
           $block->end = $this->tokenValue();
-          if ($this->nextRealToken() == T_CLOSE_TAG) {
-            // Capture post stuff? It gets picked up in body.
-            $block->semicolon = FALSE;
-            return $block;
-          }
-          elseif ($this->nextRealToken() == ';') {
-            // Capture anything after end tag and before semicolon.
-            $stuff = $this->buildExpression(array(';'));
-            if (!$stuff->isEmpty()) {
-              $block->post3 = $stuff;
-            }
-          }
           break;
 
         case ';':
-          // @todo if (!isset($block->end) { error }
-          $block->semicolon = TRUE;
+          // TODO if (!isset($block->end) { error }
         case '}':
           return $block;
           break;
 
+        case T_WHITESPACE:
+          break;
+
         default:
-          if (!$pre++ && in_array($this->nextRealToken(), array('(', '{', ':'))) {
-            prev($this->tokens);
-            // Capture anything before parameters.
-            $stuff = $this->buildExpression(array('(', '{', ':'));
-            if (!$stuff->isEmpty()) {
-              $block->pre = $stuff;
-            }
-          }
-          elseif ($block->nobraces == 1 && !$body_captured) {
-            $statements_to_return = $this->tokenType() == T_TRY ? 2 : 1;
-            prev($this->tokens);
-            $block->body = $this->buildBody(array(';'), $statements_to_return);
-            $body_captured = TRUE;
-          }
-          elseif ($block->nobraces == 1 && $body_captured) {
-            prev($this->tokens);
-            return $block;
-          }
-          else {
-            $block->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
-            $block->extra = $this->cleanToken();
-            return $block;
-          }
+          $block->warning = 'unexected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
+          return $block;
           break;
       }
     }
@@ -3269,26 +2768,14 @@ class PGPReader extends PGPParser {
     // Create object.
     $block = new PGPTryCatch();
     $block->type = $this->tokenType();
-    $this->getSettings($block);
-
-    // Local items.
-    $pre = 0;
 
     while (next($this->tokens) !== FALSE) {
       switch ($this->tokenType()) {
         case '(':
-          $pre++;
           $block->exception = $this->buildExpression(array(')'));
           break;
 
         case ')':
-          if (in_array($this->nextRealToken(), array('{', ':'))) {
-            // Capture anything after conditions and before body.
-            $stuff = $this->buildExpression(array('{', ':'));
-            if (!$stuff->isEmpty()) {
-              $block->post = $stuff;
-            }
-          }
           break;
 
         case '{':
@@ -3300,20 +2787,14 @@ class PGPReader extends PGPParser {
           return $block;
           break;
 
+        case T_COMMENT: // TODO Until we can figure a better way to handle embedded comments
+        case T_WHITESPACE:
+          break;
+
         default:
-          if (!$pre++ && in_array($this->nextRealToken(), array('(', '{', ':'))) {
-            prev($this->tokens);
-            // Capture anything before conditions.
-            $stuff = $this->buildExpression(array('(', '{', ':'));
-            if (!$stuff->isEmpty()) {
-              $block->pre = $stuff;
-            }
-          }
-          else {
-            $block->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
-            $block->extra = $this->cleanToken();
-            return $block;
-          }
+          $block->warning = 'unexected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
+          $block->extra = $this->cleanToken();
+          return $block;
           break;
       }
     }
@@ -3323,371 +2804,15 @@ class PGPReader extends PGPParser {
   }
 
   /**
-   * Builds a special string expression with variable references.
-   *
-   * @todo Move the cases into buildExpression and let it do the parsing.
-   *
-   * @return PGPString
-   *   An object of the expression.
-   */
-  private function buildString() {
-    $this->debugPrint(__FUNCTION__);
-
-    // Create object.
-    $expression = new PGPString();
-    $expression->type = T_SPECIAL_STRING;
-    $this->getSettings($expression);
-
-    while (next($this->tokens) !== FALSE) {
-      $this->debugPrint('while buildString');
-      $this->printToken();
-
-      switch ($this->tokenType()) {
-        case T_STRING: // @todo Is this token possible in this context?
-          $this->debugPrint('inside T_STRING of ' . __FUNCTION__);
-          $expression->insertLast($this->buildFunctionCall(), 'call'); // @todo The toString method does not have a case for this key.
-//          $this->functionCalls[] = &$expression; // @todo Include this?
-          break;
-
-        case T_VARIABLE:
-          // This could be an array.
-          $return_tokens = array('"', T_VARIABLE, T_ENCAPSED_AND_WHITESPACE, T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES, T_CONSTANT_ENCAPSED_STRING); // Not sure if last one applies
-
-          // Create object.
-          $component = new PGPOperand();
-          $component->insertLast($this->tokenType(), 'type');
-          $component->insertLast($this->tokenValue(), 'value');
-          $component = $this->buildExpression($return_tokens, $component);
-          $expression->insertLast($component, 'operand');
-          break;
-
-//        case T_CONSTANT_ENCAPSED_STRING:
-        case T_ENCAPSED_AND_WHITESPACE:
-          $expression->insertLast($this->cleanToken(), 'string');
-          break;
-/*
-        case '$': // Added for ${DB_ERROR} = TRUE;
-          $expression->insertLast($this->tokenType(), 'dollar'); // Was 'begin'
-          $has_begin = TRUE;
-          break;
-*/
-//        case '{': // Added for ${DB_ERROR} = TRUE;
-        case T_CURLY_OPEN:
-        case T_DOLLAR_OPEN_CURLY_BRACES:
-          $return_tokens = array('}');
-          $expression->insertLast($this->cleanToken(), 'open');
-          $expression->insertLast($this->buildExpression($return_tokens), 'operand');
-          $dummy = '}';
-          $expression->insertLast($dummy, 'close');
-          break;
-
-        case '"':
-          // Marks the begin and end of a string with variables inside.
-          return $expression;
-          break;
-
-        case '}':
-          break;
-
-        case T_WHITESPACE:
-          // Example: catch whitespace at end of array value
-          if ($this->tokenValue() != ' ') {
-            $expression->insertLast($this->tokenValue(), 'whitespace'); // @todo This will be the sole instance of storing the whitespace as a string not an array.
-          }
-          break;
-
-        case T_START_HEREDOC:
-          $expression->insertLast($this->tokenValue(), 'begin');
-          break;
-
-        case T_END_HEREDOC:
-          $temp = $this->tokenValue();
-          // Only a ';' may follow the closing identifier.
-          // No so, a heredoc may be a parameter to function call.
-          list($preserveWhitespace, , ) = $this->getSettings();
-          if (!$preserveWhitespace && $this->nextRealToken() != ';') {
-            $temp .= "\n";
-          }
-          $expression->insertLast($temp, 'end');
-          break;
-
-        default:
-          prev($this->tokens);
-          $expression->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
-          $expression->extra = $this->cleanToken();
-          return $expression;
-          break;
-      }
-    }
-    $expression->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
-    $expression->extra = $this->cleanToken();
-    return $expression;
-  }
-
-  /**
-   * Builds a list statement.
-   *
-   * @todo This is a "function call" with an attached "assignment" expression.
-   *
-   * @return PGPListStatement
-   *   An object of the statement.
-   */
-  private function buildList() {
-    $this->debugPrint(__FUNCTION__);
-
-    // Create object.
-    $expression = new PGPListStatement();
-    $expression->type = $this->tokenType();
-    $expression->name = new PGPExpression();
-    $expression->noparens = 0;
-    $this->getSettings($expression);
-
-    $name = $this->buildSpecialOperators();
-    $expression->name->insertLast($name, 'operand');
-
-    // Local items.
-    $pre = 0;
-    $has_assignment = FALSE;
-
-    while (next($this->tokens) !== FALSE) {
-      $this->debugPrint('while buildList');
-      $this->printToken();
-      switch ($this->tokenType()) {
-        case '(':
-          $pre++;
-          $expression->parameters = new PGPList('parameters', $this->getSettings());
-        case ',':
-          $expression->parameters->insertLast($this->buildExpression(array(',', ';', T_CLOSE_TAG)));
-          break;
-
-        case ')':
-          if (!$has_assignment) {
-            $expression->assignment = $this->buildExpression(array(',', ';', T_CLOSE_TAG));
-            $has_assignment = TRUE;
-          }
-          else {
-            // Added for if ((list(..) = function_call(..)) && ..)
-            prev($this->tokens);
-            return $expression;
-          }
-          break;
-
-        case ';':
-          $expression->semicolon = TRUE;
-          return $expression;
-          break;
-
-        default:
-          if (!$pre++) {
-            prev($this->tokens);
-            // Capture anything before parameters.
-            $stuff = $this->buildExpression(array('('));
-            if (!$stuff->isEmpty()) {
-              $expression->pre = $stuff;
-            }
-          }
-          elseif ($has_assignment) {
-            // Added for things like: if (list(..) = <array expression> <array operator> <array expression> ..)
-            prev($this->tokens);
-            return $expression;
-          }
-          else {
-            $expression->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
-            $expression->extra = $this->cleanToken();
-            return $expression;
-          }
-          break;
-      }
-    }
-    $expression->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
-    $expression->extra = $this->cleanToken();
-    return $expression;
-  }
-
-  /**
-   * Builds a namespace [or use] statement.
-   *
-   * @return PGPNamespace
-   *   An object of the statement.
-   */
-  private function buildNamespace() {
-    $this->debugPrint(__FUNCTION__);
-
-    // Create object.
-    $expression = new PGPNamespace();
-    $expression->comment = $this->comment;
-    $expression->type = $this->tokenType();
-    $this->getSettings($expression);
-
-    // Global items.
-    $this->comment = array();
-
-    // Local items.
-    $alias = 0;
-
-    while (next($this->tokens) !== FALSE) {
-      $this->debugPrint('while buildNamespace');
-      $this->printToken();
-      switch ($this->tokenType()) {
-        case T_STRING:
-        case T_NS_SEPARATOR:
-          // @deprecated this entire case block.
-          if ($alias) {
-            // @deprecated
-            $expression->alias = $this->tokenValue();
-          }
-          else {
-            // @todo May the name begin with a back slash?
-            // Only namespace statement may have a body.
-            prev($this->tokens);
-            $expression->name = $this->buildExpression(array(';', '{', T_AS));
-          }
-          break;
-
-        case T_AS:
-          // @deprecated this entire case block.
-          $alias++;
-          $expression->alias = $this->buildExpression(array(';'));
-          break;
-
-        case '{':
-          if ($expression->type == T_USE) {
-            $expression->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
-            break;
-          }
-          $expression->bodyComment = $this->buildBodyComment();
-          $expression->body = $this->buildBody();
-          break;
-
-        case '}':
-          return $expression;
-          break;
-
-        case ';':
-          return $expression;
-          break;
-
-        default:
-          if (!$alias) {
-            // @todo May the name begin with a back slash?
-            // Only namespace statement may have a body.
-            prev($this->tokens);
-            $expression->name = $this->buildExpression(array(';', '{', T_AS));
-          }
-          else {
-            $expression->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
-            $expression->extra = $this->cleanToken();
-            return $expression;
-          }
-          break;
-      }
-    }
-    $expression->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
-    $expression->extra = $this->cleanToken();
-    return $expression;
-  }
-
-  /**
-   * Builds a use statement.
-   *
-   * @return PGPUse
-   *   An object of the statement.
-   */
-  private function buildUse($in_body = FALSE) {
-    $this->debugPrint(__FUNCTION__);
-
-    // Create object.
-    $expression = new PGPUse();
-    $expression->comment = $this->comment;
-    $expression->type = $in_body ? T_USE : $this->tokenType(); // @todo Will this ever not be T_USE?
-    $expression->semicolon = TRUE;
-    $expression->nobraces = 1;
-    $expression->nouse = $in_body; // Means to not print 'use' at beginning.
-    $expression->values = new PGPList('values', $this->getSettings());
-    $this->getSettings($expression);
-
-    // Global items.
-    $this->comment = array();
-
-    // Local items.
-    $is_alias = FALSE;
-
-    while (next($this->tokens) !== FALSE) {
-      $this->debugPrint('while buildUse');
-      $this->printToken();
-      switch ($this->tokenType()) {
-        case ',':
-          $type = $is_alias ? 'alias' : 'name';
-          $expression->values->insertLast($temp, $type);
-          $is_alias = FALSE;
-          $temp = NULL; // Necessary?
-          $expression->values->insertLast($this->tokenValue(), 'comma');
-          $temp = $this->buildExpression(array(',', T_AS, T_INSTEADOF, ';', '{'));
-          break;
-
-        case T_AS:
-        case T_INSTEADOF:
-          // @todo Only allowed outside of class or trait.
-          $is_alias = TRUE;
-          $expression->values->insertLast($temp, 'name');
-          $temp = NULL; // Necessary?
-          $expression->values->insertLast($this->tokenValue(), 'operator');
-          $temp = $this->buildExpression(array(',', T_AS, T_INSTEADOF, ';', '{'));
-          break;
-
-        case ';':
-          $type = $is_alias ? 'alias' : 'name';
-          $expression->values->insertLast($temp, $type);
-          $expression->semicolon = TRUE;
-          return $expression;
-          break;
-
-        case '{':
-          // @todo Only allowed inside of class or trait.
-          $type = $is_alias ? 'alias' : 'name';
-          $expression->values->insertLast($temp, $type);
-          // Build body.
-          $this->inUseBody = TRUE;
-          $expression->nobraces = 0;
-          $expression->semicolon = FALSE;
-          $expression->bodyComment = $this->buildBodyComment();
-          $expression->body = $this->buildBody();
-          $this->inUseBody = FALSE;
-          break;
-
-        case '}':
-          return $expression;
-          break;
-
-        default:
-          if ($expression->values->isEmpty()) {
-            prev($this->tokens);
-            $temp = $this->buildExpression(array(',', T_AS, T_INSTEADOF, ';', '{'));
-          }
-          else {
-            // @todo Unreachable code.
-            $expression->warning = 'unexpected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
-            $expression->extra = $this->cleanToken();
-            return $expression;
-          }
-          break;
-      }
-    }
-    $expression->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
-    $expression->extra = $this->cleanToken();
-    return $expression;
-  }
-
-  /**
-   * Returns a document comment string or stores it if related to the next token.
+   * Returns a document comment string or store it if related to the next token.
    *
    * This may be added to: statement list, function or function body.
    * If atop a function, then add to function.
    * If inside a function, then add to function body.
    * Else add to statements.
    *
-   * @return array
-   *   The document comment token (or empty array if related to the next token).
+   * @return string
+   *   The document comment (or blank if related to the next token).
    */
   private function buildComment() {
     $this->debugPrint(__FUNCTION__);
@@ -3719,14 +2844,10 @@ class PGPReader extends PGPParser {
           T_FUNCTION,
           T_INTERFACE,
           T_CLASS,
-          T_TRAIT, // @todo Add namespace to this list?
         );
-        // @todo This will not identify a document comment if the next statement
-        // begins with a "prepend" item.
         $key = $this->nextRealToken('key', TRUE);
         if (in_array($key, $obvious) || ($key == T_STRING && $this->nextRealToken('value', TRUE) == 'define')) {
           $this->comment = $comment;
-          $this->includeWhitespaceWithDocComment = TRUE;
         }
         else {
           return $comment;
@@ -3740,238 +2861,238 @@ class PGPReader extends PGPParser {
   /**
    * Checks for and builds a body comment.
    *
-   * @param boolean $return_value
-   *   (optional) Whether to return comment value or entire token.
-   * @param boolean $require_newline
-   *   (optional) Whether to require a newline in the comment.
-   *
    * @return string
-   *   A string of the comment, or blank if a comment is not found.
+   *   A string of the comment.
    */
-  private function buildBodyComment($return_value = TRUE, $require_newline = FALSE) {
+  private function buildBodyComment() {
     $this->debugPrint(__FUNCTION__);
     if ($this->nextRealToken('type', TRUE) == T_COMMENT) {
       // If previous token is ';', ')' (this can occur with a one-line body), or
       // whitespace without a return, then the comment is appended to the line.
-      // @todo Could also be a ',' in an array expression.
-      // @todo Need not have any whitespace before the comment.
-      if ($require_newline) {
-        // Useful in array expression where the comment may be inline.
-        $comment = $this->nextRealToken('value', TRUE);
-        if (strpos($comment, '//') !== 0 && strpos($comment, '#') !== 0) {
-          return;
-        }
-      }
-
-      list($preserveWhitespace, $preserveNewline, ) = $this->getSettings();
-
+      // TODO Could also be a ',' in an array expression.
+      // TODO Need not have any whitespace before the comment.
       $append = 0;
-      $whitespace = '';
       if ($this->nextTokenType() == T_WHITESPACE) {
-        $newlines = substr_count($this->nextTokenValue(), "\n");
-        if ($newlines > 0) {
+        $blankLines = substr_count($this->nextTokenValue(), "\n");
+        if ($blankLines > 0) {
           // The comment is not appended.
           return;
         }
-        $whitespace = $preserveWhitespace ? $this->nextTokenValue() : '';
         // Advance the tokens.
         next($this->tokens);
       }
       $append = 1;
       // A comment only includes a newline if its style is '//' or '#'.
-      $value = $this->nextRealToken('value', TRUE);
-      // @todo cleanComment is no longer necessary with conformWhitespaceInTokens.
-      $value = $preserveWhitespace ? $value : $this->cleanComment($value);
       $data = array(
-        'type' => T_COMMENT,
-        'value' => $whitespace . $value,
+        'type' => $this->tokenType(), // TODO Why set this value as type?
+        'value' => $this->cleanComment($this->nextRealToken('value', TRUE)),
         'append' => $append,
       );
-      if (!$this->conformWhitespaceInTokens) {
-        // With conformed whitespace tokens, this is harmful.
-        $this->previousTokenIncludesNewLine = TRUE;
-      }
       // Advance the tokens.
       next($this->tokens);
       // Return the comment.
-      return $return_value ? $data['value'] : $data;
+      return $data['value'];
     }
     return '';
   }
 
   /**
-   * @} End of "defgroup gp_builder".
+   * Builds a special string expression with variable references.
+   *
+   * @return array
+   *   An array of the expression.
+   */
+  private function buildString() {
+    $this->debugPrint(__FUNCTION__);
+
+    // Create object.
+    $expression = new PGPString();
+    $expression->type = T_SPECIAL_STRING;
+
+    while (next($this->tokens) !== FALSE) {
+      $this->debugPrint("while buildString");
+      $this->printToken();
+
+      switch ($this->tokenType()) {
+        case T_STRING: // TODO Is this token possible in this context?
+          $this->debugPrint('inside T_STRING of ' . __FUNCTION__);
+          $expression->insertLast($this->buildFunctionCall(), 'call'); // TODO The toString method does not have a case for this key.
+//          $this->functionCalls[] = &$expression; // TODO Include this? // 2010-07-08 Hmm???
+          break;
+
+        case T_VARIABLE:
+          // This could be an array
+          $return_tokens = array('"', T_VARIABLE, T_ENCAPSED_AND_WHITESPACE, T_CONSTANT_ENCAPSED_STRING); // Not sure if last one applies
+
+          // Create object.
+          $component = new PGPOperand();
+          $component->insertLast($this->tokenType(), 'type');
+          $component->insertLast($this->tokenValue(), 'value');
+          $component = $this->buildExpression($return_tokens, $component);
+          $expression->insertLast($component, 'operand');
+          break;
+
+//        case T_CONSTANT_ENCAPSED_STRING:
+        case T_ENCAPSED_AND_WHITESPACE:
+          $expression->insertLast($this->cleanToken(), 'string');
+          break;
+/*
+        case '$': // 2010-02-23 Added for ${DB_ERROR} = TRUE;
+          $expression->insertLast($this->tokenType(), 'dollar'); // Was 'begin'
+          $has_begin = TRUE;
+          break;
+*/
+//        case '{': // 2010-02-23 Added for ${DB_ERROR} = TRUE;
+        case T_CURLY_OPEN:
+        case T_DOLLAR_OPEN_CURLY_BRACES:
+          $return_tokens = array('}');
+          $expression->insertLast($this->cleanToken(), 'open');
+          $expression->insertLast($this->buildExpression($return_tokens), 'operand');
+          $dummy = '}';
+          $node = &$expression->insertLast($dummy, 'close');
+          break;
+
+        case '"':
+          // Marks the begin and end of a string with variables inside.
+          return $expression;
+          break;
+
+        case '}':
+          break;
+
+        case T_WHITESPACE:
+          // Example: catch whitespace at end of array value
+          if ($this->tokenValue() != ' ') {
+            $expression->insertLast($this->tokenValue(), 'whitespace');
+          }
+          break;
+
+        case T_START_HEREDOC:
+          $expression->insertLast($this->tokenValue(), 'begin');
+          break;
+
+        case T_END_HEREDOC:
+          $temp = $this->tokenValue();
+          // Only a ';' may follow the closing identifier.
+          if ($this->nextRealToken() != ';') {
+            $temp .= "\n";
+          }
+          $expression->insertLast($temp, 'end');
+          break;
+
+        default:
+          prev($this->tokens);
+          $expression->warning = 'unexected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
+          $expression->extra = $this->cleanToken();
+          return $expression;
+          break;
+      }
+    }
+    $expression->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
+    $expression->extra = $this->cleanToken();
+    return $expression;
+  }
+
+  /**
+   * Builds a list statement.
+   *
+   * TODO This is a "function call" with an attached "assignment" expression.
+   *
+   * @return array
+   *   An array of the statement.
+   */
+  private function buildList() {
+    $this->debugPrint(__FUNCTION__);
+
+    // Create object.
+    $expression = new PGPListStatement();
+    $expression->type = $this->tokenType();
+    $expression->name = $this->tokenValue();
+    $expression->noparens = 0;
+    $expression->parameters = new PGPList();
+//    $expression->assignment = new PGPExpression();
+
+    // Local variables.
+    $has_assignment = FALSE;
+
+    while (next($this->tokens) !== FALSE) {
+      $this->debugPrint("while buildList");
+      $this->printToken();
+      switch ($this->tokenType()) {
+        case T_WHITESPACE:
+          break; // 2010-03-21 Following code is copied from buildFunctionCall. Why?
+          // Intentionally bleed into next case for a require statement.
+          // TODO There could be whitespace even with parentheses.
+          // Check for next non-comment and non-whitespace token.
+//          if (/*!$require ||*/ !$expression->parameters->isEmpty()) {
+//            break;
+//          }
+//          $expression->noparens = 1;
+
+        case '(':
+        case ',':
+          $this->isMultiline = FALSE; // TODO Is this necessary?
+          $expression->parameters->insertLast($this->buildExpression(array(',', ';', T_CLOSE_TAG))); // 2009-06-13 Inline html
+          $this->isMultiline = TRUE;
+          break;
+
+        case ')':
+          if (!$has_assignment) {
+            $expression->assignment = $this->buildExpression(array(',', ';', T_CLOSE_TAG)); // array(',', ')')); // 2009-06-13 Inline html
+            $has_assignment = TRUE;
+          }
+          else {
+            // Added 2010-02-23 for if ((list(..) = function_call(..)) && ..)
+            prev($this->tokens);
+            return $expression;
+          }
+          break;
+
+        case ';':
+          return $expression;
+          break;
+
+        case T_CLOSE_TAG:
+          // 2009-06-13 Inline html
+          $expression->inline = 1; // TODO This property is not defined in the class.
+          prev($this->tokens);
+          return $expression;
+          break;
+
+        default:
+          if ($has_assignment) {
+            // Added 2010-02-23 for things like: if (list(..) = <array expression> <array operator> <array expression> ..)
+            prev($this->tokens);
+            return $expression;
+          }
+          $expression->warning = 'unexected syntax in ' . __METHOD__ . '(' . __LINE__ . ')';
+          $expression->extra = $this->cleanToken();
+          return $expression;
+          break;
+      }
+    }
+    $expression->warning = 'unexpected end of file in ' . __METHOD__ . '(' . __LINE__ . ')';
+    $expression->extra = $this->cleanToken();
+    return $expression;
+  }
+
+  /**
+   * @} End of "defgroup pgp_builder".
    */
 
   /**
-   * @defgroup gp_helper Grammar parser helper functions
+   * @defgroup pgp_helper Grammar parser helper functions
    * @{
    */
 
   /**
-   * Returns the preserve format flag used with array parsing.
+   * Sets the preserve array flag used with array parsing.
    *
-   * @return boolean
+   * @param boolean $preserveArrayFormat
    *   Indicates whether to preserve array formatting.
    */
-  public function getPreserveArrayWhitespace() {
-    return $this->preserveArrayWhitespace;
-  }
-
-  /**
-   * Returns the preserve newline flag used with array parsing.
-   *
-   * @return boolean
-   *   Indicates whether to preserve array newline formatting.
-   */
-  public function getPreserveArrayNewline() {
-    return $this->preserveArrayNewline;
-  }
-
-  /**
-   * Returns the preserve whitespace flag used with all parsing.
-   *
-   * @return boolean
-   *   Indicates whether to preserve whitespace formatting.
-   */
-  public function getPreserveWhitespace() {
-    return $this->preserveWhitespace;
-  }
-
-  /**
-   * Returns the preserve whitespace flag used with all parsing.
-   *
-   * @return boolean
-   *   Indicates whether to preserve whitespace formatting.
-   */
-  public function getPreserveWhitespaceLikeOriginal() {
-    return $this->preserveWhitespaceLikeOriginal;
-  }
-
-  /**
-   * Returns the preserve newline flag used with all parsing (except arrays?).
-   *
-   * @return boolean
-   *   Indicates whether to preserve newline formatting.
-   */
-  public function getPreserveNewline() {
-    return $this->preserveNewline;
-  }
-
-  /**
-   * Sets the preserve format flag used with array parsing.
-   *
-   * @param boolean $preserveArrayWhitespace
-   *   (optional) Indicates whether to preserve array formatting.
-   */
-  public function setPreserveArrayWhitespace($preserveArrayWhitespace = FALSE) {
-    $this->preserveArrayWhitespace = $preserveArrayWhitespace;
-  }
-
-  /**
-   * Sets the preserve newline flag used with array parsing.
-   *
-   * @param boolean $preserveArrayNewline
-   *   (optional) Indicates whether to preserve array newline formatting.
-   */
-  public function setPreserveArrayNewline($preserveArrayNewline = FALSE) {
-    $this->preserveArrayNewline = $preserveArrayNewline;
-  }
-
-  /**
-   * Sets the preserve whitespace flag used with all parsing.
-   *
-   * @param boolean $preserveWhitespace
-   *   (optional) Indicates whether to preserve whitespace formatting.
-   */
-  public function setPreserveWhitespace($preserveWhitespace = FALSE) {
-    $this->preserveWhitespace = $preserveWhitespace;
-  }
-
-  /**
-   * Sets the preserve whitespace flag used with all parsing.
-   *
-   * @param boolean $preserveWhitespace
-   *   (optional) Indicates whether to preserve whitespace formatting.
-   */
-  public function setPreserveWhitespaceLikeOriginal($preserveWhitespace = FALSE) {
-    $this->preserveWhitespaceLikeOriginal = $preserveWhitespace;
-  }
-
-  /**
-   * Sets the preserve newline flag used with all parsing (except arrays?).
-   *
-   * @param boolean $preserveNewline
-   *   (optional) Indicates whether to preserve newline formatting.
-   */
-  public function setPreserveNewline($preserveNewline = FALSE) {
-    $this->preserveNewline = $preserveNewline;
-  }
-
-  /**
-   * Returns settings applicable to current parsing context.
-   *
-   * @param PGPBase $object
-   *   (optional) Grammar object on which to store preservation settings.
-   *
-   * @return array
-   *   Applicable settings.
-   */
-  private function getSettings($object = NULL) {
-    if ($this->arrayExpressions) {
-      // Use array preservation settings (applicable to current array object).
-      $settings = array($this->preserveArrayWhitespace, $this->preserveArrayNewline, $this->preserveWhitespaceLikeOriginal);
-    }
-    else {
-      // Use global preservation settings.
-      $settings = array($this->preserveWhitespace, $this->preserveNewline, $this->preserveWhitespaceLikeOriginal);
-    }
-
-    if (!is_null($object)) {
-      list($object->preserveWhitespace, $object->preserveNewline, $object->preserveWhitespaceLikeOriginal) = $settings;
-    }
-    return $settings;
-  }
-
-  /**
-   * Tokenizes the code snippet and prepares the tokens for parsing.
-   *
-   * @param string $snippet
-   *   (optional) A code snippet string.
-   * @param boolean $insert_token
-   *   (optional) Whether to insert an initial token.
-   *
-   * @return boolean
-   *   Whether the tasks were successful.
-   */
-  private function prepareTokens(&$snippet = NULL, $insert_token = TRUE) {
-    if ($snippet) {
-      $this->setSnippet($snippet);
-    }
-    if (empty($this->tokens)) {
-      $this->statements = new PGPBody();
-      return FALSE;
-    }
-
-    // Global items.
-    $this->resetOthers();
-    reset($this->tokens);
-
-    if ($insert_token) {
-      // Add an initial token to eliminate special handling of first token and
-      // to enable all token processing in while (next()) loops.
-      array_unshift($this->tokens, array(T_WHITESPACE, '', 0));
-    }
-
-    // Conform newline characters into whitespace tokens.
-    $this->conformWhitespaceInTokens();
-
-    // Set the parent object reference for recursive calls.
-    // Only used during call to buildGrammar().
-    $parent = NULL;
-    $this->parents[] = &$parent;
-
-    return TRUE;
+  public function setPreserveArrayFormat($preserveArrayFormat = FALSE) {
+    $this->preserveArrayFormat = $preserveArrayFormat;
   }
 
   /**
@@ -3991,85 +3112,18 @@ class PGPReader extends PGPParser {
   }
 
   /**
-   * Moves newline from non-whitespace tags to subsequent whitespace token.
-   *
-   * If subsequent token is not whitespace, then a whitespace token is inserted.
-   * Moving the newline character allows us to eliminate exception handling code
-   * in various routines.
-   *
-   * If we strip the indent spaces, then we can indent ourselves. This would
-   * ensure the rewritten file is formatted nicely. With upgrade routines, if
-   * we need to write an expression (e.g. an array) at a different level of
-   * indention, then we could do so. Storing the indent spaces eliminates this
-   * flexibility. In the body parsing, we store the number of newlines and do the
-   * indention in the output routine. For expressions like arrays, this is not
-   * always (or ever) done.
-   */
-  private function conformWhitespaceInTokens() {
-    $this->conformWhitespaceInTokens = TRUE;
-
-    // Insert a dummy last token to avoid special code to check last token.
-    array_push($this->tokens, array(T_WHITESPACE, '', 0));
-
-    // Loop in reverse to be able to set loop indices.
-    for ($i = count($this->tokens) - 1; $i > 0; $i--) {
-      $current = &$this->tokens[$i];
-      $prior = &$this->tokens[$i - 1];
-      if (is_array($prior)) {
-        if (in_array($prior[0], array(T_OPEN_TAG, T_OPEN_TAG_WITH_ECHO, T_CLOSE_TAG, T_COMMENT))) {
-          if (substr($prior[1], -1) == "\n") {
-            // Remove newline from prior token.
-            $prior[1] = substr($prior[1], 0, -1);
-            if (is_array($current) && $current[0] == T_WHITESPACE) {
-              // Add newline to current whitespace token.
-              $current[1] = "\n" . $current[1];
-            }
-            else {
-              // Insert whitespace token.
-              $this->insertWhitespaceToken($i, $prior[2]);
-            }
-          }
-        }
-        elseif ($prior[0] != T_WHITESPACE && substr($prior[1], -1) == "\n") {
-          // Inline HTML may have a newline character at end, but we ignore it.
-          $this->debugPrint(__METHOD__);
-          $this->debugPrint('$prior that is not in list');
-          $this->debugPrint($prior);
-        }
-      }
-    }
-  }
-
-  /**
-   * Inserts a whitespace token into token list.
-   *
-   * @param integer $position
-   *   The index at which to insert the whitespace token.
-   * @param integer $line
-   *   The line number applicable to the whitespace token.
-   */
-  private function insertWhitespaceToken($position, $line) {
-    $head = array_slice($this->tokens, 0, $position);
-    $tail = array_slice($this->tokens, $position);
-    $new = array(array(T_WHITESPACE, "\n", $line));
-
-    $this->tokens = array_merge($head, $new, $tail);
-  }
-
-  /**
    * Sets the code snippet to be parsed.
    *
-   * @todo Why would tokens need to be shared among classes?
+   * TODO Why would tokens need to be shared among classes?
    *
    * @param string $snippet
-   *   (optional) A code snippet string.
+   *   A code snippet string.
    */
   public function setSnippet(&$snippet = NULL) {
     // Clear tokens.
     $this->clearArray($this->tokens);
     $this->resetTokens();
     if ($snippet) {
-      $snippet = str_replace(array("\r\n", "\r"), array("\n", "\n"), $snippet);
       $this->tokens = token_get_all($snippet);
     }
   }
@@ -4086,7 +3140,6 @@ class PGPReader extends PGPParser {
     $this->clearArray($this->classes);
     $this->clearArray($this->functions);
     $this->clearArray($this->functionCalls);
-    $this->clearArray($this->functionCallNames);
     $this->clearArray($this->defines);
     $this->clearArray($this->globals);
     $this->clearArray($this->comments);
@@ -4120,7 +3173,7 @@ class PGPReader extends PGPParser {
   }
 
   /**
-   * Resets the other arrays and class variables (other than settings).
+   * Resets the other arrays and class variables.
    */
   private function resetOthers() {
     // Items declared in parent.
@@ -4129,22 +3182,18 @@ class PGPReader extends PGPParser {
     $this->classes = array();
     $this->functions = array();
     $this->functionCalls = array();
-    $this->functionCallNames = array();
     $this->defines = array();
     $this->globals = array();
     $this->comments = array();
 
     // Items declared in this class.
     $this->expressions = 0;
+    $this->isMultiline = TRUE;
     $this->isInterface = FALSE;
-    $this->isAnonymous = FALSE;
     $this->isInlineIf = FALSE;
-    $this->isReturnToken = TRUE;
-    $this->inFunctionName = FALSE;
     $this->inFunctionOrCall = FALSE;
     $this->addWhitespace = FALSE;
     $this->addNewLineToWhitespace = FALSE;
-    $this->includeWhitespaceWithDocComment = FALSE;
     $this->unary = '';
     $this->reference = '';
     $this->suppress = '';
@@ -4159,11 +3208,8 @@ class PGPReader extends PGPParser {
   /**
    * Removes the ending newline character from an end-of-line comment.
    *
-   * @todo No longer needed if we call conformWhitespaceInTokens().
-   *
    * @param string $comment
    *   A string containing a single-line comment.
-   *
    * @return string
    *   The modified string.
    */
@@ -4339,33 +3385,20 @@ class PGPReader extends PGPParser {
    * Returns next non-whitespace token type or value.
    *
    * @param string $key
-   *   (optional) A string equal to 'type' or 'value'.
+   *   A string equal to 'type' or 'value'.
    * @param boolean $include_comment
-   *   (optional) Indicates whether a comment counts as a real token.
-   * @param string $direction
-   *   (optional) Direction in which to traverse the token array.
-   *
+   *   Indicates whether a comment counts as a real token.
    * @return string (or constant)
    *   A string with the desired token value.
    */
-  private function nextRealToken($key = '', $include_comment = FALSE, $direction = 'forward') {
-    // Initialize.
-    if ($direction == 'forward') {
-      $next = 'next';
-      $previous = 'prev';
-    }
-    else {
-      $next = 'prev';
-      $previous = 'next';
-    }
-
+  private function nextRealToken($key = '', $include_comment = FALSE) {
     $count = 0;
     $values = array(T_WHITESPACE);
     if (!$include_comment) {
       $values[] = T_COMMENT;
     }
     // Need to test for end of file.
-    while ($next($this->tokens) !== FALSE) {
+    while (next($this->tokens) !== FALSE) {
       $count++;
       if (!in_array($this->tokenType(), $values)) {
         break;
@@ -4373,12 +3406,10 @@ class PGPReader extends PGPParser {
     }
     // 2006-06-20
     if (current($this->tokens) === FALSE) {
-      $item = 'EOA';
-      // Set array pointer to first or last item so we can further reset it.
-      $next == 'next' ? end($this->tokens) : reset($this->tokens);
+      return 'EOA';
     }
     // Save desired value.
-    elseif ($key == 'value') {
+    if ($key == 'value') {
       $item = $this->tokenValue();
     }
     else {
@@ -4386,7 +3417,7 @@ class PGPReader extends PGPParser {
     }
     // Reset position in array.
     while ($count > 0) {
-      $previous($this->tokens);
+      prev($this->tokens);
       $count--;
     }
     return $item;
@@ -4511,7 +3542,6 @@ class PGPReader extends PGPParser {
    * Returns the current parent expression object.
    *
    * @todo Not used.
-   *
    * @return PGPExpression
    */
   private function &currentParentExpression() {
@@ -4526,22 +3556,10 @@ class PGPReader extends PGPParser {
    * Returns TRUE if the comment includes a newline.
    *
    * @param string $comment
-   *
    * @return boolean
    */
   private function includesNewline($comment) {
-    return !$this->conformWhitespaceInTokens && (strpos($comment, '//') === 0 || strpos($comment, '#') === 0);
-  }
-
-  /**
-   * Returns TRUE if a newline should follow the comment.
-   *
-   * @param string $comment
-   *
-   * @return boolean
-   */
-  private function newlineFollows($comment) {
-    return $this->conformWhitespaceInTokens && (strpos($comment, '//') === 0 || strpos($comment, '#') === 0);
+    return (strpos($comment, '//') === 0 || strpos($comment, '#') === 0);
   }
 
   /**
@@ -4569,7 +3587,7 @@ class PGPReader extends PGPParser {
         if (empty($body)) {
           return FALSE;
         }
-        elseif ($body->first()->line <= $line && $body->lastLine() >= $line) {
+        elseif ($body->first()->line <= $line && $body->last()->line >= $line) {
           $found = TRUE;
           return $item;
         }
@@ -4581,6 +3599,6 @@ class PGPReader extends PGPParser {
   }
 
   /**
-   * @} End of "defgroup gp_helper".
+   * @} End of "defgroup pgp_helper".
    */
 }

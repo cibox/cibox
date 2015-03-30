@@ -11,7 +11,7 @@ playbooks=(
 for i in "${playbooks[@]}"
 do
    echo "Install "${i}
-   ansible-playbook ${i}
+   ansible-playbook -vvvv ${i}
    if [ "$?" == "0" ]; then
     echo "Finished installing "${i}
    else
