@@ -2,5 +2,8 @@
 - name: Install Security Testing
   shell: "rsync -avz devops/modules/ sites/all/modules/contrib/"
 
+- name: Enable Security Testing module
+  shell: "drush en -y security_testing"
+
 - name: Run Security Testing
-  shell: "drush en -y security_testing; drush -y sec-test sites/all/modules"
+  shell: "drush -y sec-test sites/all/modules"
