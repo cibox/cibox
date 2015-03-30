@@ -2,8 +2,8 @@
 - name: Install Security Testing
   shell: "rsync -avz devops/modules/ sites/all/modules/contrib/"
 
-- name: Enable Security Testing module
-  shell: "drush en -y security_testing"
+- name: Enable Security Review module
+  shell: "drush en -y security_review"
 
-- name: Run Security Testing
-  shell: "drush -y sec-test sites/all/modules"
+- name: Run Security Review
+  shell: "drush secrev 2>&1 | grep error | tee -a ./commentinfo.md"
