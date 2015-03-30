@@ -5,5 +5,8 @@
 - name: Enable Security Review module
   shell: "drush en -y security_review"
 
+- name: Creating Security Review file
+  shell: touch {{ build_reports_dir }}/SecurityReview.txt
+
 - name: Run Security Review
   shell: "drush secrev 2>&1 | grep error | tee -a {{ build_reports_dir }}/SecurityReview.txt"
