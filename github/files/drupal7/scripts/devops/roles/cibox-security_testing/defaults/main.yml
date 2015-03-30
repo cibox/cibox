@@ -1,2 +1,2 @@
-  vars:
-    build_reports_dir: build_reports
+---
+build_reports_dir: build_reports
