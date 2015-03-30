@@ -1,0 +1,103 @@
+<?php
+/**
+ * @file
+ * Provides primary Drupal hook implementations.
+ *
+ * @author Jim Berry ("solotandem", http://drupal.org/user/240748)
+ */
+
+/**
+ * Grammar Parser library version is unknown.
+ */
+define('GPLIB_VERSION_UNKNOWN', 0);
+
+/**
+ * Grammar Parser library version is invalid.
+ */
+define('GPLIB_VERSION_INVALID', 1);
+
+/**
+ * Grammar Parser library version is valid.
+ */
+define('GPLIB_VERSION_VALID', 2);
+
+/**
+ * Implements hook_libraries_info().
+ */
+function gplib_libraries_info() {
+  $libraries['grammar_parser'] = array(
+    'title' => 'Grammar Parser Library',
+    'vendor url' => 'http://drupal.org/project/grammar_parser',
+    'download url' => 'http://drupal.org/project/grammar_parser',
+    'version arguments' => array(
+      'file' => 'engine/parser.inc',
+      'pattern' => "/const GRAMMAR_PARSER_VERSION = '(\d+\.\d+)'/",
+    ),
+    'versions' => array(
+      '2.1' => array(),
+    ),
+    'files' => array(
+      'php' => array(
+        'engine/parser.inc',
+        'engine/editor.inc',
+        'engine/list.inc',
+        'engine/object.inc',
+        'engine/reader.inc',
+        'engine/writer.inc',
+      ),
+    ),
+  );
+
+  return $libraries;
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function gplib_flush_caches() {
+  // Use this hook as a proxy to force periodic refreshing of the version state.
+  variable_set('gplib_grammar_parser_version_state', GPLIB_VERSION_UNKNOWN);
+  return array();
+}
+
+/**
+ * Indicates whether the installed library code is of the correct version.
+ *
+ * @param boolean $display_message
+ *   Whether to display a message.
+ *
+ * @return boolean
+ *   Whether a valid version was found.
+ */
+function gplib_version_check($display_message = TRUE) {
+  $version_state = variable_get('gplib_grammar_parser_version_state', GPLIB_VERSION_UNKNOWN);
+  if ($version_state == GPLIB_VERSION_VALID) {
+    return TRUE;
+  }
+
+  $info = gplib_libraries_info();
+  $info = $info['grammar_parser'];
+  $keys = array_keys($info['versions']);
+  $version = reset($keys);
+  $url = l('here', $info['download url']);
+  $message = t('Install version @version of the Grammar Parser library code (from !url) in a libraries directory such as "sites/all/libraries." For easy installation, use the drush make file in the Grammar Parser Library project.', array('@version' => $version, '!url' => $url));
+
+  if ($version_state == GPLIB_VERSION_INVALID) {
+    if ($display_message) {
+      drupal_set_message($message, 'error');
+    }
+    return FALSE;
+  }
+
+  $info = libraries_detect('grammar_parser');
+  if ($info === FALSE || empty($info['version']) || !version_compare($info['version'], $version, '>=')) {
+    if ($display_message) {
+      drupal_set_message($message, 'error');
+    }
+    variable_set('gplib_grammar_parser_version_state', $info === FALSE ? GPLIB_VERSION_UNKNOWN : GPLIB_VERSION_INVALID);
+    return FALSE;
+  }
+
+  variable_set('gplib_grammar_parser_version_state', GPLIB_VERSION_VALID);
+  return TRUE;
+}

@@ -1,0 +1,1892 @@
+<?php
+
+/**
+ * @file
+ * Scans the source code of a module for XSS,CSRF and SQL INJECTION.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function security_testing_menu() {
+
+  $items = array();
+
+  $items['admin/config/development/security_testing'] = array(
+    'title' => 'Security Testing',
+    'description' => 'Scans the source code of a module for vulnerabilities',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('security_testing_get_location'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+  );
+
+  $items['admin/config/development/security_testing/scanning'] = array(
+    'title' => 'Scanning',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access arguments' => array('administer site configuration'),
+    'weight' => -10,
+  );
+
+  $items['admin/config/development/security_testing/ofc'] = array(
+    'title' => 'Ouput functions Call',
+    'page callback' => array('security_testing_output'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'security_testing_menu.inc',
+  );
+
+  $items['admin/config/development/security_testing/sfc'] = array(
+    'title' => 'Secure function call',
+    'page callback' => array('security_testing_secure'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'security_testing_menu.inc',
+  );
+
+  $items['admin/config/development/security_testing/nfc'] = array(
+    'title' => 'Normal function call',
+    'page callback' => array('security_testing_normal'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'security_testing_menu.inc',
+  );
+
+  $items['admin/config/development/security_testing/delete_ofc/%'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('security_testing_delete_ofc_confirm', 5),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'security_testing_menu.inc',
+  );
+
+  $items['admin/config/development/security_testing/delete_sfc/%'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('security_testing_delete_sfc_confirm', 5),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'menu.inc',
+  );
+
+  $items['admin/config/development/security_testing/delete_nfc/%'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('security_testing_delete_nfc_confirm', 5),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'menu.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Displays form for getting the location of a module to scan.
+ */
+function security_testing_get_location() {
+
+  $form['directory_uri'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Enter the location of module directory to scan'),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Start scanning'),
+    '#submit' => array('security_testing_form_submit'),
+  );
+  return $form;
+}
+
+/**
+ * Takes the directory name from form and calls the scanning routine.
+ */
+function security_testing_form_submit($form, &$form_state) {
+  $dirname = $form_state['values']['directory_uri'];
+
+  if (is_dir($dirname)) {
+    security_testing_testing($dirname);
+  }
+  else {
+    drupal_set_message(t("Directory not found"), 'warning');
+  }
+}
+
+/**
+ * Initializes Reader for parsing the file.
+ *
+ * @param string $dirname
+ *   path of the directory.
+ *
+ * Takes the path of directory,
+ * Initialises the reader,
+ * and then call the function to scan all the files present in the directory.
+ */
+function security_testing_testing($dirname) {
+  $list = array();
+
+  $security_testing_lines = 0;
+
+  // Log file name.
+  $pathh = drupal_realpath(file_default_scheme() . '://') . "/security_testing";
+  variable_set('log_file_name', $pathh . '/testing.txt');
+  file_put_contents($pathh . '/testing.txt', '');
+
+  // Only file with extension .php, .inc or .module to be scanned
+  // for vulnerabilities.
+  $ext_allowed  = array('php', 'inc', 'module');
+  $source = '';
+
+  // Getting the contents of all files to be scanned
+  // in a variable to initialise PGPReader.
+  security_testing_get_all_files_content($dirname, $source, $ext_allowed, $security_testing_lines, $list['line_offset']);
+  $new_source = str_replace('<?php', '', $source);
+  $new_source = str_replace('?>', '', $new_source);
+  $new_source = "<?php" . $new_source;
+
+  // Stores all the code of a module in the file code.php.
+  $filenam = $pathh . '/code.php';
+  file_put_contents($filenam, $new_source);
+
+  // Initializing the Reader.
+  $security_testing_reader = new PGPReader($new_source);
+  $security_testing_reader->addTokenNames();
+  $security_testing_reader->buildGrammar();
+
+  security_testing_functions($list, $security_testing_reader);
+}
+
+/**
+ * Implements hook_boot().
+ *
+ * Register shutdown function.
+ */
+function security_testing_boot() {
+  @include_once DRUPAL_ROOT . '/includes/database/log.inc';
+  Database::startLog('security_testing');
+  drupal_register_shutdown_function('security_testing_shutdown');
+}
+
+/**
+ * Scanning for CSRF.
+ *
+ * This function is used only during test run of Simpletest
+ * for getting all the database queries of the visiting page.
+ * If any INSERT,UPDATE or DELETE query of the scanning module runs.
+ * Then the module is CSRF vulnerable.
+ */
+function security_testing_shutdown() {
+
+  // Checking for CSRF only while during CSRF run.
+  if (variable_get('write_to_file') == 1) {
+    $pathh = variable_get('security_testing_path') . "/simpletest_results.txt";
+    $dirname = drupal_realpath(drupal_get_path('module', 'my_module'));
+    $security_testing_files = array();
+    security_testing_get_all_files($dirname, $security_testing_files);
+
+    if (method_exists('Database', 'getLog')) {
+      $queries = Database::getLog('security_testing', 'default');
+      foreach ($queries as $query) {
+        $temp = $query['query'];
+        $source_file = $query['caller']['file'];
+        // Checking if the query is not of SELECT type and also if it
+        // presents in one of the file of scanning module.
+        // Then the module is CSRF Vulnerable.
+        if (strpos($temp, "SELECT") === FALSE && in_array($source_file, $security_testing_files)) {
+          $print = t("This link is CSRF vulnerable Query @query runs while visiting this link\n", array('@query' => $temp));
+          file_put_contents($pathh, $print, FILE_APPEND);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Getting all the file names of a module.
+ *
+ * These files are used for checking whether the INSERT,UPDATE or DELETE query
+ * that runs are from scanning module or not.
+ */
+function security_testing_get_all_files($dirname, &$security_testing_files) {
+
+  $temps = scandir($dirname);
+  foreach ($temps as $temp) {
+    if (substr(drupal_basename($temp), 0, 1) == '.') {
+      continue;
+    }
+    if (is_dir($dirname . "/" . $temp)) {
+      security_testing_get_all_files($dirname . "/" . $temp, $security_testing_files);
+    }
+    else {
+      $security_testing_files[] = $dirname . "/" . $temp;
+    }
+  }
+}
+
+/**
+ * This function will search for functions present in the code.
+ *
+ * @param array $list
+ *   Array containing names of all fuctions present in the module,
+ *   secure function calls, normal function calls, output function calls
+ *   and line offset.
+ * @param PGPReader $security_testing_reader
+ *   Parsed code of the module.
+ */
+function security_testing_functions(&$list, $security_testing_reader) {
+
+  // Getting the Normal function calls from the database.
+  $query = db_select('security_testing_normal', 'n')
+    ->fields('n', array('name_of_nfc'))
+    ->execute();
+  foreach ($query as $q) {
+    $list['normal_list'][] = $q->name_of_nfc;
+  }
+
+  // Getting the Secure function calls from the database.
+  $query = db_select('security_testing_secure', 'n')
+    ->fields('n', array('name_of_sfc'))
+    ->execute();
+  foreach ($query as $q) {
+    $list['secure_list'][] = $q->name_of_sfc;
+  }
+
+  // Getting the Output function calls from the database.
+  $query = db_select('security_testing_output', 'n')
+    ->fields('n', array('name_of_ofc'))
+    ->execute();
+  foreach ($query as $q) {
+    $list['output_list'][$q->name_of_ofc] = $q->name_of_ofc;
+  }
+
+  // Get all the functions node of the scanning module.
+  $nodes = &$security_testing_reader->getFunctions();
+
+  foreach ($nodes as $node) {
+    $item = $node;
+    $body = $item->data->body;
+    $list['all_func_list']['name'][] = $node->data->name;
+    $list['all_func_list']['node']['name'][] = $node->data->name;
+    $list['all_func_list']['node']['node'][] = $node;
+
+    // Stores the parameters of each function.
+    $param_temp = array();
+    for ($j = 0; $j < $node->data->parameterCount(); $j++) {
+      if (is_object($node->data->getParameterVariable($j))) {
+        $param_temp[] = ltrim($node->data->getParameterVariable($j)->toString(), '&');
+      }
+    }
+    $list['all_func_list']['node']['parameters'][] = $param_temp;
+    unset($param_temp);
+  }
+
+  // Create an array $security_testing_searched_list. It will keep track of
+  // the functions scanned by the Security Testing and will be used to
+  // prevents redundant scanning.
+  $security_testing_searched_list = array();
+
+  // Getting all the links and callbacks from hook_menu.
+  $menu_callbacks = security_testing_get_all_callbacks($list['all_func_list'], $security_testing_searched_list);
+  $count = count($menu_callbacks['index']['callback_value']);
+
+  // Storing the page callbacks of all the links of hook_menu()
+  // in array $security_testing_search_func_list.
+  $security_testing_search_func_list = array();
+
+  // Storing the page callback function name of a link
+  // in array $security_testing_search_func_list.
+  for ($i = 0; $i < $count; $i++) {
+    // Getting the page callback function name of a link.
+    $temp = $menu_callbacks['index']['callback_value'][$i];
+
+    // If page callback function is drupal_get_form
+    // then get the value of its argument.
+    if ($temp == 'drupal_get_form') {
+      $security_testing_search_func_list[] = $menu_callbacks['index']['arguments_value'][$i];
+    }
+    else {
+      $security_testing_search_func_list[] = $temp;
+    }
+  }
+
+  // Getting the count of all the functions present in the module.
+  $count = count($list['all_func_list']['name']);
+
+  // Start scanning for functions present in page callbacks of hook_menu.
+  foreach ($security_testing_search_func_list as $calling_function) {
+
+    // Only scan if the function definition is present in the module.
+    if (in_array($calling_function, $list['all_func_list']['name'])) {
+      for ($i = 0; $i < $count; $i++) {
+        if ($list['all_func_list']['node']['name'][$i] == $calling_function) {
+          $security_testing_searched_list[] = $calling_function;
+          $node = $list['all_func_list']['node']['node'][$i];
+          $item = $node;
+          $body = $item->data->body;
+          security_testing_function_calls($list, $security_testing_searched_list, $security_testing_reader, $body);
+        }
+      }
+    }
+  }
+
+  // Scanning for functions present in the module which are not being scanned
+  // by page callbacks of hook_menu.
+  // These function are mostly hooks.
+  for ($i = 0; $i < $count; $i++) {
+    $remaining_function_name = $list['all_func_list']['node']['name'][$i];
+    if (!in_array($remaining_function_name, $security_testing_search_func_list) && !in_array($remaining_function_name, $security_testing_searched_list)) {
+      $security_testing_searched_list[] = $remaining_function_name;
+      $node = $list['all_func_list']['node']['node'][$i];
+      $item = $node;
+      $body = $item->data->body;
+      security_testing_function_calls($list, $security_testing_searched_list, $security_testing_reader, $body);
+    }
+  }
+}
+
+/**
+ * Getting all the classes present in a module.
+ *
+ * @param PGPReader $security_testing_reader
+ *   Parsed code.
+ *
+ * @return array
+ *   Returns an array containing class nodes.
+ */
+function security_testing_get_class_nodes($security_testing_reader) {
+
+  // Get all the classes node of the scanning module.
+  $nodes_classes = &$security_testing_reader->getClasses();
+
+  // Initialize $_security_testing_all_classes_list.
+  foreach ($nodes_classes as $node2) {
+    $_security_testing_all_classes_list['name'][] = $node2->data->name;
+    $_security_testing_all_classes_list['node']['name'][] = $node2->data->name;
+    $_security_testing_all_classes_list['node']['node'][] = $node2;
+
+    // Stores the start and end line of each class.
+    $_security_testing_all_classes_list['node']['start_line'][] = $node2->line;
+    $bod = $node2->data->body;
+    while ($bod) {
+      $line = $bod->last()->line;
+      if ($bod->last()->data instanceof PGPBody) {
+        $bod = $bod->last()->data->body;
+      }
+      else {
+        break;
+      }
+    }
+    $_security_testing_all_classes_list['node']['end_line'][] = $line;
+  }
+  return $_security_testing_all_classes_list;
+}
+
+
+/**
+ * This function will get the content of all files inside module directory.
+ *
+ * @param string $dirname
+ *   Directory name.
+ * @param string $source
+ *   Adds the content of files inside directory dirname into source.
+ * @param array $ext_allowed
+ *   File extensions('.inc','.php','.module').
+ * @param int $security_testing_lines
+ *   Line number in file code.php.
+ * @param array $security_testing_offset
+ *   Security Testing stores complete source code of a module in a single file
+ *   named code.php in security_testing folder in default files directory.
+ *   $security_testing_offset maps the line numbers of code.php with the
+ *   line numbers of orignal file.
+ */
+function security_testing_get_all_files_content($dirname, &$source, $ext_allowed, &$security_testing_lines, &$security_testing_offset) {
+
+  $filenames = scandir($dirname);
+
+  foreach ($filenames as $filename) {
+    if (substr(basename($filename), 0, 1) == '.') {
+      continue;
+    }
+    elseif (is_dir($dirname . "/" . $filename)) {
+      security_testing_get_all_files_content($dirname . "/" . $filename, $source, $ext_allowed, $security_testing_lines, $security_testing_offset);
+    }
+    else {
+      $extension = pathinfo($filename, PATHINFO_EXTENSION);
+
+      // IF extension is .module then store the module name
+      // in file module_name.txt.
+      // Simpletest takes the module name from this file to enable the module
+      // and testing for CSRF and XSS.
+      if ($extension == "module") {
+        $module_file = drupal_realpath(file_default_scheme() . '://') . "/security_testing/module_name.txt";
+        $module = preg_split('[\.]', $filename);
+        file_put_contents($module_file, $module[0]);
+        $module_name = $module[0];
+      }
+      if (in_array($extension, $ext_allowed) && substr($filename, -8) != '.tpl.php') {
+        $source .= file_get_contents($dirname . "/" . $filename);
+        $temp_lines = count(file($dirname . "/" . $filename));
+
+        // Storing starting and ending line number of a file in array
+        // $security_testing_offset. This information will be used for
+        // mapping line numbers in code.php with the original number.
+        $security_testing_offset[$filename]['start_line'] = $security_testing_lines;
+        $security_testing_lines = $security_testing_lines + $temp_lines;
+        $security_testing_offset[$filename]['end_line'] = $security_testing_lines;
+      }
+    }
+  }
+}
+
+/**
+ * Returns the correct line number and file name.
+ *
+ * @param array $list
+ *   Array containing line offset.
+ * @param int $line
+ *   line number in code.php.
+ *
+ * Scanning is done on a single file code.php containing all the source code
+ *  of the module.
+ * This function performs the mapping between the line number in code.php
+ * with the line number and file name of module.
+ */
+function security_testing_get_correct_line($list, $line) {
+
+  foreach ($list['line_offset'] as $key => $value) {
+    if ($value['start_line'] <= $line && $value['end_line'] >= $line) {
+      $line = $line - $value['start_line'];
+      return t("@line in file @file", array('@line' => $line, '@file' => $key));
+    }
+  }
+}
+
+/**
+ * Getting all page callbacks and page arguments for a link from hook_menu.
+ *
+ * @return array
+ *   Array containing links,keys,callbacks,and arguments.
+ */
+function security_testing_get_all_callbacks($security_testing_all_func_list, &$security_testing_searched_list) {
+
+  // Get the count of the functions present in the module.
+  $count = count($security_testing_all_func_list['name']);
+
+  // Search for the function hook_menu.
+  for ($i = 0; $i < $count; $i++) {
+    if (strlen($security_testing_all_func_list['node']['name'][$i]) > 5) {
+      $hook = substr($security_testing_all_func_list['node']['name'][$i], -5);
+      if ($hook == '_menu') {
+        // Getting hook_menu node.
+        $node = $security_testing_all_func_list['node']['node'][$i];
+        $security_testing_searched_list[] = $security_testing_all_func_list['node']['name'][$i];
+        break;
+      }
+    }
+  }
+
+  if (!isset($node)) {
+    return;
+  }
+
+  // Get the starting statement of hook_menu.
+  $current = $node->data->body->first();
+
+  while ($current->next != NULL) {
+    // Getting a statement from the function hook_menu().
+    $temps = security_testing_get_statement($current);
+
+    // Move $current to next statement.
+    $current = $current->next;
+    if (count($temps['data']) != 0) {
+      for ($i = 0; $i < count($temps['data']); $i++) {
+        $node = $temps['node'][$i];
+        $variable = $node->data->values->getElement()->getElement(0);
+        $num_of_index = $variable->countType('index');
+        if ($num_of_index != 0) {
+          $link = $variable->getType('index', 1)->trim();
+          // Get the link of menu item.
+          $index['link'][] = $link;
+          $value = $node->data->values->getElement()->getElement(2);
+          if ($value instanceof PGPArray) {
+            $values = $value->values->first();
+            $check = FALSE;
+            $check2 = FALSE;
+            $check3 = FALSE;
+            while ($values->next != NULL) {
+              if ($values->type == "key") {
+                $key_val = $values->data->trim();
+
+                // Get the page callback from hook_menu.
+                if ($key_val == "page callback") {
+                  $index['index']['key_callback'][] = $key_val;
+                  $values = $values->next->next;
+                  $value_val = $values->data->trim();
+                  $index['index']['callback_value'][] = $value_val;
+                  $check2 = TRUE;
+                }
+
+                // Get the page arguments for above page callback.
+                if ($key_val == "page arguments") {
+                  $index['index']['key_arguments'][] = $key_val;
+                  $values = $values->next->next;
+                  $value_val = $values->data->first()->data->values->first()->next->data->trim();
+                  $index['index']['arguments_value'][] = $value_val;
+                  $check = TRUE;
+                }
+
+                // Get the file name in which above page
+                // callback function is stored.
+                if ($key_val == "file") {
+                  $index['index']['file_key'][] = $key_val;
+                  $values = $values->next->next;
+                  $value_val = $values->data->trim();
+                  $index['index']['file'][] = $value_val;
+                  $check3 = TRUE;
+                }
+              }
+              $values = $values->next;
+            }
+
+            // If page_argument key is not present, put NULL.
+            if ($check == FALSE && $check2 == TRUE) {
+              $index['index']['arguments_value'][] = "NULL";
+            }
+
+            // If file key is not present,put NULL.
+            if ($check3 == FALSE && $check2 == TRUE) {
+              $index['index']['file'][] = "NULL";
+            }
+            unset($key_val);
+          }
+        }
+      }
+    }
+    unset($temps);
+  }
+
+  if (count($index) == 0) {
+    return $index;
+  }
+  else {
+    return;
+  }
+}
+
+/**
+ * Scans the file for each of output function Calls.
+ *
+ * @param array $list
+ *   Array containing names of all fuctions present in the module,
+ *   secure function calls, normal function calls, output function calls
+ *   and line offset.
+ * @param Array $security_testing_searched_list
+ *   Array containing names of scanned functions.
+ * @param PGPReader $security_testing_reader
+ *   Parsed code.
+ * @param PGPBody $body
+ *   PGPBody instance, contains complete body of a function.
+ * Now only scanning for drupal_set_title() ,theme() and return.
+ */
+function security_testing_function_calls($list, &$security_testing_searched_list, $security_testing_reader, $body) {
+
+  if (!$body) {
+    return;
+  }
+
+  // Storing a function name in an array to stop
+  // redundant searching of the same function again.
+  // This array may contains duplicate entries but it stores only the
+  // those functions that were scanned by the Security Testing.
+  $security_testing_searched_list[] = $body->parent->data->name;
+
+  // Scanning the code for each output function call.
+  foreach ($list['output_list'] as $key => $type) {
+    $nodes = $body->searchAll('PGPFunctionCall', 'name', 'value', $type, TRUE);
+    security_testing_grabbing_variables($list, $security_testing_reader, $nodes, $type, $security_testing_searched_list);
+  }
+}
+
+/**
+ * This function starts scanning.
+ *
+ * @param array $list
+ *   Array containing names of all fuctions present in the module,
+ *   secure function calls, normal function calls, output function calls
+ *   and line offset.
+ * @param PGPReader $security_testing_reader
+ *   Parsed code.
+ * @param PGPfunctionCall $nodes
+ *   All PGP functionCall object of type $type.
+ * @param string $type
+ *   Ouput function call.
+ * @param Array $security_testing_searched_list
+ *   Array containing names of scanned functions.
+ */
+function security_testing_grabbing_variables($list, $security_testing_reader, $nodes, $type, &$security_testing_searched_list) {
+
+  // If the function node is empty then return.
+  if (empty($nodes)) {
+    return;
+  }
+
+  foreach ($nodes as $node) {
+    $function_data = $node->data;
+    if (get_class($function_data) == 'PGPFunctionCall') {
+      $function_data_array['name_value'][] = $function_data->name['value'];
+      $function_data_array['line'][] = $node->line;
+      $function_data_array['name_type'][] = $function_data->name['type'];
+      $function_data_array['type'][] = $function_data->type;
+      $function_data_array['ite'][] = $function_data;
+
+      // Getting all the arguments present inside a function call.
+      security_testing_getting_variables($list, $function_data, $function_data_array, $type);
+
+      // Backsearching for each argument of output function call to
+      // get its last assigned value.
+      $ab = security_testing_checking_variable($list, $security_testing_searched_list, $security_testing_reader, $function_data, $function_data_array[$type]['variables'], $function_data_array, $type, $function_data->parent->line);
+
+      // If while backsearching or inside the output function call.
+      // A function call is encountered which is present in the
+      // function in the source code then scans this function.
+      if (isset($function_data_array[$type]['f_calls'])) {
+        foreach ($function_data_array[$type]['f_calls'] as $fun_call) {
+          if (in_array($fun_call, $list['all_func_list']['name']) && !in_array($fun_call, $security_testing_searched_list)) {
+            for ($i = 0; $i < count($list['all_func_list']['name']); $i++) {
+              if ($list['all_func_list']['node']['name'][$i] == $fun_call) {
+                $nnode = $list['all_func_list']['node']['node'][$i];
+                $new_body = $nnode->data->body;
+                security_testing_function_calls($list, $security_testing_searched_list, $security_testing_reader, $new_body);
+              }
+            }
+          }
+        }
+      }
+
+      // Store all the function calls for output function call $type.
+      if (isset($function_data_array[$type]['f_call_data'])) {
+        file_put_contents(variable_get('log_file_name'), t("Function Calls for @type at line @line \n", array(
+          '@type' => $type,
+          '@line' => security_testing_get_correct_line($list, $node->line))), FILE_APPEND);
+        array_walk($function_data_array[$type]['f_call_data'], "security_testing_file_put_contents");
+        file_put_contents(variable_get('log_file_name'), t("Ended Function Calls DATA for @type\n", array('@type' => $type)), FILE_APPEND);
+      }
+
+      // Store the path followed by Security_testing to get the last assigned
+      // value of arguments of output function call $type.
+      if (count($ab) != 0) {
+        file_put_contents(variable_get('log_file_name'), t("Path followed for @type at line @line \n", array(
+          '@type' => $type,
+          '@line' => security_testing_get_correct_line($list, $node->line))), FILE_APPEND);
+        array_walk($ab, "security_testing_file_put_contents");
+        file_put_contents(variable_get('log_file_name'), t("Ended Final result for @type\n\n\n", array('@type' => $type)), FILE_APPEND);
+      }
+
+      unset($function_data_array);
+    }
+  }
+}
+
+/**
+ * Create log file.
+ */
+function security_testing_file_put_contents($value, $key) {
+  file_put_contents(variable_get('log_file_name'), "    " . $value . "\n", FILE_APPEND);
+}
+
+/**
+ * Get all function Calls and variables from one function call.
+ *
+ * @param array $list
+ *   Array containing names of all fuctions present in the module,
+ *   secure function calls, normal function calls, output function calls
+ *   and line offset.
+ * @param PGPNode $ite
+ *   Node containing function call.
+ * @param array $itemm
+ *   Array for storing function call name and its arguments.
+ * @param string $var
+ *   Output function call name ex:->drupal_set_title,theme etc.
+ *
+ * ex- functioncall is drupal_set_title(hello(),$a,count($b))
+ * so this function will grab $a and $b in
+ * itemm['drupal_set_title']['variables'] and
+ * hello() and count() in itemm['drupal_set_title']['f_calls']
+ */
+function security_testing_getting_variables(&$list, $ite, &$itemm, $var) {
+
+  // Creating a static array to prevent redundant displaying of
+  // warning message.
+  static $security_testing_in_list = array();
+
+  if (!is_object($ite)) {
+    return;
+  }
+
+  // IF we encounter any unknown function call,
+  // while back searching then issue warning message.
+  if (!($ite->name instanceof PGPOperand)) {
+    if (!in_array($ite->name['value'], $list['normal_list']) && !in_array($ite->name['value'], $list['all_func_list']['name'])) {
+      $warning = t("Function call @fcall at line @line seems to be vulnerable", array(
+        '@fcall' => $ite->name['value'],
+        '@line' => security_testing_get_correct_line($list, $ite->parent->line)));
+      if (!in_array($warning, $security_testing_in_list)) {
+        $security_testing_in_list[] = $warning;
+        drupal_set_message($warning);
+      }
+    }
+  }
+  else {
+    if (!in_array($ite->name, $list['normal_list']) && !in_array($ite->name, $list['all_func_list']['name'])) {
+      $warning = t("Function call @fcall at line @line seems to be vulnerable", array(
+        '@fcall' => $ite->name,
+        '@line' => security_testing_get_correct_line($list, $ite->parent->line)));
+      if (!in_array($warning, $security_testing_in_list)) {
+        $security_testing_in_list[] = $warning;
+        drupal_set_message($warning);
+      }
+    }
+  }
+
+  $count = $ite->parameterCount();
+  for ($i = 0; $i < $count; $i++) {
+    $params[] = $ite->getParameter($i)->stripComments();
+  }
+  $func_call_complete = preg_split('[\(]', $ite->toString());
+  $func_call_name = $func_call_complete[0];
+
+  // Scanning t() and watchdog() for vulnerabilities.
+  if (in_array($func_call_name, array('t', 'watchdog'))) {
+    $bool = TRUE;
+    $string = $params[0]->toString();
+    if ($string != filter_xss_admin($string)) {
+      $bool = FALSE;
+      $warning = t("String inside @func at line @line seems to be vulnerable", array(
+        '@func' => $func_call_name,
+        '@line' => security_testing_get_correct_line($list, $ite->parent->line)));
+      if (!in_array($warning, $security_testing_in_list)) {
+        $security_testing_in_list[] = $warning;
+        drupal_set_message($warning);
+      }
+    }
+
+    if ($count > 1 && $func_call_name == 't') {
+      $string2 = $params[1];
+    }
+    elseif ($count > 2 && $func_call_name == 'watchdog') {
+      $string2 = $params[2];
+    }
+    if (isset($string2)) {
+      if ($string2->isType(T_ARRAY)) {
+        $checkk = $string2->findNode('operand');
+        for ($i = 0; $i < $checkk->count; $i++) {
+          $prefix = substr($checkk->getKey($i)->toString(), 1, 1);
+
+          // If t() or watchdog() has ! place holder
+          // then backsearch for this place holder variable.
+          if ($prefix == '!') {
+            $bool = FALSE;
+            drupal_set_message(t("one of the variable of @func at line @line might result into vulnerability", array(
+              '@func' => $func_call_name,
+              '@line' => security_testing_get_correct_line($list, $ite->parent->line))));
+            break;
+          }
+        }
+      }
+      else {
+        drupal_set_message(t("Parameter to @func at line @line is not an array", array(
+          '@func' => $func_call_name,
+          '@line' => security_testing_get_correct_line($list, $ite->parent->line))));
+      }
+    }
+    if ($bool) {
+      return;
+    }
+  }
+
+  // Gets all the variable arguments present in the function call.
+  if ($count) {
+    foreach ($params as $param) {
+
+      // If another function call is one of the arguments in the testing
+      // function call ex-> func_one(func_two($a));
+      // Checks if this inside function call($func_two) is secure function
+      // call.IF it is then stop further back searching.
+      // If not then get the arguments that are present
+      // inside this function call, $a in the example.
+      if ($param->isType(T_FUNCTION_CALL)) {
+        $editor = PGPEditor::getInstance();
+        // $temp - Object of class PGPNode.
+        $temp = $editor->textToStatements($param->toString())->get(0);
+
+        // $tempp_values - Object of class PGPList.
+        if (get_class($temp->data) == 'PGPAssignment') {
+          $tempp_values = $temp->data->values;
+        }
+        if (isset($tempp_values)) {
+          // Create an object $tempp of class PGPFunctionCall.
+          $tempp = $tempp_values->getElement()->getType('operand')->stripComments();
+          $tempp->parent->line = $ite->parent->line;
+        }
+        else {
+          continue;
+        }
+        // Do the same as above for function calls of classes. ex. $a->func().
+        if ($tempp->name instanceof PGPOperand) {
+          $object_func_call = preg_split('[->]', $tempp->name->toString());
+          $itemm[$var]['variables'][] = $object_func_call[0];
+          $list['class_check'][] = $object_func_call[1];
+        }
+        else {
+          $break_this = $tempp->name['value'];
+
+          // If we encounter any secure function call then stop
+          // further backsearching.
+          if (in_array($break_this, $list['secure_list'])) {
+            continue;
+          }
+        }
+
+        if (!empty($break_this)) {
+          $itemm[$var]['f_calls'][] = $break_this;
+        }
+
+        // Recurse for function call which is present as argument.
+        // For ex:-func_one(func_two($a),$b).
+        // If func_two() is not a secure_function_call then scan
+        // function func_two().
+        $itemm[$var]['f_call_data'][] = $param->toString();
+        security_testing_getting_variables($list, $tempp, $itemm, $var);
+
+      }
+      if ($param->isType(T_VARIABLE)) {
+        // Store the variable arguments.
+        // Ex:- drupal_set_title($a).
+        // Store $a in the array $itemm['druapal_set_title]['variables'].
+        $itemm[$var]['variables'][] = $param->trim();
+      }
+      if ($param->isType(T_ARRAY)) {
+        // If function contains an array variable as an argument then scan
+        // for each component of array.
+        // For ex:-> func_one(array($a,$b,func_two()),$c,$d,func_three()).
+        // Scan for func_two() and store $a and $b in the itemm array.
+        $par = $param->first()->data;
+        $fir = $par->values->first();
+        $fir2 = $fir->next;
+        $gets = security_testing_get_all_variables_from_array($par);
+
+        if (!empty($gets)) {
+          foreach ($gets as $get) {
+            if ($get->isType(T_VARIABLE)) {
+              // Store variable.
+              // For ex:->$a,$b in the above example.
+              $itemm[$var]['variables'][] = $get->trim();
+            }
+            if ($get->isType(T_FUNCTION_CALL)) {
+              // Scan for function call which is present inside an array.
+              // For ex:->func_two()in the above example.
+              $editor2 = PGPEditor::getInstance();
+              $temp2 = $editor2->textToStatements($get->toString())->get(0);
+              if (get_class($temp2->data) == 'PGPAssignment') {
+                $tempp2_values = $temp2->data->values;
+              }
+              if (isset($tempp2_values)) {
+                $tempp2 = $tempp2_values->getElement()->getType('operand')->stripComments();
+                $tempp2->parent->line = $ite->parent->line;
+              }
+              else {
+                continue;
+              }
+              if ($tempp2->name instanceof PGPOperand) {
+                $object_func_call2 = preg_split('[->]', $tempp2->name->toString());
+                $itemm[$var]['variables'][] = $object_func_call2[0];
+                $list['class_check'][] = $object_func_call2[1];
+              }
+              else {
+                $break_this2 = $tempp2->name['value'];
+                // If the function call is a secure function call then break
+                // backsearching.
+                if (in_array($break_this2, $list['secure_list'])) {
+                  continue;
+                }
+              }
+              if (!empty($break_this2)) {
+                // Store function call name.
+                $itemm[$var]['f_calls'][] = $break_this2;
+              }
+              $itemm[$var]['f_call_data'][] = $get->toString();
+              // If the function call is not secure function call then scan
+              // this function.
+              security_testing_getting_variables($list, $tempp2, $itemm, $var);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+/**
+ * Back-searching.
+ *
+ * @param array $list
+ *   Array containing names of all fuctions present in the module,
+ *   secure function calls, normal function calls, output function calls
+ *   and line offset.
+ * @param Array $security_testing_searched_list
+ *   Array containing names of scanned functions.
+ * @param PGPReader $security_testing_reader
+ *   Parsed code.
+ * @param PGPFunctioncall $ite
+ *   Contains functions calls.
+ * @param array $variables
+ *   Array containing variables.Back searching will be done for these variables.
+ * @param array $itemm
+ *   Array for storing data while backsearching.
+ * @param string $type
+ *   Type of output function call.
+ * @param int $line
+ *   Line of function call
+ * @param array $ab
+ *   Stores the path followed.
+ *
+ * This function will do the back searching for the variables
+ * present in the function calls
+ * For ex->  func_one($a,$b,func_two($c,$d))
+ * So this function will do the scanning for $a,$b,$c,$d provided
+ * func_one and func_two are not secure function calls.
+ */
+function security_testing_checking_variable($list, $security_testing_searched_list, $security_testing_reader, $ite, &$variables, &$itemm, $type, $line, $ab=array()) {
+
+  if (empty($variables)) {
+    return;
+  }
+
+  foreach ($variables as $varr) {
+    $check_array1 = preg_split("[\[]", $varr);
+
+    // Get the last assigned statement of the variable.
+    $statement = security_testing_fetch_assignments($list, $security_testing_reader, $ite, $varr, $line);
+
+    if ($statement) {
+      $check_array2 = preg_split("[\[]", $statement->data->values->getElement()->getElement(0)->toString());
+      $temp2_line = $statement->line;
+
+      $rets = security_testing_checking_all_variables($list, $security_testing_searched_list, $security_testing_reader, $ite, $temp2_line, $type, $varr, $itemm, $statement);
+      if (!empty($rets)) {
+        foreach ($rets['values'] as $ret) {
+          $ab[] = $ret;
+        }
+      }
+      $temp_line = $rets['temp_line'];
+    }
+    else {
+      continue;
+    }
+    // Continue back searching if we have any array variable
+    // Ex-> 1). $aa['one'] = "one";
+    // 2). $aa['two'] = 'two';
+    // 3). return $aa;
+    // Here both the $aa values will be returned.
+    if (count($check_array1) > 1 || count($check_array2) > 1) {
+      $cond = TRUE;
+      while ($cond) {
+        $value = security_testing_fetch_assignments($list, $security_testing_reader, $ite, $varr, $temp_line);
+        if ($value) {
+          $temp_line = $value->line;
+          $rets = security_testing_checking_all_variables($list, $security_testing_searched_list, $security_testing_reader, $ite, $temp_line, $type, $varr, $itemm, $value);
+          if (!empty($rets)) {
+            foreach ($rets['values'] as $ret) {
+              if (!in_array($ret, $ab)) {
+                $ab[] = $ret;
+              }
+            }
+          }
+          $temp_line = $value->line;
+        }
+        else {
+          $cond = FALSE;
+        }
+      }
+    }
+  }
+
+  return $ab;
+}
+
+/**
+ * Back searching for variables.
+ *
+ * @param array $list
+ *   Array containing names of all fuctions present in the module,
+ *   secure function calls, normal function calls, output function calls
+ *   and line offset.
+ * @param Array $security_testing_searched_list
+ *   Array containing names of scanned functions.
+ * @param PGPReader $security_testing_reader
+ *   Parsed code.
+ * @param PGPFunctioncall $ite
+ *   Output functions call.
+ * @param int $line
+ *   Line number to scan.
+ * @param int $type
+ *   Type of output function call, example: theme(), drupal_set_message() etc.
+ * @param string $varr
+ *   Variable to backsearch.
+ * @param array $itemm
+ *   Array for storing data while backsearching.
+ * @param PGPNode $statement
+ *   Node containing statement.
+ */
+function security_testing_checking_all_variables(&$list, $security_testing_searched_list, $security_testing_reader, $ite, $line, $type, $varr, &$itemm, $statement) {
+
+  static $security_testing_prevent_backsearch = array();
+
+  // Do not back-search if the line is already being scanned.
+  if (!in_array($line, $security_testing_prevent_backsearch)) {
+    $security_testing_prevent_backsearch[] = $line;
+  }
+  else {
+    $ret['values'] = array();
+    $ret['temp_line'] = $line;
+    return $ret;
+  }
+
+  // Saved in log file testing.txt .
+  $ab[] = "At line no " . security_testing_get_correct_line($list, $line);
+  $array_line = $line;
+
+  // Get all the variables & function calls present on the right side
+  // of assignment operator.
+  $vals = security_testing_get_all_variables($statement);
+
+  if (empty($vals)) {
+    return;
+  }
+
+  foreach ($vals as $val) {
+    // Back searching for $a =  new func(); .
+    if ($val == 'new') {
+      $key = array_search('new', $vals);
+      $class_name = preg_split("[\(]", $vals[$key + 1]->toString());
+      $class_name = $class_name[0];
+      $_security_testing_all_classes_list = security_testing_get_class_nodes($security_testing_reader);
+      for ($k = 0; $k < count($_security_testing_all_classes_list['name']); $k++) {
+        if ($_security_testing_all_classes_list['name'][$k] == $class_name) {
+          $start_line = $_security_testing_all_classes_list['node']['start_line'][$k];
+          $end_line = $_security_testing_all_classes_list['node']['end_line'][$k];
+          $classes_count = count($list['all_func_list']['name']);
+          for ($l = 0; $l < $classes_count; $l++) {
+            $func_line = $list['all_func_list']['node']['node'][$l]->line;
+            if ($func_line > $start_line && $func_line < $end_line) {
+              if (array_key_exists('class_check', $list) && in_array($list['all_func_list']['node']['name'][$l], $list['class_check'])) {
+                $key2 = array_search($list['all_func_list']['node']['name'][$l], $list['class_check']);
+                $list['class_check'][$key2] = "NULL";
+                security_testing_function_calls($list, $security_testing_searched_list, $security_testing_reader, $list['all_func_list']['node']['node'][$l]->data->body);
+              }
+            }
+          }
+        }
+      }
+    }
+    // If the element is variable.
+    elseif ($val->isType(T_VARIABLE)) {
+      $tempp = array($val->trim());
+      $new_vals = '';
+      // Recurively scans the variable.
+      $new_vals = security_testing_checking_variable($list, $security_testing_searched_list, $security_testing_reader, $ite, $tempp, $itemm, $type, $statement->line, $ab);
+
+      if (!empty($new_vals)) {
+        foreach ($new_vals as $new_val) {
+          if (!in_array($new_val, $ab)) {
+            $ab[] = $new_val;
+          }
+        }
+      }
+      else {
+        $ab[] = $val->trim();
+      }
+      unset($tempp);
+      unset($new_vals);
+
+      // If the variable is inside an if-else loop then it might get the value
+      // from the value outside the if-loop.
+      $cond = TRUE;
+      $temp_line = $line;
+      // Check if the variable is inside if-loop.
+      $cond = security_testing_checking_conditions_var($security_testing_reader, $ite, $temp_line, $statement);
+      while ($cond) {
+        $value = security_testing_fetch_assignments($list, $security_testing_reader, $ite, $varr, $temp_line);
+        if ($value) {
+          $temp_line = $value->line;
+          $rets = security_testing_checking_all_variables($list, $security_testing_searched_list, $security_testing_reader, $ite, $temp_line, $type, $varr, $itemm, $value);
+          if (!empty($rets)) {
+            foreach ($rets['values'] as $ret) {
+              if (!in_array($ret, $ab)) {
+                $ab[] = $ret;
+              }
+            }
+          }
+          $array_line = $rets['temp_line'];
+          $cond = security_testing_checking_conditions_var($security_testing_reader, $ite, $value->line, $value);
+          $temp_line = $value->line;
+        }
+        else {
+          $cond = FALSE;
+        }
+      }
+    }
+    elseif ($val->isType(T_FUNCTION_CALL)) {
+      // If the element is a function call.
+      $editor = PGPEditor::getInstance();
+      $temp = $editor->textToStatements($val->toString())->get(0);
+      if (get_class($temp->data) == 'PGPAssignment') {
+        $tempp_values = $temp->data->values;
+      }
+      if (isset($tempp_values)) {
+        $tempp = $tempp_values->getElement()->getType('operand')->stripComments();
+        $tempp->parent->line = $line;
+      }
+      else {
+        continue;
+      }
+      $new = array();
+      if ($tempp->name instanceof PGPOperand) {
+        $object_func_call = preg_split('[->]', $tempp->name->toString());
+        $new[$type]['variables'][] = $object_func_call[0];
+        if (count($object_func_call) > 1) {
+          $list['class_check'][] = $object_func_call[1];
+        }
+      }
+      else {
+        $break_this = $tempp->name['value'];
+        if (in_array($break_this, $list['secure_list'])) {
+          continue;
+        }
+      }
+
+      if (!empty($break_this)) {
+        $itemm[$type]['f_calls'][] = $break_this;
+      }
+      $itemm[$type]['f_call_data'][] = $val->toString();
+
+      security_testing_getting_variables($list, $tempp, $new, $type);
+
+      if (isset($new[$type]['f_call_data'])) {
+        for ($z = 0; $z < count($new[$type]['f_call_data']); $z++) {
+          $itemm[$type]['f_calls'][] = array_key_exists("f_calls", $new[$type]) ? $new[$type]['f_calls'][$z] : "";
+          $itemm[$type]['f_call_data'][] = $new[$type]['f_call_data'][$z];
+        }
+      }
+      $new_vals = security_testing_checking_variable($list, $security_testing_searched_list, $security_testing_reader, $ite, $new[$type]['variables'], $itemm, $type, $statement->line);
+      if (!empty($new_vals)) {
+        foreach ($new_vals as $new_val) {
+          if (!in_array($new_val, $ab)) {
+            $ab[] = $new_val;
+          }
+        }
+      }
+      unset($new);
+      unset($new_vals);
+
+      $cond = TRUE;
+      $temp_line = $line;
+      $cond = security_testing_checking_conditions_var($security_testing_reader, $ite, $temp_line, $statement);
+      while ($cond) {
+        $value = security_testing_fetch_assignments($list, $security_testing_reader, $ite, $varr, $temp_line);
+        if ($value) {
+          $temp_line = $value->line;
+          $rets = security_testing_checking_all_variables($list, $security_testing_searched_list, $security_testing_reader, $ite, $temp_line, $type, $varr, $itemm, $value);
+          if (!empty($rets)) {
+            foreach ($rets['values'] as $ret) {
+              if (!in_array($ret, $ab)) {
+                $ab[] = $ret;
+              }
+            }
+          }
+          $array_line = $rets['temp_line'];
+          $cond = security_testing_checking_conditions_var($security_testing_reader, $ite, $value->line, $value);
+          $temp_line = $value->line;
+        }
+        else {
+          $cond = FALSE;
+        }
+      }
+    }
+    else {
+      $ab[] = $val->trim();
+      $cond = TRUE;
+      $temp_line = $line;
+      $cond = security_testing_checking_conditions_var($security_testing_reader, $ite, $temp_line, $statement);
+      while ($cond) {
+        $value = security_testing_fetch_assignments($list, $security_testing_reader, $ite, $varr, $temp_line);
+        if ($value) {
+          $temp_line = $value->line;
+          $rets = security_testing_checking_all_variables($list, $security_testing_searched_list, $security_testing_reader, $ite, $temp_line, $type, $varr, $itemm, $value);
+          if (!empty($rets)) {
+            foreach ($rets['values'] as $ret) {
+              if (!in_array($ret, $ab)) {
+                $ab[] = $ret;
+              }
+            }
+          }
+          $array_line = $rets['temp_line'];
+          $cond = security_testing_checking_conditions_var($security_testing_reader, $ite, $value->line, $value);
+          $temp_line = $value->line;
+        }
+        else {
+          $cond = FALSE;
+        }
+      }
+    }
+  }
+  $return2['values'] = $ab;
+  $return2['temp_line'] = $array_line;
+  unset($array_line);
+  return $return2;
+}
+
+
+/**
+ * Checking for if,else if.
+ *
+ * @param PGPReader $security_testing_reader
+ *   Parsed code.
+ * @param PGPFunctionCall $ite
+ *   contains output function call from where back searching have started.
+ * @param int $line
+ *   Line number of the line which we wants to check wheather it is inside
+ * conditional statement or not.
+ *
+ * @return bool
+ *   True if the variable is inside if-else loop, switch case or
+ *   is present in the statement like $a .= "anything";
+ *   In the above cases we have to continue backsearch for the variable
+ *   because it might be possible that the variable is getting its value from
+ *   a statement which is present before the current statement.
+ */
+function security_testing_checking_conditions_var($security_testing_reader, $ite, $line, $statement) {
+  static $security_testing_check_cond_var = array(0);
+  static $security_testing_if_conditions_lines = array();
+
+  $get_node = array();
+
+  // Prevent redundant back-searching by storing the line number of
+  // statement which is inside the if-else loop.
+  if (!in_array($line, $security_testing_check_cond_var)) {
+    $security_testing_check_cond_var[] = $line;
+  }
+  else {
+    return FALSE;
+  }
+
+  // Line number of the output function call from where
+  // backsearching for variable starts.
+  $check_line = $ite->parent->line;
+
+  // Getting the complete function definition containing the if-else loop.
+  $body = $security_testing_reader->findFunction($check_line--);
+  while (!$body) {
+    $body = $security_testing_reader->findFunction($check_line--);
+  }
+
+  // Getting the function name.
+  $function_name = $body->name;
+
+  // To checking for condition $aa .= anything() .
+  // Because in this case to get the complete $aa.
+  // we have to back-search for any assignment to $aa.
+  $split = explode("=", $statement->data->toString());
+  if (substr(trim($split[0]), -1) == '.') {
+    return TRUE;
+  }
+
+  // Getting the first statement of the function.
+  // For example:->
+  // function foo() {
+  // $a = "one";
+  // $b = "two";
+  // }
+  // $current is node containing '$a = "one"';
+  $current = $body->body->first();
+
+  // Get the starting and ending line of all if, if-else and switch block
+  // present in the function.
+  if (!array_key_exists($function_name, $security_testing_if_conditions_lines)) {
+    // Iterate for the complete function.
+    while ($current->next != NULL) {
+      $tt = $current->data;
+      // Check if the current statement is of type if-else,switch case.
+      if ($tt instanceof PGPConditional) {
+        // Check if the current statement is of type switch case.
+        if ($tt->type == T_SWITCH) {
+
+          // Get the starting line of switch case.
+          $security_testing_if_conditions_lines[$function_name]['start_line'][] = $current->line;
+          $get_node[] = $current;
+          $current = $current->next;
+
+          // Reach to the end of switch case.
+          while (is_array($current->data) && $current->data['type'] == T_WHITESPACE) {
+            $current = $current->next;
+          }
+
+          // Get the ending line of switch case.
+          if (!$current->line) {
+            $security_testing_if_conditions_lines[$function_name]['end_line'][] = $line + 1;
+          }
+          else {
+            $security_testing_if_conditions_lines[$function_name]['end_line'][] = $current->line;
+          }
+
+        }
+        elseif ($tt->type == T_IF) {
+          $security_testing_if_conditions_lines[$function_name]['start_line'][] = $current->line;
+          $get_node[] = $current;
+          $current = $current->next;
+          while (is_array($current->data) && $current->data['type'] == T_WHITESPACE) {
+            $current = $current->next;
+          }
+          if (!$current->line) {
+            $security_testing_if_conditions_lines[$function_name]['end_line'][] = $line + 1;
+          }
+          else {
+            if (is_object($current->data)) {
+              if (!in_array($current->data->type,
+                  array(T_ELSEIF, T_ELSE_IF, T_ELSE))) {
+                $security_testing_if_conditions_lines[$function_name]['end_line'][] = $current->line;
+              }
+            }
+            else {
+              $security_testing_if_conditions_lines[$function_name]['end_line'][] = $current->line;
+            }
+          }
+        }
+        else {
+          $current = $current->next;
+          while ((!is_object($current->data)) && ($current->next != NULL)) {
+            $current = $current->next;
+          }
+          if (!$current->line) {
+            $security_testing_if_conditions_lines[$function_name]['end_line'][] = $line + 1;
+          }
+          else {
+            if (!in_array($current->data->type,
+                array(T_ELSEIF, T_ELSE_IF, T_ELSE))) {
+              $security_testing_if_conditions_lines[$function_name]['end_line'][] = $current->line;
+            }
+          }
+        }
+      }
+      else {
+        $current = $current->next;
+      }
+    }
+  }
+
+  // If $line is greater then the starting line and less then the
+  // ending line of a if-else, then return TRUE.
+  $ins = FALSE;
+  if (!empty($security_testing_if_conditions_lines[$function_name]['start_line'])) {
+    $start_line = $security_testing_if_conditions_lines[$function_name]['start_line'];
+    $end_line = $security_testing_if_conditions_lines[$function_name]['end_line'];
+    $count = count($start_line);
+    if ($line > $start_line[0]) {
+      for ($i = 0; $i < $count; $i++) {
+        $start = $start_line[$i];
+        $end = $end_line[$i];
+        if ($line > $start && $line < $end) {
+          $ins = TRUE;
+        }
+      }
+    }
+  }
+
+  return $ins;
+}
+
+/**
+ * Performs back-searching for a variable in a function.
+ *
+ * @param array $list
+ *   Array containing names of all fuctions present in the module,
+ *   secure function calls, normal function calls, output function calls
+ *   and line offset.
+ * @param PGPReader $security_testing_reader
+ *   Parsed code.
+ * @param PGPFunctionCall $ite
+ *   Output function call from where back searching have started.
+ * @param string $var
+ *   Name of the variable.
+ * @param int $line
+ *   Line number of the current statement containing $var on the
+ *   left side of assingment operator.
+ *
+ * @return PGPNode
+ *   Returns PGPNode of a statement having variable $var on the left side
+ *   of assingment operator and line number less than the $line.
+ */
+function security_testing_fetch_assignments($list, $security_testing_reader, $ite, $var, $line) {
+
+  // Create a static array to prevent redundant displaying
+  // of warning message.
+  static $security_testing_in_list2 = array();
+
+  if (is_object($ite)) {
+    // Get the line number of the output function call from where
+    // backsearching for $var begins.
+    $check_line = $ite->parent->line;
+
+    // Get the complete function definition.
+    $body = $security_testing_reader->findFunction($check_line--);
+    while (!$body) {
+      $body = $security_testing_reader->findFunction($check_line--);
+    }
+    // Get function name.
+    $function_name = $body->name;
+    // Get a pointer to the first statement of the function.
+    $current = $body->body->first();
+  }
+
+  $assign = array();
+  // Get all the assignment statements present in the function.
+  while ($current->next != NULL) {
+    $temps = security_testing_get_statement($current);
+    $current = $current->next;
+    if (count($temps['data']) != 0) {
+      for ($i = 0; $i < count($temps['data']); $i++) {
+        $assign['data'][] = $temps['data'][$i] . "-" . $temps['line'][$i];
+        $assign['line'][] = $temps['line'][$i];
+        $assign['node'][] = $temps['node'][$i];
+        $split = explode("=", $temps['data'][$i]);
+        $assign['variable'][] = trim($split[0]);
+        $assign['value'][] = $temps['node'][$i]->data->getValue()->trim();
+      }
+    }
+    unset($temps);
+  }
+
+  // Get the variable name.
+  // For example:->
+  // if the variable is an array and its name is like $a['foo'] then we store
+  // this variable name as $a.
+  $orignal = $var;
+  $get_object1 = preg_split('[->]', $var);
+  $var = $get_object1[0];
+  $get_object1 = preg_split("[\[]", $var);
+  // Store count of "[" in $num1.
+  $num1 = count($get_object1);
+  $var = trim($get_object1[0]);
+
+  // Remove the following elements from the statement.
+  // For example:-> if a statement is $a .= $b;
+  // then remove "." from the statement.
+  $rem_array = array('.', '+', '-', '*', '/', '%');
+  if (array_key_exists('data', $assign)) {
+    $count_assign = count($assign['data']) - 1;
+  }
+  else {
+    $count_assign = -1;
+  }
+  for ($i = $count_assign; $i >= 0; $i--) {
+    $orignal2 = $assign['variable'][$i];
+
+    // Remove last character on left of assignment operator
+    // if it is present in the $rem_array.
+    $last_char = substr($orignal2, -1);
+    if (in_array($last_char, $rem_array)) {
+      $orignal2 = trim(substr($orignal2, 0, -1));
+    }
+
+    // If variable is like $a->any_thing.
+    // then match the complete variables.
+    $get_object2 = preg_split('[->]', $orignal2);
+    if (count($get_object2) > 1) {
+      if ($orignal == $orignal2) {
+        if ($assign['line'][$i] < $line) {
+          $final_value = $assign['node'][$i];
+          break;
+        }
+      }
+      continue;
+    }
+
+    // Check if the variable is an array.
+    $var2 = $get_object2[0];
+    $get_object2 = preg_split("[\[]", $var2);
+    $num2 = count($get_object2);
+    $new_temp = array();
+
+    // Store the smaller count of "[" in variable $coun.
+    // For ex :->
+    // 2 arrays $two['x']['y']['z'] and $two['x']['y'] have same values.
+    // but $two['x']['y']['z'] and $two['x']['y']['a'] are different variables.
+    // So for the 2 arrays to contain same values they must have
+    // same set of keys.
+    if ($num2 <= $num1) {
+      $coun = $num2;
+    }
+    else {
+      $coun = $num1;
+    }
+
+    // Match the keys.
+    for ($j = 0; $j < $coun; $j++) {
+      $tem2 = $get_object2[$j];
+      $tem1 = $get_object1[$j];
+      if ($j < $coun - 1) {
+        $tem1 .= '[';
+        $tem2 .= '[';
+      }
+      $new_temp2[] = $tem2;
+      $new_temp1[] = $tem1;
+    }
+    $var222 = implode($new_temp2);
+    $var111 = implode($new_temp1);
+    unset($new_temp2);
+    unset($new_temp1);
+
+    // If keys are matched then return this node.
+    if ($var222 == $var111) {
+      if ($assign['line'][$i] < $line) {
+        $final_value = $assign['node'][$i];
+        break;
+      }
+    }
+  }
+
+  // If a variable is not found during back-searching then it might
+  // comes from parameters of the function.
+  if (empty($final_value)) {
+    for ($i = 0; $i < count($list['all_func_list']['name']); $i++) {
+      if ($function_name == $list['all_func_list']['name'][$i]) {
+        for ($j = 0; $j < count($list['all_func_list']['node']['parameters'][$i]); $j++) {
+          if ($list['all_func_list']['node']['parameters'][$i][$j] == $var) {
+            $file_put = t("    **Variable @var on line @line comes from parameters**\n", array(
+              "@var" => $var,
+              '@line' => security_testing_get_correct_line($list, $line)));
+
+            if (!in_array($file_put, $security_testing_in_list2)) {
+              $security_testing_in_list2[] = $file_put;
+              file_put_contents(variable_get('log_file_name'), $file_put, FILE_APPEND);
+              drupal_set_message($file_put);
+            }
+          }
+        }
+      }
+    }
+    return;
+  }
+  else {
+    return $final_value;
+  }
+}
+
+/**
+ * Recursively gets all the assignments nodes in a function.
+ *
+ * @param PGPNode $current
+ *   PGPNode containing one statement of a function.
+ *
+ * @return Array
+ *   Array containing line number,PGPNode and PGPNode data(stored as string).
+ */
+function security_testing_get_statement($current) {
+
+  $statement = $current->data;
+
+  // If $statement is an assignment node then stores its data as string and
+  // return.
+  // Example 1).
+  // if $statement is a node of statement:->$a = $b+func();
+  // then, $ret['data'] = "$a = $b + func()";
+  // $ret['line'] = line number of $statement;
+  // $ret['node'] = PGPNode of $statement;
+  if ($statement instanceof PGPAssignment) {
+    $ret['data'][] = $statement->toString();
+    $ret['line'][] = $current->line;
+    $ret['node'][] = $current;
+    return $ret;
+  }
+
+  // If it encounter a For-loop or Switch-case or If-else statement.
+  // In Example 1). if $statement is a node of statement:->
+  // for ($init; condition; $init++) { $a = $b + $c };
+  if (($statement instanceof PGPFor) || ($statement instanceof PGPCase) || ($statement instanceof PGPConditional)) {
+
+    // Get the node of the first statement.
+    // For ex:-> $a = $b + $c.
+    $temp_curr = $statement->body->first();
+
+    // Recursively get the PGPNode information(line number,node & node data)
+    // and store in array $ret.
+    while ($temp_curr->next != NULL) {
+      $temps = security_testing_get_statement($temp_curr);
+      if (count($temps['data']) != 0) {
+        for ($i = 0; $i < count($temps['data']); $i++) {
+          $ret['data'][] = $temps['data'][$i];
+          $ret['line'][] = $temps['line'][$i];
+          $ret['node'][] = $temps['node'][$i];
+        }
+      }
+      $temp_curr = $temp_curr->next;
+    }
+    if (empty($ret)) {
+      return;
+    }
+    else {
+      return $ret;
+    }
+  }
+
+  // If it encounter a foreach loop,
+  // Example 2). if variable $statement is a node of the statement:->
+  // foreach ($a as $b => $c) {
+  // $x = $b;
+  // $y = $c;
+  // }
+  if ($statement instanceof PGPForeach) {
+
+    // Store complete foreach loop as a string.
+    $bod = $statement->toString();
+
+    // In the above example, Take line "foreach ($a as $b=>$c)" and
+    // Store "$a" in variable $source.
+    // "$b" in $cond[0].
+    // if "$c" is present, store it in $cond[1].
+    $new = preg_split('[{]', $bod);
+    $cond = $new[0];
+    $cond = trim(substr_replace($cond, '', 0, 7));
+    $cond = str_replace('(', '', $cond);
+    $cond = str_replace(')', '', $cond);
+    $cond = preg_split('[as]', $cond, 2);
+    $source = trim($cond[0]);
+    $cond = preg_split('[=>]', $cond[1]);
+
+    // If $c is present.
+    if (count($cond) == 2) {
+
+      // $key = "$b" and $value = "$c";
+      $key = trim($cond[0]);
+      $value = trim($cond[1]);
+
+      // Instantiate editor.
+      $editor = PGPEditor::getInstance();
+
+      // In the statement ($a as $b=>$c),
+      // We can perceive that $b and $c are getting their's value
+      // from variable $a
+      // So we can assume the above statement as
+      // $b = $a;
+      // $c = $a;
+      // The above 2 statements will us in backsearching to track from where
+      // $b and $b are getting their's value.
+      // Make a PGPNode with value $c = $a; and store this value in
+      // $ret for return.
+      $temp = $editor->textToStatements($value . "=" . $source)->get(0);
+      $temp->line = $current->line;
+      $ret['data'][] = $temp->data->toString();
+      $ret['line'][] = $temp->line;
+      $ret['node'][] = $temp;
+
+      // Make another PGPNode with value $b = $a; and store this value.
+      $editor2 = PGPEditor::getInstance();
+      $temp2 = $editor2->textToStatements($key . "=" . $source)->get(0);
+      $temp2->line = $current->line;
+      $ret['data'][] = $temp2->data->toString();
+      $ret['line'][] = $temp2->line;
+      $ret['node'][] = $temp2;
+
+    }
+    elseif (count($cond) == 1) {
+      // If $c is not present.If we have a statement - foreach ($a as $b) {}.
+      $value = trim($cond[0]);
+      $editor = PGPEditor::getInstance();
+      $temp = $editor->textToStatements($value . "=" . $source)->get(0);
+      $temp->line = $current->line;
+      $ret['data'][] = $temp->data->toString();
+      $ret['line'][] = $temp->line;
+      $ret['node'][] = $temp;
+    }
+
+    // Get the first statement in variable $temp_curr.
+    // For example 2). $temp_curr = "$x = $b";
+    $temp_curr = $statement->body->first();
+
+    // Recursively get each statement of foreach loop.
+    while ($temp_curr->next != NULL) {
+      $temps = security_testing_get_statement($temp_curr);
+      if (count($temps['data']) != 0) {
+        for ($i = 0; $i < count($temps['data']); $i++) {
+          $ret['data'][] = $temps['data'][$i];
+          $ret['line'][] = $temps['line'][$i];
+          $ret['node'][] = $temps['node'][$i];
+        }
+      }
+      $temp_curr = $temp_curr->next;
+    }
+
+    if (empty($ret)) {
+      return;
+    }
+    else {
+      return $ret;
+    }
+  }
+}
+
+/**
+ * Getting variables and function calls.
+ *
+ * @param PGPNode $node
+ *   node containing a line.
+ *
+ * @return array
+ *   array of variable and functionCall names present in a statement.
+ *
+ * This function will grab all the variables and function calls from right
+ * side of assignment operator
+ * Ex-> $a = $b + $c + hello() + array("key" => $val,array($k));
+ * This function will grab $b,$c,hello(),"key",$val,$k.
+ */
+function security_testing_get_all_variables($node) {
+  // Get everything on a single line.
+  // consider a line:
+  // $a = $b + $c + 'any_string' ;
+  // here $value1 is the node of "$a = $b + $c + 'any_string'";
+  // $value1->toString() prints this value as a string.
+  $value1 = $node->data->values->getElement();
+
+  // Iterate through every elements of a line.
+  // In the above example there are 7 elements:
+  // $a, =, $b, +, $c, +, 'any_string'.
+  $i = 1;
+  while ($value1->getElement($i)) {
+
+    $value2 = $value1->getElement($i);
+
+    // If a statement contain new operator like $a = new a();
+    if ($value2 === 'new') {
+      $values[] = $value2;
+    }
+
+    if (is_object($value2)) {
+
+      // Get the variable names.
+      // For example:-> $a, $b in the above example.
+      if ($value2 instanceof PGPOperand) {
+        $editor = PGPEditor::getInstance();
+        $temp = $editor->textToStatements($value2->trim());
+        $tempp = $temp->first()->data->values->getElement(0);
+        $values[] = $tempp;
+      }
+
+      // Get all elements from array.
+      // Consider a statement : $one = array($two=>"two",$three,$four=>$five).
+      // So the following if block will store
+      // $two, "two", $three, $four, $five in the array  $values.
+      if ($value2 instanceof PGPArray) {
+        $temps = security_testing_get_all_variables_from_array($value2);
+        for ($k = 0; $k < count($temps); $k++) {
+          $values[] = $temps[$k];
+        }
+      }
+
+      // If an element is a function call.
+      // Consider a statement : $a = func($b."something");
+      // So the following if block will store
+      // func($b."something") in the array $values.
+      if ($value2 instanceof PGPFunctionCall) {
+        $editor = PGPEditor::getInstance();
+        $temp = $editor->textToStatements($value2->toString());
+
+        if (is_object($temp->first()->data) && get_class($temp->first()->data) == "PGPAssignment") {
+          $tempp_values = $temp->first()->data->values;
+        }
+        if (isset($tempp_values)) {
+          $tempp = $tempp_values->getElement()->getType('operand')->stripComments();
+          $values[] = $tempp;
+        }
+      }
+    }
+    else {
+      // If an element is a string.
+      // Consider a statement : $a = "something";
+      // So the following if block will store
+      // "something" in the array $values.
+      if (is_array($value2)) {
+        if (is_string($value2['value'])) {
+          $editor = PGPEditor::getInstance();
+          $temp = $editor->textToStatements('$aa = ' . $value2['value']);
+          $tempp = $temp->first()->data->getValue();
+          $values[] = $tempp;
+        }
+      }
+
+    }
+    $i++;
+  }
+
+  if (empty($values)) {
+    return;
+  }
+  else {
+    return $values;
+  }
+}
+
+/**
+ * This Function will get all variables and functionCalls from inside array.
+ *
+ * @param PGPArray $value2
+ *   contain array.
+ *
+ * @return array
+ *   containing all the variables and functionCalls present in an array.
+ */
+function security_testing_get_all_variables_from_array($value2) {
+  // Get the pointer to the first element of the array.
+  $values = $value2->values->first();
+
+  // Iterate through the whole array.
+  while ($values->next != NULL) {
+    $obj = $values->data;
+    if (is_object($obj)) {
+      // If the element is a variable.
+      if ($obj->isType(T_VARIABLE)) {
+        $ret[] = $obj;
+      }
+      elseif ($obj->isType(T_ARRAY)) {
+        // If the element is an array.
+        $par = $obj->first()->data;
+        $fir = $par->values->first();
+        $fir2 = $fir->next;
+        $gets = security_testing_get_all_variables_from_array($par);
+        if (!empty($gets)) {
+          foreach ($gets as $get) {
+            $ret[] = $get;
+          }
+        }
+      }
+      elseif ($obj->isType(T_FUNCTION_CALL)) {
+        // If an element is a function call.
+        $ret[] = $obj;
+      }
+      else {
+        // If an element is a string.
+        $ret[] = $obj;
+      }
+    }
+    $values = $values->next;
+  }
+
+  if (empty($ret)) {
+    return;
+  }
+  else {
+    return $ret;
+  }
+}

@@ -1,0 +1,211 @@
+<?php
+
+/**
+ * @file
+ * This test file will act like a bot for injecting random
+ * data into database fields of a module and testing for
+ * CSRF.
+ */
+
+/**
+ * Implements class of simpleTest.
+ */
+class SecurityTestingTestCase extends DrupalWebTestCase {
+  protected $privilegeduser;
+
+  /**
+   * Provide name and description to the simpletest.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Security testing bot',
+      'description' => 'Going to some links',
+      'group' => 'Security Testing',
+    );
+  }
+
+  /**
+   * Setup drupal and login user with all permissions.
+   */
+  public function setUp() {
+    $this->path = drupal_realpath(file_default_scheme() . '://') . "/security_testing";
+
+    // Get the module name.
+    $this->module = file_get_contents($this->path . '/module_name.txt');
+    $this->assertTrue(module_exists($this->module), t("@module_name module is present.", array("@module_name" => $this->module)));
+    parent::setUp('node', 'security_testing', 'grammar_parser', $this->module);
+
+    $this->setup = TRUE;
+    $permissions = module_invoke_all('permission');
+
+    // Getting all persmissions so as to act like a root user in the test.
+    foreach ($permissions as $key => $val) {
+      $all_perm[] = $key;
+    }
+
+    $this->admin_user = $this->drupalCreateUser($all_perm);
+    $this->drupalLogin($this->admin_user);
+
+    // Add some data to the DB so menu items with %placeholders work.
+    $this->insertRandomData();
+  }
+
+  /**
+   * Injecting data into database.
+   *
+   * Injecting random data into the database fields.
+   * The links in hook_menu which with placeholders
+   * need some data from databsae to become active.
+   * Here we also inject some XSS data in string fields
+   * of DB.
+   */
+  public function insertRandomData() {
+    // Get schema of the module.
+    $items = drupal_get_schema_unprocessed($this->module);
+
+    $this->assertTrue(count($items) > 0, t("Database schema is present for module @module_name", array("@module_name" => $this->module)));
+    foreach ($items as $item_key => $item_value) {
+      $table_name = $item_key;
+      $fields = $item_value['fields'];
+      foreach ($fields as $field_key => $field_value) {
+        $column_type = $field_value['type'];
+
+        // Insert some XSS data into the database if the field is of
+        // string type.
+        if (in_array($column_type, array('char', 'varchar', 'tinytext',
+                                         'text', 'blob', 'mediumtext',
+                                         'mediumblob', 'longtext', 'longblob',
+                                         'enum', 'set'))) {
+          $column_value[$field_key] = '\'<"p">\'';
+        }
+        // Insert random data.
+        elseif (in_array($column_type, array('tinyint', 'smallint',
+                                             'mediumint', 'int',
+                                             'bigint', 'float',
+                                             'double', 'decimal'))) {
+          $column_value[$field_key] = '10';
+        }
+        elseif ($column_type == 'date') {
+          $column_value[$field_key] = '0000-00-00';
+        }
+        elseif ($column_type == 'time') {
+          $column_value[$field_key] = '00:00:00';
+        }
+        elseif (in_array($column_type, array('datetime', 'timestamp'))) {
+          $column_value[$field_key] = '0000-00-00 00:00:00';
+        }
+        elseif ($column_type == 'year') {
+          $column_value[$field_key] = '0000';
+        }
+      }
+      $result = db_insert($table_name)
+              ->fields($column_value)
+              ->execute();
+
+      unset($column_name);
+      unset($column_value);
+    }
+  }
+
+  /**
+   * Checks for XSS / CSRF.
+   *
+   * Iterates through all menu items in module and checks if they are
+   * vulnerable for XSS / CSRF.
+   */
+  public function testSecurityAudit() {
+
+    // Compiles a list of all menu items, handling placeholders.
+    $links = $this->getLinks();
+
+    // Set the variable so that security_testing_shutdown() check for CSRF.
+    variable_set('write_to_file', 1);
+
+    // Also store the results of simpletest in file simpletest_restults.txt.
+    variable_set('security_testing_path', $this->path);
+    $pathh = $this->path . "/simpletest_results.txt";
+    file_put_contents($pathh, "");
+
+    foreach ($links as $link) {
+      file_put_contents($pathh, "\n\nLink -- " . $link . "\n", FILE_APPEND);
+
+      // Go to each link and check whether the data inserted into the
+      // database become sanitized or not.
+      // CSRF checking for this link is done by security_testing_shutdown().
+      $source_code = $this->drupalGet($link);
+      $xss_check = strpos($source_code, '<"p">');
+      if ($xss_check) {
+        debug(t("Data coming from the database is not sanitized at @link", array('@link' => $link)));
+        file_put_contents($pathh, "Data coming from the database is not sanitized \n", FILE_APPEND);
+      }
+      else {
+        debug(t("Data coming from the database is sanitized at @link", array('@link' => $link)));
+        file_put_contents($pathh, "Data coming from the database is sanitized \n", FILE_APPEND);
+      }
+    }
+    variable_set('write_to_file', 0);
+  }
+
+  /**
+   * Gets all menu links from hook_menu.
+   */
+  public function getLinks() {
+    $links = array();
+
+    // Get all links from hook_menu.
+    $module_implementation = module_exists($this->module) ? module_invoke($this->module, "menu") : array();
+    foreach ($module_implementation as $link => $link_information) {
+      $links[] = $link;
+    }
+
+    $link_with_placeholder = $link_without_placeholder = array();
+    foreach ($links as $link) {
+      // Seperate links with placeholders.
+      if (strpos($link, '%') == TRUE) {
+        $url = base_path() . $link;
+        $count = preg_split('[/]', $url);
+        $countt = count($count);
+
+        for ($i = 0; $i < $countt; $i++) {
+          if (strlen($count[$i]) > 0 && $count[$i][0] == '%') {
+            $count[$i] = ".*";
+          }
+        }
+        $tempp = implode($count, "/");
+        $link_with_placeholder[] = preg_replace('[/]', '\/', $tempp);
+      }
+      else {
+        $link_without_placeholder[] = $link;
+      }
+    }
+
+    // First, Go to all the links without placeholder to get the value
+    // of placeholder in links with placeholder. Insert the placeholder
+    // value so that the link with placeholder works.
+    $new_links = array();
+    foreach ($link_without_placeholder as $link_without) {
+      $code = $this->drupalGet($link_without);
+      $count_with_placeholder = count($link_with_placeholder);
+      for ($i = 0; $i < $count_with_placeholder; $i++) {
+        preg_match('/"' . $link_with_placeholder[$i] . '"/', $code, $new_link);
+        if (isset($new_link[0])) {
+          $link_with_placeholder[$i] == "NULL";
+          $link_temp = preg_split('[' . base_path() . ']', $new_link[0]);
+          $link_temp[1] = trim($link_temp[1], "\"");
+          $new_links[] = $link_temp[1];
+          $this->assertLinkByHref($link_temp[1], 0, t("Link @link found", array("@link" => $link_temp[1])));
+        }
+        unset($new_link);
+      }
+    }
+
+    // Return an array with all workable links.
+    if (count($new_links) > 0) {
+      $new_array = array_merge($link_without_placeholder, $new_links);
+      return $new_array;
+    }
+    else {
+      return $link_without_placeholder;
+    }
+  }
+}

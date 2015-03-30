@@ -1,0 +1,136 @@
+<?php
+
+/**
+ * @file
+ * Install, functions for the security_testing module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function security_testing_install() {
+
+  $pathh = drupal_realpath(file_default_scheme() . '://') . "/security_testing";
+  if (!is_dir($pathh)) {
+    mkdir($pathh);
+    chmod($pathh, 0757);
+
+    $file = $pathh . '/testing.txt';
+    $f = fopen($file, "a+");
+    chmod($file, 0757);
+
+    $file2 = $pathh . '/code.php';
+    $f2 = fopen($file2, "a+");
+    chmod($file2, 0757);
+
+    $file3 = $pathh . '/simpletest_results.txt';
+    $f3 = fopen($file3, "a+");
+    chmod($file3, 0757);
+
+    $file4 = $pathh . '/module_name.txt';
+    $f4 = fopen($file4, "a+");
+    chmod($file4, 0757);
+
+    fclose($f);
+    fclose($f2);
+    fclose($f3);
+    fclose($f4);
+  }
+
+  $output_calls = array('drupal_set_message',
+    'drupal_set_title', 'theme',
+    'return', 'watchdog');
+
+  foreach ($output_calls as $out) {
+    db_insert('security_testing_output')
+      ->fields(array(
+          'name_of_ofc' => $out,
+         ))
+      ->execute();
+  }
+
+  $secure_list = array('check_plain', 'filter_xss', 'filter_xss_admin');
+  foreach ($secure_list as $sec) {
+    db_insert('security_testing_secure')
+      ->fields(array(
+          'name_of_sfc' => $sec,
+         ))
+      ->execute();
+  }
+
+  $normal_list = array('drupal_get_form', 't', 'l', 'count', 'max',
+    'implode', 'trim', 'array_shift', 'explode', 'url', 'isset',
+    'str_replace', 'strtr', 'file_create_url', 'array_key_exists',
+    'theme', 'variable_get', 'return', 'drupal_set_title',
+    'drupal_set_message', 'confirm_form', 'watchdog', 'drupal_render',
+    'strtolower', 'drupal_substr', 'strcmp', 'system_settings_form',
+    'substr');
+
+  foreach ($normal_list as $nor) {
+    db_insert('security_testing_normal')
+      ->fields(array(
+          'name_of_nfc' => $nor,
+         ))
+      ->execute();
+  }
+
+}
+
+/**
+ * Implements hook_schema().
+ */
+function security_testing_schema() {
+
+  $schema['security_testing_output'] = array(
+    'description' => 'Stores output function calls',
+    'fields' => array(
+      'ofc_id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'unique id of output function call',
+      ),
+      'name_of_ofc' => array(
+        'type' => 'varchar',
+        'length' => 1024,
+        'description' => 'name of output function call',
+      ),
+    ),
+    'primary key' => array('ofc_id'),
+  );
+
+  $schema['security_testing_secure'] = array(
+    'description' => 'Stores secure function calls',
+    'fields' => array(
+      'sfc_id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'unique id of secure function call',
+      ),
+      'name_of_sfc' => array(
+        'type' => 'varchar',
+        'length' => 1024,
+        'description' => 'secure of secure function call',
+      ),
+    ),
+    'primary key' => array('sfc_id'),
+  );
+
+  $schema['security_testing_normal'] = array(
+    'description' => 'Stores normal function calls',
+    'fields' => array(
+      'nfc_id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'unique id of normal function call',
+      ),
+      'name_of_nfc' => array(
+        'type' => 'varchar',
+        'length' => 1024,
+        'description' => 'name of normal function call',
+      ),
+    ),
+    'primary key' => array('nfc_id'),
+  );
+
+  return $schema;
+}
