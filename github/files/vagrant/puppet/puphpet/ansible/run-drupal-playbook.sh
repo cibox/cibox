@@ -6,6 +6,7 @@ playbooks=(
 /var/www/drupal/reinstall.yml \
 /var/www/drupal/security.yml \
 /var/www/drupal/sniffers.yml \
+/var/www/drupal/tests.yml \
 )
 
 for i in "${playbooks[@]}"
