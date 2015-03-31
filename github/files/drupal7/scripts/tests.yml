@@ -22,7 +22,6 @@
   tasks:
   - name: Install behat dependencies from composer.json
     shell: "cd {{ behat_root }} && composer up"
-    when: update_dependencies == 'yes'
 
   - name: Create dynamic behat.yml
     template: src={{ behat_root }}/behat.yml.j2 dest={{ behat_root }}/behat.yml
