@@ -17,6 +17,7 @@
     installation_profile_name: pp
     drupal_version: 7
     with_vm: True
+    with_tests: True
     with_reinstall: True
     vm_provisioner: puppet
 
@@ -77,10 +78,15 @@
   - name: Create empty readme files for placeholders 5
     file: path={{ repo_subfolder }}/{{ drupal_subfolder }}/sites/all/modules/features/readme.txt state=touch
 
-  - name: Injecting vmbox into repo
-    synchronize: src=files/vagrant/{{ vm_provisioner }}/ dest={{ repo_subfolder }}/ recursive=yes archive=no
+  - name: Injecting behat tests into repo
+    synchronize: src=files/tests dest={{ repo_subfolder }}/ recursive=yes archive=no
     when: with_vm == True
     register: vmbox
+
+  - name: Injecting vmbox into repo
+    synchronize: src=files/vagrant/{{ vm_provisioner }}/ dest={{ repo_subfolder }}/ recursive=yes archive=no
+    when: with_tests == True
+    register: tests
 
   - name: Add ansible roles to vagrant box
     synchronize: src=../roles/ dest={{ repo_subfolder }}/puphpet/ansible/roles/ recursive=yes archive=no
