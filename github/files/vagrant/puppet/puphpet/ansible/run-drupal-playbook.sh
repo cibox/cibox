@@ -5,7 +5,7 @@ export PYTHONUNBUFFERED=1
 playbooks=(
 /var/www/drupal/reinstall.yml \
 /var/www/drupal/sniffers.yml \
-/var/www/drupal/tests.yml --extra-vars "update_dependencies='yes'" \
+/var/www/drupal/tests.yml \
 )
 
 for i in "${playbooks[@]}"
