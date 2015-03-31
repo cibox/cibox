@@ -12,7 +12,7 @@
     behat_root: '../tests/behat'
     config_file: behat.yml
     features_dir: features
-    browser: 'firefox'
+    browser: 'chrome'
     selenium_url: 127.0.0.1:4444/wd/hub
     run_javascript_tests: 'no'
     update_dependencies: no
@@ -22,7 +22,6 @@
   tasks:
   - name: Install behat dependencies from composer.json
     shell: "cd {{ behat_root }} && composer up"
-    when: update_dependencies == 'yes'
 
   - name: Create dynamic behat.yml
     template: src={{ behat_root }}/behat.yml.j2 dest={{ behat_root }}/behat.yml
@@ -53,6 +52,7 @@
 
   - name: Wait until selenium start
     wait_for: port=4444 delay=10 host=127.0.0.1
+    when: run_javascript_tests == 'yes'
 
   - name: Create directory for build reports
     file: path={{ behat_drupal_root }}/{{ build_reports_dir }} state=directory mode=0777
