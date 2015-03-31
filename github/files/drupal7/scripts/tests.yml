@@ -12,7 +12,7 @@
     behat_root: '../tests/behat'
     config_file: behat.yml
     features_dir: features
-    browser: 'firefox'
+    browser: 'chrome'
     selenium_url: 127.0.0.1:4444/wd/hub
     run_javascript_tests: 'no'
     update_dependencies: no
