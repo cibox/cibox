@@ -5,6 +5,9 @@
 - name: Enable Security Review module
   shell: "drush en -y security_review"
 
+- name: Creating build reports dir
+  shell: mkdir {{ build_reports_dir }}
+
 - name: Creating Security Review file
   shell: touch {{ build_reports_dir }}/SecurityReview.txt
 
