@@ -136,11 +136,11 @@
 
   - name: Fix permissions for composer libs
     sudo: yes
-    file: path={{ composer_dir }} state=directory mode=0655 recurse=yes
+    file: path={{ composer_dir }} state=directory mode=655 recurse=yes
 
   - name: Create symlink to phpcs binary
     sudo: yes
-    file: src={{ composer_dir }}/vendor/bin/phpcs dest={{ phpcs_bin }} state=link mode=0655 force=yes
+    file: src={{ composer_dir }}/vendor/bin/phpcs dest={{ phpcs_bin }} state=link mode=655 force=yes
 
   - name: Install nodejs packages
     sudo: yes
@@ -167,7 +167,7 @@
 
   - name: Create directory for build reports
     sudo: yes
-    file: path={{ build_reports_dir }} state=directory mode=0750
+    file: path={{ build_reports_dir }} state=directory mode=750
 
   tasks:
   - name: PHP CodeSniffer run
