@@ -21,7 +21,6 @@ npm_packages:
   - jshint
 
 gem_packages:
-  - jshint
   - scss-lint
 
 sniffers_apt_repos:
