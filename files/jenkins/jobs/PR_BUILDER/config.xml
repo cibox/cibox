@@ -94,7 +94,7 @@ sudo chown -R www-data:jenkins ../build${BUILD_NUMBER}
   <publishers>
     <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@0.1.9">
       <token>CHANGE_ME</token>
-      <room>1357356</room>
+      <room>CHANGE_ME</room>
       <startNotification>true</startNotification>
       <notifySuccess>true</notifySuccess>
       <notifyAborted>true</notifyAborted>
