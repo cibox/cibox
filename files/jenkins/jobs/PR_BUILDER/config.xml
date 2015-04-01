@@ -102,8 +102,8 @@ sudo chown -R www-data:jenkins ../build${BUILD_NUMBER}
       <notifyUnstable>false</notifyUnstable>
       <notifyFailure>true</notifyFailure>
       <notifyBackToNormal>true</notifyBackToNormal>
-      <startJobMessage>$JOB_NAME #$BUILD_NUMBER $STATUS ($CHANGES_OR_CAUSE) &lt;br /&gt; Started by $ghprbTriggerAuthor ($ghprbActualCommitAuthorEmail) &lt;br /&gt;&lt;a href=&quot;$URL/console&quot;&gt;Open Builder console within Jenkins&lt;/a&gt;&lt;br /&gt;&lt;a href=&q$
-      <completeJobMessage>$JOB_NAME #$BUILD_NUMBER $STATUS after $DURATION &lt;br /&gt; by $ghprbTriggerAuthor ($ghprbActualCommitAuthorEmail) &lt;br /&gt;&lt;a href=&quot;$URL/console&quot;&gt;Open Builder console within Jenkins&lt;/a&gt;&lt;br /&gt;&lt;a href=&quot;$ghpr$
+            <startJobMessage>&gt;&gt;&gt; &lt;strong&gt;$ghprbPullTitle&lt;/strong&gt; &lt;br /&gt; $JOB_NAME #$BUILD_NUMBER $STATUS ($CHANGES_OR_CAUSE) &lt;br /&gt; Started by $ghprbTriggerAuthor ($ghprbActualCommitAuthorEmail) &lt;br /&gt;&lt;a href=&quot;$URL/console&quot;&gt;Open Builder console within Jenkins&lt;/a&gt;&lt;br /&gt;&lt;a href=&quot;CHANGE_ME_TO_PROJECT_HTTPS_URL/pull/$ghprbPullId&quot;&gt;Open PR at Github&lt;/a&gt; &lt;br /&gt;</startJobMessage>
+            <completeJobMessage>&gt;&gt;&gt; &lt;strong&gt;$ghprbPullTitle&lt;/strong&gt; &lt;br /&gt; $JOB_NAME #$BUILD_NUMBER $STATUS after $DURATION &lt;br /&gt; by $ghprbTriggerAuthor ($ghprbActualCommitAuthorEmail) &lt;br /&gt;&lt;a href=&quot;$URL/console&quot;&gt;Open Builder console within Jenkins&lt;/a&gt;&lt;br /&gt;&lt;a href=&quot;CHANGE_ME_TO_PROJECT_HTTPS_URL/pull/$ghprbPullId&quot;&gt;Open PR at Github&lt;/a&gt;</completeJobMessage>
     </jenkins.plugins.hipchat.HipChatNotifier>
   </publishers>
     <buildWrappers>
