@@ -91,7 +91,21 @@ sudo chown -R www-data:jenkins ../build${BUILD_NUMBER}
             </command>
         </hudson.tasks.Shell>
     </builders>
-    <publishers/>
+  <publishers>
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@0.1.9">
+      <token>68e0bc4512cebaf45f4ea79ae81219</token>
+      <room>1357356</room>
+      <startNotification>true</startNotification>
+      <notifySuccess>true</notifySuccess>
+      <notifyAborted>true</notifyAborted>
+      <notifyNotBuilt>false</notifyNotBuilt>
+      <notifyUnstable>false</notifyUnstable>
+      <notifyFailure>true</notifyFailure>
+      <notifyBackToNormal>true</notifyBackToNormal>
+      <startJobMessage>$JOB_NAME #$BUILD_NUMBER $STATUS ($CHANGES_OR_CAUSE) &lt;br /&gt; Started by $ghprbTriggerAuthor ($ghprbActualCommitAuthorEmail) &lt;br /&gt;&lt;a href=&quot;$URL/console&quot;&gt;Open Builder console within Jenkins&lt;/a&gt;&lt;br /&gt;&lt;a href=&q$
+      <completeJobMessage>$JOB_NAME #$BUILD_NUMBER $STATUS after $DURATION &lt;br /&gt; by $ghprbTriggerAuthor ($ghprbActualCommitAuthorEmail) &lt;br /&gt;&lt;a href=&quot;$URL/console&quot;&gt;Open Builder console within Jenkins&lt;/a&gt;&lt;br /&gt;&lt;a href=&quot;$ghpr$
+    </jenkins.plugins.hipchat.HipChatNotifier>
+  </publishers>
     <buildWrappers>
         <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.0">
             <colorMapName>xterm</colorMapName>
