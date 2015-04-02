@@ -1,0 +1,36 @@
+---
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+# Setup/install tasks.
+- include: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- include: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+# Install and configure XHProf.
+- name: Install XHProf using PECL.
+  command: "pecl install {{ item }}"
+  register: pecl_result
+  changed_when: "pecl_result.rc == 0"
+  failed_when: "not (('already installed' in pecl_result.stdout) or ('install ok:' in pecl_result.stdout))"
+  with_items:
+    # Manual channel installation required for certain PEAR versions.
+    - "channel://pecl.php.net/xhprof-0.9.4"
+    - xhprof
+
+- name: Copy XHProf INI into php.d folder.
+  template:
+    src: xhprof.ini.j2
+    dest: "{{ php_extension_conf_path }}/xhprof.ini"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart webserver
+
+- name: Ensure XHProf output directory exists.
+  file:
+    path: "{{ xhprof_output_dir }}"
+    state: directory
+    mode: 0777

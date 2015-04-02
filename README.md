@@ -43,6 +43,7 @@ ansible-playbook jenkinsbox.yml --tags "TAGNAME"
 - ansible-jenkins
 - ansible-composer
 - ansible-php-pear
+- ansible-php-xhprof
 - ansible-sniffers
 - apache
 - mysql
