@@ -1,3 +1,3 @@
 #!/bin/sh
 # You should install ansible for ability to run this script
-ansible-playbook -v security.yml
+ansible-playbook -v devops.yml
