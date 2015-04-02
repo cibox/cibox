@@ -7,4 +7,4 @@
     scan_security: true
 
   roles:
-    - { role: /var/www/drupal/devops/roles/cibox-security_testing, when: scan_security == true }
+    - { role: devops/roles/cibox-security_testing, when: scan_security == true }
