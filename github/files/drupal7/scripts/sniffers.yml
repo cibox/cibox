@@ -11,6 +11,7 @@
     artifacts_file: commentinfo.md
     webroot: http://localhost
     installation_profile_name: pp
+    scan_security: true
     phpcs_extensions: php,inc,install,module
     phpcs_features_extensions: module
     custom_modules_path: sites/all/modules/custom/
@@ -30,11 +31,13 @@
     git_repos:
       - { branch: 'master', repo: 'http://git.drupal.org/sandbox/coltrane/1921926.git', name: 'DrupalSecure' } # git clone --branch master http://git.drupal.org/sandbox/coltrane/1921926.git DrupalSecure
       - { branch: '7.x-1.x', repo: 'https://github.com/klausi/drupalpractice.git', name: 'DrupalPractice' } #git clone --branch 7.x-1.x https://github.com/klausi/drupalpractice.git DrupalPractice
+      - { branch: 'master', repo: 'https://github.com/podarok/phpcs-security-audit.git', name: 'Security' } #git clone --branch master https://github.com/podarok/phpcs-security-audit.git Security
       - { branch: 'master', repo: 'https://github.com/podarok/Symfony2-coding-standard.git', name: 'Symfony2' }
 
     phpcs_standards:
       - { path: 'vendor/drupal/coder/coder_sniffer/Drupal', name: 'Drupal' } #/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal Drupal
       - { path: 'vendor/podarok/DrupalSecure/DrupalSecure', name: 'DrupalSecure' } #/root/.composer/vendor/podarok/DrupalSecure DrupalSecure
+      - { path: 'vendor/podarok/Security/Security', name: 'Security' } #/root/.composer/vendor/podarok/Security Security
       - { path: 'vendor/podarok/DrupalPractice/DrupalPractice', name: 'DrupalPractice' } #/root/.composer/vendor/podarok/DrupalPractice DrupalPractice
 
     npm_packages:
@@ -66,6 +69,9 @@
 
     scsslint_folders:
       - { name: 'themes', path: 'sites/all/themes/custom' }
+
+  roles:
+    - { role: /var/www/drupal/devops/roles/cibox-security-testing, when: scan_security == true }
 
   pre_tasks:
 
@@ -173,6 +179,11 @@
     shell: 'if grep "FOUND" {{ build_reports_dir }}/{{ item.name }}sniff.txt; then echo "<strong>`wc -l < {{ build_reports_dir }}/{{ item.name }}sniff.txt`</strong> CodeSniffer: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi;'
     with_items: phpcs_standards
 
+  - name: Security Review report build
+    ignore_errors: yes
+    shell: 'if grep "error" {{ build_reports_dir }}/{{ item.name }}sniff.txt; then echo "<strong>`wc -l < {{ build_reports_dir }}/{{ item.name }}sniff.txt`</strong> Security Review: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi;'
+    with_items: phpcs_standards
+
   - name: PHP CodeSniffer for features run
     shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_features_extensions }} -n {{ features_path }} --report-file={{ build_reports_dir }}/Features{{ item.name }}sniff.txt --ignore={{ phpcs_features_ignore | join(",") }} || true'
     with_items: phpcs_standards
@@ -202,3 +213,4 @@
   - name: Website credentials
     sudo: yes
     lineinfile: dest={{ workspace_root }}/{{ artifacts_file }} line="Build site installed at {{ webroot }}" create=yes state=present
+

@@ -100,6 +100,10 @@
     shell: "{{ php_env_vars }} drush -y si {{ installation_profile_name }} --db-url=mysql://{{ mysql_user }}:{{ mysql_pass }}@127.0.0.1:/{{ mysql_db }} --account-name={{ drupal_user }} --account-pass={{ drupal_pass }} --uri={{ site_url }}"
     when: workflow_type == "profile"
 
+  - name: Making permissions usable
+    shell: chmod -R 777 sites/default
+    sudo: yes
+
   - name: Remove settings.php
     file: name=sites/default/settings.php state=absent
     sudo: yes
