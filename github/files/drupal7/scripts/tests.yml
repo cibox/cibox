@@ -12,16 +12,18 @@
     behat_root: '../tests/behat'
     config_file: behat.yml
     features_dir: features
+    resources_path: /var/www/tests/behat/resources
     browser: 'chrome'
     selenium_url: 127.0.0.1:4444/wd/hub
     run_javascript_tests: 'no'
-    update_dependencies: no
+    update_dependencies: 'yes'
     selenium_jar_path: /var/lib/selenium/selenium.jar
     chrome_driver_path: /var/lib/chrome-driver/chromedriver
 
   tasks:
   - name: Install behat dependencies from composer.json
     shell: "cd {{ behat_root }} && composer up"
+    when: update_dependencies == 'yes'
 
   - name: Create dynamic behat.yml
     template: src={{ behat_root }}/behat.yml.j2 dest={{ behat_root }}/behat.yml
@@ -65,7 +67,6 @@
     when: run_javascript_tests == 'yes'
 
   - name: Run headlses Behat tests
-    ignore_errors: yes
     shell: 'echo "Behat tests: standard file {{ behat_base_url }}/{{ build_reports_dir }}/report.html" >> {{ workspace_root }}/{{ artifacts_file }} && cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }} --tags "~@javascript"'
     when: run_javascript_tests == 'no'
 
