@@ -3,6 +3,7 @@
 export PYTHONUNBUFFERED=1
 
 playbooks=(
+/vagrant/puphpet/ansible/sendmail.yml \
 /vagrant/puphpet/ansible/apache.yml \
 /vagrant/puphpet/ansible/php.yml \
 /vagrant/puphpet/ansible/php-xdebug.yml \

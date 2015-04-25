@@ -37,6 +37,20 @@ If ```xip.io``` not working - create row with
 
 in ```/etc/hosts```
 
+Tools
+=====
+
+PHP Profiler XHProf
+It is installed by default, but to use it as Devel module integration use:
+```sh
+drush en devel -y
+drush vset devel_xhprof_enabled 1
+drush vset devel_xhprof_directory '/usr/share/php' && drush vset devel_xhprof_url '/xhprof_html/index.php'
+ln -s /usr/share/php/xhprof_html xhprof_html
+```
+After `vset devel_xhprof_enabled` it could return an error about "Class 'XHProfRuns_Default' not found" - ignore it.
+
+
 Linux Containers
 =====
 
@@ -46,8 +60,9 @@ For approaching lxc, please install vagrant plugin
 
 ```sh
 vagrant plugin install vagrant-lxc
-apt-get install redir lxc
+apt-get install redir lxc cgroup-bin
 ```
+also you may need to apply this patch https://github.com/fgrehm/vagrant-lxc/pull/354
 
 When your system is enpowered by apparmor, you should enable nfs mounts for your host
 machine

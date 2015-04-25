@@ -1,0 +1,20 @@
+---
+- name: Create link to phpd as a service
+  file: src=/var/www/hp-dis/vendor/podarok/phpdaemon/bin/phpd dest=/etc/init.d/phpd state=link
+  ignore_errors: yes
+
+- name: Create phpd directory within /etc
+  file: dest=/etc/phpd state=directory
+  ignore_errors: yes
+
+- name: Create link to phpd.conf within /etc
+  file: src=/var/www/hp-dis/app/config/phpd.conf dest=/etc/phpd/phpd.conf state=link
+  ignore_errors: yes
+
+- name: Install redis server
+  apt: name=redis-server state=present
+
+- name: Start phpd
+#  stat: src=/etc/phpd/phpd.conf
+  service: name=phpd state=restarted
+  ignore_errors: yes

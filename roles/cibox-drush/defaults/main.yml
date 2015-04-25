@@ -3,7 +3,7 @@ drush_install_mode: composer
 
 drush_composer_bin: /usr/local/bin/composer
 drush_composer_version: 6.*
-drush_composer_user: vagrant
+drush_composer_user: root
 
 drush_git_repo: https://github.com/drush-ops/drush.git
 drush_git_version: 6.2.0

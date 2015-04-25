@@ -35,4 +35,6 @@
     php_apc_enable_cli: "0"
 
   roles:
-    - { role: ansible-role-php }
+    - { role: ansible-role-php, tags: ["php-stack"] }
+    - { role: ansible-php-pear, tags: ["ansible-php-pear", "php-stack"] }
+    - { role: ansible-role-php-xhprof, tags: ["ansible-php-xhprof", "php-stack"] }
