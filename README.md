@@ -6,6 +6,8 @@ CIBox (Continuous Integration Box)
 Wiki https://github.com/propeoplemd/cibox/wiki
 
 Introduction video http://youtu.be/EJZcqTcycf0
+TIP:
+Don't forget to setup HIPCHAT settings with CHANGE_ME... placeholders to be able meet project requirements
 
 This repo consists basically from two playbooks
 - CI server installation/provisioning jenkinsbox.yml
@@ -43,6 +45,7 @@ ansible-playbook jenkinsbox.yml --tags "TAGNAME"
 - ansible-jenkins
 - ansible-composer
 - ansible-php-pear
+- ansible-php-xhprof
 - ansible-sniffers
 - apache
 - mysql
