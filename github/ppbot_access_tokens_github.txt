@@ -1,6 +1,0 @@
-Access tokens
-
-manual
-CHANGE_ME
-from jenkins
-CHANGE_ME
