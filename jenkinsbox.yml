@@ -10,6 +10,7 @@
 
   roles:
     - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
+    - { role: cibox-misc, tags: ["misc"] }
     - { role: ansible-php-pear, tags: ["ansible-php-pear", "php-stack"] }
     - { role: ansible-role-php-xhprof, tags: ["ansible-php-xhprof", "php-stack"] }
     - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
@@ -56,16 +57,7 @@
       - pear.drush.org
     pear_packages:
       - drush/drush
-    apt_repos:
-      - ppa:ansible/ansible
     apt_packages:
-      - software-properties-common
-      - python-software-properties
-      - apparmor-utils
-      - make
-      - rsync
-      - libssl-dev
-      - zlib1g-dev
       - apache2
       - php5
       - php5-gd
@@ -74,17 +66,7 @@
       - php5-mysql
       - php5-curl
       - php5-memcached
-      - memcached
-      - tree
       - php5-imagick
-      - imagemagick
-      - ansible
-      - git
-      - imagemagick
-      - php5-imagick
-      - rng-tools
-      - python-passlib
-      - cgroup-bin
     apache2_modules:
       - rewrite
     jenkins_configs:
@@ -126,14 +108,6 @@
     lineinfile: dest=/etc/sudoers line="jenkins ALL=(ALL) NOPASSWD:ALL"
     tags:
       - cibox-jenkins
-
-  - name: Install apt repos
-    apt_repository: repo={{ item }} validate_certs=no
-    with_items: apt_repos
-    tags:
-      - php-stack
-      - mysql
-      - apache
 
   - name: Update apt cache
     sudo: yes
