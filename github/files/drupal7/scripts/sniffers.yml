@@ -166,8 +166,7 @@
       - ruby
 
   - name: Create directory for build reports
-    sudo: yes
-    file: path={{ build_reports_dir }} state=directory mode=750
+    file: path={{ build_reports_dir }} state=directory mode=770
 
   tasks:
   - name: PHP CodeSniffer run
