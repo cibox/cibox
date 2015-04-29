@@ -71,7 +71,7 @@
       - { name: 'themes', path: 'sites/all/themes/custom' }
 
   roles:
-    - { role: /var/www/drupal/devops/roles/cibox-security-testing, when: scan_security == true }
+    - { role: devops/roles/cibox-security-testing, when: scan_security == true }
 
   pre_tasks:
 
