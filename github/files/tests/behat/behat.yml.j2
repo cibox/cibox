@@ -7,7 +7,7 @@ default:
       contexts:
         - FeatureContext: ~
         - Behat\Drupal\Propeople\PropeopleContext: ~
-  #        - Behat\Drupal\Propeople\Email\EmailContext:
+        - Behat\Drupal\Propeople\Email\EmailContext:
   #            mail_account_strings: _mail_account_strings
   #        - Behat\Drupal\Propeople\Redirect\RedirectContext: ~
   #            wait_for_redirect: 30
@@ -18,12 +18,17 @@ default:
     emuse\BehatHTMLFormatter\BehatHTMLFormatterExtension:
       name: html
     Behat\MinkExtension:
-      goutte: ~
+      goutte:
+        guzzle_parameters:
+          config:
+            curl:
+              CURLOPT_TIMEOUT: 600
+              CURLOPT_CONNECTTIMEOUT: 0
       selenium2:
         wd_host: {{ selenium_url }}
         #browser: {{ browser }}
       base_url: {{ behat_base_url }}
-      files_path: resources
+      files_path: {{ resources_path }}
     Drupal\DrupalExtension:
       blackbox: ~
       api_driver: 'drupal'

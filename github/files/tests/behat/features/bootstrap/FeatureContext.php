@@ -8,10 +8,12 @@ use Behat\Drupal\Propeople\RawPropeopleContext;
 // Helpers.
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
+
 /**
  * Class FeatureContext.
  */
 class FeatureContext extends RawPropeopleContext {
+
   /**
    * Initializes context.
    *
@@ -21,4 +23,13 @@ class FeatureContext extends RawPropeopleContext {
    */
   public function __construct() {
   }
+
+  /**
+   * @api
+   * @Given /^It is allowed to register users without approval$/
+   */
+  public function allowToRegisterWithoutApproval() {
+    self::setDrupalVariables(array('user_register', USER_REGISTER_VISITORS));
+  }
+
 }
