@@ -1,0 +1,15 @@
+---
+
+- name: Install apt repos
+  sudo: yes
+  apt_repository: repo={{ item }} validate_certs=no
+  with_items: apt_repos
+
+- name: Update apt
+  apt: update_cache=yes
+  sudo: yes
+
+- name: Install packages
+  action: apt pkg={{ item }} state=latest
+  sudo: yes
+  with_items: apt_packages

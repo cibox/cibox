@@ -15,6 +15,10 @@ This repo consists basically from two playbooks
 
 You have to use *64bit* Ubuntu 12.04 LTS or 14.04 LTS systems for CI server
 
+Common and base apps and packages
+=====
+cibox-misc role contains all basic packages required for cibox and vagrant installation.
+
 Possible variations
 =====
 

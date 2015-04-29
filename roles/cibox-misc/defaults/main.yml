@@ -1,0 +1,25 @@
+---
+
+apt_repos:
+  - ppa:ansible/ansible
+
+apt_packages:
+  - imagemagick
+  - libmagickcore-dev
+  - libmagickwand-dev
+  - htop
+  - vim
+  - time
+  - tree
+  - make
+  - apparmor-utils
+  - python-software-properties
+  - software-properties-common
+  - rsync
+  - libssl-dev
+  - zlib1g-dev
+  - ansible
+  - rng-tools
+  - python-passlib
+  - cgroup-bin
+  - git
