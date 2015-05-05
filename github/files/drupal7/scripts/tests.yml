@@ -9,19 +9,21 @@
     build_reports_dir: build_reports
     behat_base_url: http://drupal.192.168.56.132.xip.io # WITHOUT TRAILING SLASH
     behat_drupal_root: /var/www/drupal
+    resources_path: /var/www/tests/behat/resources
     behat_root: '../tests/behat'
     config_file: behat.yml
     features_dir: features
     browser: 'chrome'
     selenium_url: 127.0.0.1:4444/wd/hub
     run_javascript_tests: 'no'
-    update_dependencies: no
+    update_dependencies: 'yes'
     selenium_jar_path: /var/lib/selenium/selenium.jar
     chrome_driver_path: /var/lib/chrome-driver/chromedriver
 
   tasks:
   - name: Install behat dependencies from composer.json
     shell: "cd {{ behat_root }} && composer up"
+    when: update_dependencies == 'yes'
 
   - name: Create dynamic behat.yml
     template: src={{ behat_root }}/behat.yml.j2 dest={{ behat_root }}/behat.yml
