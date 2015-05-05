@@ -11,6 +11,7 @@
   roles:
     - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
     - { role: cibox-misc, tags: ["misc"] }
+    - { role: ansible-role-php, tags: ["php-stack"] }
     - { role: ansible-php-pear, tags: ["ansible-php-pear", "php-stack"] }
     - { role: ansible-role-php-xhprof, tags: ["ansible-php-xhprof", "php-stack"] }
     - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
