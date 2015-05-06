@@ -58,7 +58,7 @@
       - pear.drush.org
     pear_packages:
       - drush/drush
-    apt_packages:
+    cibox_apt_packages:
       - apache2
       - php5
       - php5-gd
@@ -121,7 +121,7 @@
 
   - name: Install apt packages
     apt: name={{ item }} state=present
-    with_items: apt_packages
+    with_items: cibox_apt_packages
     tags:
       - php-stack
       - mysql
