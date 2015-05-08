@@ -7,7 +7,8 @@ Wiki https://github.com/propeoplemd/cibox/wiki
 
 Introduction video http://youtu.be/EJZcqTcycf0
 TIP:
-Don't forget to setup HIPCHAT settings with CHANGE_ME... placeholders to be able meet project requirements
+Don't forget to setup all http://ci_hostname:8080/configure settings with CHANGE_ME... placeholders to be able meet project requirements.
+Also you should change all CHANGE_ME placeholders for DEMO and PR builders jobs as well.
 
 This repo consists basically from two playbooks
 - CI server installation/provisioning jenkinsbox.yml
