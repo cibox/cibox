@@ -82,8 +82,8 @@ cd new_pull_request
 sudo rsync -avz drupal/ /var/www/build${BUILD_NUMBER}
 cd /var/www/build${BUILD_NUMBER}
 sudo chown -R www-data:jenkins *
-ansible-playbook sniffers.yml --extra-vars "workspace_root=${WORKSPACE} webroot=http://ci_server_ip_address/build${BUILD_NUMBER}"
 ansible-playbook reinstall.yml --extra-vars "php_env_vars='APP_ENV=dev' mysql_user=root mysql_pass=root mysql_db=drupal${BUILD_NUMBER} php_env_vars='APP_ENV=dev' drupal_folder=/var/www/build${BUILD_NUMBER} base_url=http://ci_server_ip_address/build${BUILD_NUMBER}"
+ansible-playbook sniffers.yml --extra-vars "workspace_root=${WORKSPACE} webroot=http://ci_server_ip_address/build${BUILD_NUMBER}"
 ansible-playbook tests.yml --extra-vars "workspace_root=${WORKSPACE} behat_base_url=http://ci_server_ip_address/build${BUILD_NUMBER} update_dependencies='yes' resources_path=${WORKSPACE}/new_pull_request//tests/behat/resources
 behat_drupal_root=/var/www/build${BUILD_NUMBER}
 behat_root=${WORKSPACE}/new_pull_request/tests/behat"
