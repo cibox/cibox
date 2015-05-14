@@ -6,7 +6,12 @@ CIBox (Continuous Integration Box)
 Wiki https://github.com/propeoplemd/cibox/wiki
 
 Introduction video http://youtu.be/EJZcqTcycf0
+
+DrupalCon Los Angeles session https://www.youtube.com/watch?v=o0pqKqnhWgw
+
+
 TIP:
+
 Don't forget to setup all http://ci_hostname:8080/configure settings with CHANGE_ME... placeholders to be able meet project requirements.
 Also you should change all CHANGE_ME placeholders for DEMO and PR builders jobs as well.
 
