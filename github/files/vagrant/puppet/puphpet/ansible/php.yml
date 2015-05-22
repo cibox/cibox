@@ -29,6 +29,7 @@
     php_upload_max_filesize: 64M
 
     php_enable_apc: true
+    php_apc_enabled_in_ini: true
     php_apc_cache_by_default: "1"
     php_apc_shm_size: "96M"
     php_apc_stat: "1"
