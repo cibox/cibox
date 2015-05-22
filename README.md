@@ -3,7 +3,7 @@ CIBox (Continuous Integration Box)
 
 [RoadMap for CIBOX](https://github.com/propeoplemd/cibox/wiki/RoadMap)
 
-[FAQ](https://github.com/propeoplemd/cibox/FAQ.md)
+[FAQ](https://github.com/propeoplemd/cibox/blob/master/FAQ.md)
 
 Wiki https://github.com/propeoplemd/cibox/wiki
 
