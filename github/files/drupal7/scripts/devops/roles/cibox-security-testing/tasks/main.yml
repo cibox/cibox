@@ -1,6 +1,7 @@
 ---
 - name: Install Security Testing
   shell: "rsync -avz devops/modules/ sites/all/modules/contrib/"
+  sudo: yes
 
 - name: Enable Security Review module
   shell: "drush en -y security_review"
