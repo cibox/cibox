@@ -181,7 +181,7 @@
 
   - name: Security Review report build
     ignore_errors: yes
-    shell: 'if grep "error" {{ build_reports_dir }}/SecurityReview.txt; then echo "<strong>`wc -l < {{ build_reports_dir }}/SecurityReview.txt`</strong> Security Review: Security Review standard file {{ webroot }}/{{ build_reports_dir }}/SecurityReview.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi;
+    shell: 'if grep "error" {{ build_reports_dir }}/SecurityReview.txt; then echo "<strong>`wc -l < {{ build_reports_dir }}/SecurityReview.txt`</strong> Security Review: Security Review standard file {{ webroot }}/{{ build_reports_dir }}/SecurityReview.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi;'
     with_items: phpcs_standards
 
   - name: PHP CodeSniffer for features run
