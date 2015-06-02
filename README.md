@@ -94,4 +94,3 @@ not used by default
 - cibox-phpdaemon: - role from HP project for installing phpdaemon
 - ansible-role-php-pecl: - role, originally developed by geerlingguy but without
  dependency from his php playbook. Can be used for installing pecl packages.
-
