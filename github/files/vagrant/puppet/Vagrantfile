@@ -54,7 +54,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
-  data['vm']['synced_folder'].each do |id, folder|
+  for folder in data['vm']['synced_folder'];
     nfs = (folder['nfs'] == "true") ? "nfs" : nil
     config.vm.synced_folder folder['source'], folder['target'],
       id: folder['id'],
