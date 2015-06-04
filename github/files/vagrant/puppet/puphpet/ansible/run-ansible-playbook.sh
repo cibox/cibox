@@ -13,12 +13,14 @@ playbooks=(
 /vagrant/puphpet/ansible/composer.yml \
 /vagrant/puphpet/ansible/drush.yml \
 /vagrant/puphpet/ansible/solr.yml \
+/vagrant/puphpet/ansible/sniffers.yml \
+/vagrant/puphpet/ansible/misc-gems.yml \
 )
 
 for i in "${playbooks[@]}"
 do
    echo "Install "${i}
-   ansible-playbook ${i}
+   ansible-playbook -i 'localhost,' ${i} --connection=local
    if [ "$?" == "0" ]; then
     echo "Finished installing "${i}
    else

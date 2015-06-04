@@ -32,10 +32,10 @@ vagrantfile-local:
                     - '--hiera_config /vagrant/puphpet/puppet/hiera.yaml'
                     - '--parser future'
         synced_folder:
-            8Q9vTs08YuK2:
-                source: ./
-                target: /var/www
-                nfs: 'true'
+            - id: drupal
+              source: ./
+              target: /var/www
+              nfs: 'true'
         usable_port_range: 2200..2250
     ssh:
         host: null
