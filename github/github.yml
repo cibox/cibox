@@ -101,8 +101,4 @@
     file: path={{ repo_subfolder }} state=directory mode=777 recurse=yes
     when: drupal_dl.changed == True or profile_copy.changed == True or vmbox.changed == True
 
-  - name: Unsetting inventory file executable bit
-    file: path={{ repo_subfolder }}/{{ drupal_subfolder }}/hosts mode=666
-    when: with_reinstall == True
-
   handlers:
