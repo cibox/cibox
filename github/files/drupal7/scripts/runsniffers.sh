@@ -5,4 +5,5 @@
 # sudo apt-get update
 # sudo apt-get install ansible
 # sudo apt-get install python-mysqldb
-ansible-playbook sniffers.yml
+export PYTHONUNBUFFERED=1
+time ansible-playbook -vvvv sniffers.yml -i 'localhost,' --connection=local

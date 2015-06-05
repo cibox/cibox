@@ -11,6 +11,8 @@ Introduction video http://youtu.be/EJZcqTcycf0
 
 DrupalCon Los Angeles session https://www.youtube.com/watch?v=o0pqKqnhWgw
 
+Kyiv Drupal Cafe session http://druler.com/node/888 (in Ukrainian)
+
 
 TIP:
 
