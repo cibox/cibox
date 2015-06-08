@@ -1,7 +1,5 @@
-#!/usr/bin/env bash
-export PYTHONUNBUFFERED=1
-EXTRA_VARS=''
-if [ ! -z '$1' -a $1 = "--windows" ]; then
-  EXTRA_VARS='--extra-vars=“is-windows=true”'
+if [ "${1}"=="--windows" ]; then
+ time ansible-playbook -vvvv reinstall.yml -i 'localhost,' --connection=local --extra-vars "is_windows=true"
+else
+ time ansible-playbook -vvvv reinstall.yml -i 'localhost,' --connection=local
 fi
-time ansible-playbook -vvvv reinstall.yml -i 'localhost,' --connection=local ${EXTRA_VARS}

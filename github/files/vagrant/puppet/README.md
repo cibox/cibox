@@ -118,7 +118,7 @@ Install [Cygwin](https://servercheck.in/blog/running-ansible-within-windows) acc
 
 Run Cygwin as Administrator user.
 
-Use default flow to up Vagrant.
+Use default flow to up Vagrant but run `sh reinstall.yml --windows`
 
 ##Windows troubleshooting
 
