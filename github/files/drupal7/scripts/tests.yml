@@ -57,6 +57,7 @@
     when: run_javascript_tests == 'yes'
 
   - name: Create directory for build reports
+    sudo: yes
     file: path={{ behat_drupal_root }}/{{ build_reports_dir }} state=directory mode=0777
 
   - name: Run full Behat tests
