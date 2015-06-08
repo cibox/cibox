@@ -120,7 +120,6 @@
     shell: "cp sites/default/default.settings.php sites/default/settings.php"
 
   - include: devops/includes/windows.yml
-    when: is_windows == true
 
   - name: Adding database variable to settings.php
     sudo: yes
@@ -169,7 +168,7 @@
 
   - name: Rebuilding drupal registry
     sudo: yes
-    shell: "{{ php_env_vars }} drush -y rr -l {{ site_url }} || true && {{ php_env_vars }} drush -y rr -l {{ site_url }} || true"
+    shell: "{{ php_env_vars }} drush -y rr -l {{ site_url }} || true"
     when: workflow_type == "sql"
 
   - name: Updating database
