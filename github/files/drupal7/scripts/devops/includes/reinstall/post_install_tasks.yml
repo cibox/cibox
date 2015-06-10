@@ -1,7 +1,7 @@
 ---
 - name: Making permissions usable
-    shell: chmod -R 777 sites/default
-    sudo: yes
+  shell: chmod -R 777 sites/default
+  sudo: yes
 
 - name: Check if registry_rebuild is installed
   shell: "{{ php_env_vars }} drush | grep -c registry_rebuild"
