@@ -6,7 +6,7 @@
   gather_facts: yes
 
   vars_files:
-    - devops/vars/reinstall_vars.yml
+    - devops/includes/vars/reinstall_vars.yml
 
   tasks:
   - include: devops/includes/reinstall/pre_install_tasks.yml
