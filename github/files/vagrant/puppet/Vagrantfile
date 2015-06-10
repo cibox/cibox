@@ -37,8 +37,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   if Vagrant.has_plugin?("vagrant-hostsupdater")
     config.hostsupdater.aliases = []
 
-    for host in apacheConfigValues['vars']['apache_vhosts']
-
     for host in apacheConfigValues[0]['vars']['apache_vhosts']
 
       # Add all the hosts that aren't defined as Ansible vars.
