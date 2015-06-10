@@ -1,0 +1,4 @@
+---
+- name: Creating cache folder
+  sudo: yes
+  file: path={{ cache_folder }} state=directory recurse=yes

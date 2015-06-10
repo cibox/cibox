@@ -1,0 +1,60 @@
+---
+- name: Getting timestamp
+  shell: date +'%Y_%m_%d_%M_%S'
+  register: backup_name_raw
+  when: pp_environment == "staging" or make_backup
+
+- name: Getting name for backup
+  set_fact: backup_name={{ backup_name_raw.stdout }}
+  when: pp_environment == "staging" or make_backup
+
+- name: Creating backup folder
+  sudo: yes
+  file: path={{ backup_folder }} state=directory recurse=yes
+
+- name: Making regular backup
+  sudo: yes
+  mysql_db: name=staging state=dump target={{ backup_folder }}/{{ backup_name }}.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
+  when: pp_environment == "staging" or make_backup
+
+- name: Check if latest backup exists
+  stat: path={{ backup_folder }}/latest.sql.gz
+  register: latest_backup_exists
+  when: workflow_type == "sql"
+
+- name: Create initial backup from staging
+  mysql_db: name=staging state=dump target={{ backup_folder }}/{{ source_backup_name }} login_user={{ mysql_user }} login_password={{ mysql_pass }}
+  when: make_backup == true and workflow_type == "sql" and latest_backup_exists.stat.exists == false
+
+- name: Downloading latest backup
+  get_url: url={{ source_database }} dest={{ backup_folder }}/latest_remote.sql.gz force=yes
+  when: workflow_type == "sql" and pp_environment == "default"
+
+- name: Droping drupal database
+  mysql_db: name={{ mysql_db }} state=absent login_user={{ mysql_user }} login_password={{ mysql_pass }}
+  when: pp_environment == "demo" or pp_environment == "default" or workflow_type == "profile"
+
+- name: Creating drupal database
+  mysql_db: name={{ mysql_db }} state=present login_user={{ mysql_user }} login_password={{ mysql_pass }}
+
+# Use ansible_env.SUDO_USER when you run script with "sudo".
+- name: Importing from remote backup
+  mysql_db: name={{ mysql_db }} state=import target={{ backup_folder }}/latest_remote.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
+  sudo: yes
+  when: workflow_type == "sql" and pp_environment == "default" and ansible_env.USER != "jenkins"
+
+# Use ansible_env.SUDO_USER when you run script with "sudo".
+- name: Copy local backup to build folder
+  sudo: yes
+  copy: src={{ backup_folder }}/latest.sql.gz dest=./latest.sql.gz force=yes mode=0644
+  when: workflow_type == "sql" and (pp_environment == "default" or pp_environment == "demo") and ansible_env.USER == "jenkins"
+
+- name: Importing from local backup
+  mysql_db: name={{ mysql_db }} state=import target=./latest.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
+  sudo: yes
+  when: workflow_type == "sql" and (pp_environment == "default" or pp_environment == "demo")
+
+- name: Remove local backup from build folder
+  sudo: yes
+  file: name=./latest.sql.gz state=absent
+  when: workflow_type == "sql" and (pp_environment == "default" or pp_environment == "demo")

@@ -1,0 +1,44 @@
+---
+- name: Remove settings.php
+  file: name=sites/default/settings.php state=absent
+  sudo: yes
+
+- name: Changing permissions for sites/default
+  sudo: yes
+  file: name=sites/default state=directory mode=777
+
+- name: Creating settings.php
+  sudo: yes
+  shell: "cp sites/default/default.settings.php sites/default/settings.php"
+
+- include: devops/includes/reinstall/settings_windows.yml
+
+- name: Adding database variable to settings.php
+  sudo: yes
+  lineinfile: dest='sites/default/settings.php' line='$databases = array(\"default\" => array (\"default\" => array (\"database\" => \"{{ mysql_db }}\", \"username\" => \"{{ mysql_user }}\", \"password\" => \"{{ mysql_pass }}\", \"host\" => \"127.0.0.1\", \"port\" => \"\", \"driver\" => \"mysql\", \"prefix\" => \"\", ), ), );'
+  when: is_windows == false
+
+- name: Random prefix for memcache to settings.php
+  sudo: yes
+  lineinfile: dest='sites/default/settings.php' line='$conf[\"memcache_key_prefix\"] = \"{{ pp_environment }}\";'
+  when: pp_environment == "CHANGE_ME" and is_windows == false
+
+- name: Memcache settings to settings.php
+  sudo: yes
+  lineinfile: dest='sites/default/settings.php' line='$conf[\"cache_backends\"][] = \"sites/all/modules/contrib/memcache/memcache.inc\";'
+  when: pp_environment == "CHANGE_ME" and is_windows == false
+
+- name: Memcache settings to settings.php
+  sudo: yes
+  lineinfile: dest='sites/default/settings.php' line='$conf[\"cache_default_class\"] = \"MemCacheDrupal\";'
+  when: pp_environment == "CHANGE_ME" and is_windows == false
+
+- name: Adding environment variable to settings.php
+  sudo: yes
+  lineinfile: dest='sites/default/settings.php' line='$conf[\"pp_environment\"] = \"{{ pp_environment }}\";'
+  when: is_windows == false
+
+- name: Stage File Proxy settings
+  sudo: yes
+  lineinfile: dest='sites/default/settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"{{ origin_site_url }}\";'
+  when: (pp_environment == "demo" or pp_environment == "default") and is_windows == false
