@@ -1,6 +1,7 @@
 ---
 drupal_user: admin
 drupal_pass: propeople
+update_admin_user: true
 installation_profile_name: pp
 mysql_user: root
 mysql_pass: root

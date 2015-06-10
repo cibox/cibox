@@ -56,3 +56,13 @@
 - name: Set writable files dir
   sudo: yes
   file: dest=sites/default/files mode=777 state=directory
+
+- name: Update admin username
+  sudo: yes
+  shell: drush sqlq "UPDATE users SET name='{{ drupal_user }}' WHERE uid=1"
+  when: update_admin_user == true and (pp_environment == "default" or pp_environment == "demo")
+
+- name: Update admin password
+  sudo: yes
+  shell: "{{ php_env_vars }} drush user-password {{ drupal_user }} --password={{ drupal_pass }}"
+  when: update_admin_user == true and (pp_environment == "demo" or pp_environment == "default")
