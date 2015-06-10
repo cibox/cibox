@@ -36,11 +36,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # If hostsupdater plugin is installed, add all servernames as aliases.
   if Vagrant.has_plugin?("vagrant-hostsupdater")
     config.hostsupdater.aliases = []
-<<<<<<< HEAD
+
     for host in apacheConfigValues['vars']['apache_vhosts']
-=======
+
     for host in apacheConfigValues[0]['vars']['apache_vhosts']
->>>>>>> 64084b1d457173cd74495ca9fec919b092259faa
+
       # Add all the hosts that aren't defined as Ansible vars.
       unless host['servername'].include? "{{"
         config.hostsupdater.aliases.push(host['servername'])
@@ -75,7 +75,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       data['vm']['provider']['virtualbox']['modifyvm'].each do |key, value|
         if key == "natdnshostresolver1"
           value = value ? "on" : "off"
-        end
+        end/Users/turcan_vasile/projects/DocuSign/Vagrantfile
         virtualbox.customize ["modifyvm", :id, "--#{key}", "#{value}"]
       end
     end
@@ -104,5 +104,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.forward_agent = true
 
   config.vm.provision :shell, :path => "puphpet/shell/execute-files.sh"
+
+  # CIBOX_HOST_OS
+    if !ENV['host_os'].nil?
+      config.vm.provision :shell, :inline => "echo "export CIBOX_HOST_OS=\"windows\"" >> /home/vagrant/.bash_rc"
+    end
+
 
 end
