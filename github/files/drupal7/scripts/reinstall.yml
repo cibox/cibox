@@ -10,7 +10,9 @@
 
   tasks:
   - include: devops/includes/reinstall/pre_install_tasks.yml
+  # @todo Should be by condition.
   - include: devops/includes/reinstall/database_workflow.yml
+  # @todo Should be by condition.
   - include: devops/includes/reinstall/profile_workflow.yml
   - include: devops/includes/reinstall/settings.yml
   - include: devops/includes/reinstall/post_install_tasks.yml
