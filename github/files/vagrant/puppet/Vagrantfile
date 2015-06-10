@@ -75,7 +75,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       data['vm']['provider']['virtualbox']['modifyvm'].each do |key, value|
         if key == "natdnshostresolver1"
           value = value ? "on" : "off"
-        end/Users/turcan_vasile/projects/DocuSign/Vagrantfile
         virtualbox.customize ["modifyvm", :id, "--#{key}", "#{value}"]
       end
     end
