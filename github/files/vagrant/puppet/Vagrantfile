@@ -100,5 +100,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.forward_agent = true
 
   config.vm.provision :shell, :path => "puphpet/shell/execute-files.sh"
-
+ 
+  # CIBOX_HOST_OS
+    if !ENV['host_os'].nil?
+      config.vm.provision :shell, :inline => "echo "export CIBOX_HOST_OS=\"windows\"" >> /home/vagrant/.bash_rc"
+    end
 end
