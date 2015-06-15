@@ -3,89 +3,75 @@
 - name: Copy settings.php (WINDOWS)
   sudo: yes
   shell: cp sites/default/settings.php /tmp/reinstall_settings.php
-  when: is_windows == true
 
 - name: Adding database variable to settings.php (WINDOWS)
   sudo: yes
   lineinfile: dest='/tmp/reinstall_settings.php' line='$databases = array(\"default\" => array (\"default\" => array (\"database\" => \"{{ mysql_db }}\", \"username\" => \"{{ mysql_user }}\", \"password\" => \"{{ mysql_pass }}\", \"host\" => \"127.0.0.1\", \"port\" => \"\", \"driver\" => \"mysql\", \"prefix\" => \"\", ), ), );'
-  when: is_windows == true
 
 - name: Restore settings.php (WINDOWS)
   sudo: yes
   shell: cp /tmp/reinstall_settings.php sites/default/settings.php
-  when: is_windows == true
 
 - name: Copy settings.php (WINDOWS)
   sudo: yes
   shell: cp sites/default/settings.php /tmp/reinstall_settings.php
-  when: is_windows == true
 
 - name: Random prefix for memcache to settings.php (WINDOWS)
   sudo: yes
   lineinfile: dest='/tmp/reinstall_settings.php' line='$conf[\"memcache_key_prefix\"] = \"{{ pp_environment }}\";'
-  when: pp_environment == "CHANGE_ME" and is_windows == true
+  when: pp_environment == "CHANGE_ME"
 
 - name: Restore settings.php (WINDOWS)
   sudo: yes
   shell: cp /tmp/reinstall_settings.php sites/default/settings.php
-  when: is_windows == true
 
 - name: Copy settings.php (WINDOWS)
   sudo: yes
   shell: cp sites/default/settings.php /tmp/reinstall_settings.php
-  when: is_windows == true
 
 - name: Memcache settings to settings.php (WINDOWS)
   sudo: yes
   lineinfile: dest='/tmp/reinstall_settings.php' line='$conf[\"cache_backends\"][] = \"sites/all/modules/contrib/memcache/memcache.inc\";'
-  when: pp_environment == "CHANGE_ME" and is_windows == true
+  when: pp_environment == "CHANGE_ME"
 
 - name: Restore settings.php (WINDOWS)
   sudo: yes
   shell: cp /tmp/reinstall_settings.php sites/default/settings.php
-  when: is_windows == true
 
 - name: Copy settings.php (WINDOWS)
   sudo: yes
   shell: cp sites/default/settings.php /tmp/reinstall_settings.php
-  when: is_windows == true
 
 - name: Memcache settings to settings.php (WINDOWS)
   sudo: yes
   lineinfile: dest='/tmp/reinstall_settings.php' line='$conf[\"cache_default_class\"] = \"MemCacheDrupal\";'
-  when: pp_environment == "CHANGE_ME" and is_windows == true
+  when: pp_environment == "CHANGE_ME"
 
 - name: Restore settings.php (WINDOWS)
   sudo: yes
   shell: cp /tmp/reinstall_settings.php sites/default/settings.php
-  when: is_windows == true
 
 - name: Copy settings.php (WINDOWS)
   sudo: yes
   shell: cp sites/default/settings.php /tmp/reinstall_settings.php
-  when: is_windows == true
 
 - name: Adding environment variable to settings.php (WINDOWS)
   sudo: yes
   lineinfile: dest='/tmp/reinstall_settings.php' line='$conf[\"pp_environment\"] = \"{{ pp_environment }}\";'
-  when: is_windows == true
 
 - name: Restore settings.php (WINDOWS)
   sudo: yes
   shell: cp /tmp/reinstall_settings.php sites/default/settings.php
-  when: is_windows == true
 
 - name: Copy settings.php (WINDOWS)
   sudo: yes
   shell: cp sites/default/settings.php /tmp/reinstall_settings.php
-  when: is_windows == true
 
 - name: Stage File Proxy settings (WINDOWS)
   sudo: yes
   lineinfile: dest='/tmp/reinstall_settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"{{ origin_site_url }}\";'
-  when: (pp_environment == "demo" or pp_environment == "default") and is_windows == true
+  when: (pp_environment == "demo" or pp_environment == "default")
 
 - name: Restore settings.php (WINDOWS)
   sudo: yes
   shell: cp /tmp/reinstall_settings.php sites/default/settings.php
-  when: is_windows == true

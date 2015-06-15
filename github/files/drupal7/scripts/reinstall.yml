@@ -9,10 +9,21 @@
     - devops/includes/vars/reinstall_vars.yml
 
   tasks:
+  - include: devops/includes/reinstall/database_backup.yml
+    when: make_backup
+
   - include: devops/includes/reinstall/pre_install_tasks.yml
-  # @todo Should be by condition.
+
   - include: devops/includes/reinstall/database_workflow.yml
-  # @todo Should be by condition.
+    when: workflow_type == "sql"
+
   - include: devops/includes/reinstall/profile_workflow.yml
+    when: workflow_type == "profile"
+
+  - include: devops/includes/reinstall/settings_windows.yml
+    when: is_windows == true
+
   - include: devops/includes/reinstall/settings.yml
+    when: is_windows == false
+
   - include: devops/includes/reinstall/post_install_tasks.yml
