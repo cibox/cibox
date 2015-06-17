@@ -12,6 +12,7 @@
     mysql_user: root
     mysql_pass: root
     mysql_db: drupal
+    drupal_tmp_dir: /tmp
     cache_folder: /var/www/cache
     backup_folder: /var/www/backup
     php_env_vars: 'APP_ENV=dev' # APP_ENV=dev - this varible will be set at PR_BUILDER from CI shell executor.
@@ -169,6 +170,10 @@
   - name: Rebuilding drupal registry
     sudo: yes
     shell: "{{ php_env_vars }} drush -y rr -l {{ site_url }} || true"
+    when: workflow_type == "sql"
+    
+  - name: Set proper temp dir
+    shell: "{{ php_env_vars }} drush vset file_temporary_path {{ drupal_tmp_dir }}"
     when: workflow_type == "sql"
 
   - name: Updating database
