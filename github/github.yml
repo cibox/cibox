@@ -13,7 +13,7 @@
 
   vars:
     repo_subfolder: DEMO # name of the future project, should be changed manually
-    drupal_subfolder: drupal
+    drupal_subfolder: docroot
     installation_profile_name: pp
     drupal_version: 7
     with_vm: True
