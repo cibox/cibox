@@ -24,6 +24,7 @@ ci_server_username: vagrant
 # This variable allows make backup from CI environment before processing.
 # true, false.
 make_backup: false
+rebuild_registry: false
 # Local environment that will be used from backup.
 local_backup_environment: 'staging'
 # htpasswd protection for securing backups.
@@ -31,8 +32,32 @@ backup_user: propeople
 backup_pass: givemebackup
 # Source backup database that will be downloaded to build site.
 # In many cases this is production dump.
-source_backup_name: latest_dev.sql.gz
+source_backup_name: stage_x_dump.sql.gz
 # URL to the source database. Can be overridden by CI server.
 source_database: http://{{ backup_user }}:{{ backup_pass }}@192.168.56.132/backup/{{ source_backup_name }}
-# @todo Variables should be as array.
-variables: {}
+
+# Settings that will be added to settings.php file.
+settings:
+  - { name: '$conf["stage_file_proxy_origin"]', value: "{{ origin_site_url }}" }
+  - { name: '$conf["pp_environment"]', value: "{{ pp_environment }}" }
+  - { name: '$conf["error_level"]', value: '2' }
+  - { name: '$conf["file_temporary_path"]', value: '/tmp' }
+
+  # Uncomment if you use MemCache.
+  #- { name: '$conf["cache_default_class"]', value: "{{ pp_environment }}" }
+  #- { name: '$conf["cache_backends"][]', value: 'sites/all/modules/contrib/memcache/memcache.inc' }
+  #- { name: '$conf["cache_default_class"]', value: 'MemCacheDrupal' }
+
+# Specific settings per environment.
+default_env_settings:
+  - { name: '$conf["error_level"]', value: '2' }
+  - { name: '$conf["cache"]', value: '0' }
+  - { name: '$conf["block_cache"]', value: '0' }
+  - { name: '$conf["preprocess_css"]', value: '0' }
+  - { name: '$conf["preprocess_js"]', value: '0' }
+
+demo_env_settings:
+  - { name: '$conf["error_level"]', value: '0' }
+
+staging_env_settings: []
+production_env_settings: []

@@ -2,3 +2,36 @@
 - name: Creating cache folder
   sudo: yes
   file: path={{ cache_folder }} state=directory recurse=yes
+
+- name: Making permissions usable
+  sudo: yes
+  file: dest=sites/default mode=777 state=directory
+
+- name: Set writable files dir
+  sudo: yes
+  file: dest=sites/default/files mode=777 state=directory
+
+- name: Set writable private files dir
+  sudo: yes
+  file: dest=sites/default/files/private mode=777 state=directory
+
+- name: Check if registry_rebuild is installed
+  shell: "{{ php_env_vars }} drush | grep -c registry_rebuild"
+  register: registry_rebuild_installed
+  ignore_errors: true
+
+- name: Downloading registry_rebuild
+  sudo: yes
+  shell: "{{ php_env_vars }} drush -y dl registry_rebuild"
+  when: rebuild_registry and registry_rebuild_installed.stdout == "0"
+
+- name: Clear drush cache
+  sudo: yes
+  shell: "{{ php_env_vars }} drush cc drush"
+  when: rebuild_registry and registry_rebuild_installed.stdout == "0"
+
+- name: Rebuilding drupal registry
+  sudo: yes
+  shell: "{{ php_env_vars }} drush -y rr -l {{ site_url }} || true"
+  when: rebuild_registry
+

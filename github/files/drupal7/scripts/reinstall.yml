@@ -11,19 +11,26 @@
   tasks:
   - include: devops/includes/reinstall/database_backup.yml
     when: make_backup
+    tags: [ 'backup' ]
 
   - include: devops/includes/reinstall/pre_install_tasks.yml
+    tags: [ 'pre-tasks' ]
 
-  - include: devops/includes/reinstall/database_workflow.yml
+  - include: devops/includes/reinstall/sql_workflow.yml
     when: workflow_type == "sql"
+    tags: [ 'sql-workflow' ]
 
   - include: devops/includes/reinstall/profile_workflow.yml
     when: workflow_type == "profile"
+    tags: [ 'profile-workflow' ]
 
   - include: devops/includes/reinstall/settings_windows.yml
     when: is_windows == true
+    tags: [ 'windows-settings' ]
 
   - include: devops/includes/reinstall/settings.yml
     when: is_windows == false
+    tags: [ 'settings' ]
 
   - include: devops/includes/reinstall/post_install_tasks.yml
+    tags: [ 'post-tasks' ]
