@@ -13,24 +13,24 @@
 
 - name: Add general settings to settings.php
   lineinfile: dest='sites/default/settings.php' line='{{ item.name }} = \"{{ item.value }}\";'
-  with_items: settings
+  with_items: global.settings
 
 - name: Add settings for default environment
   lineinfile: dest='sites/default/settings.php' line='{{ item.name }} = \"{{ item.value }}\";'
-  with_items: default_env_settings
+  with_items: default_env.settings
   when: pp_environment == "default"
 
 - name: Add settings for demo environment
   lineinfile: dest='sites/default/settings.php' line='{{ item.name }} = \"{{ item.value }}\";'
-  with_items: demo_env_settings
+  with_items: demo_env.settings
   when: pp_environment == "demo"
 
 - name: Add settings for staging environment
   lineinfile: dest='sites/default/settings.php' line='{{ item.name }} = \"{{ item.value }}\";'
-  with_items: staging_env_settings
+  with_items: staging_env.settings
   when: pp_environment == "staging"
 
 - name: Add settings for production environment
   lineinfile: dest='sites/default/settings.php' line='{{ item.name }} = \"{{ item.value }}\";'
-  with_items: production_env_settings
+  with_items: production_env.settings
   when: pp_environment == "production"

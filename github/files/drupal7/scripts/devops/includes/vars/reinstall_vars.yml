@@ -37,27 +37,57 @@ source_backup_name: latest_prod.sql.gz
 source_database: http://{{ backup_user }}:{{ backup_pass }}@192.168.56.132/backup/{{ source_backup_name }}
 
 # Settings that will be added to settings.php file.
-settings:
-  - { name: '$conf["pp_environment"]', value: "{{ pp_environment }}" }
-  - { name: '$conf["file_temporary_path"]', value: '{{ tmp_folder }}' }
+global:
+  settings:
+    - { name: '$conf["pp_environment"]', value: "{{ pp_environment }}" }
+    - { name: '$conf["file_temporary_path"]', value: '{{ tmp_folder }}' }
+    # Uncomment if you use MemCache.
+    #- { name: '$conf["cache_default_class"]', value: "{{ pp_environment }}" }
+    #- { name: '$conf["cache_backends"][]', value: 'sites/all/modules/contrib/memcache/memcache.inc' }
+    #- { name: '$conf["cache_default_class"]', value: 'MemCacheDrupal' }
+  modules: []
+  drush_commands:
+    - { name: 'cc', arguments: "all" }
 
-  # Uncomment if you use MemCache.
-  #- { name: '$conf["cache_default_class"]', value: "{{ pp_environment }}" }
-  #- { name: '$conf["cache_backends"][]', value: 'sites/all/modules/contrib/memcache/memcache.inc' }
-  #- { name: '$conf["cache_default_class"]', value: 'MemCacheDrupal' }
+# Specific settings and commands per environment.
+default_env:
+  settings:
+    - { name: '$conf["stage_file_proxy_origin"]', value: "{{ origin_site_url }}" }
+    - { name: '$conf["error_level"]', value: '2' }
+    - { name: '$conf["cache"]', value: '0' }
+    - { name: '$conf["block_cache"]', value: '0' }
+    - { name: '$conf["preprocess_css"]', value: '0' }
+    - { name: '$conf["preprocess_js"]', value: '0' }
+  modules: []
+  #  - stage_file_proxy
+  #  - devel
+  #  - views_ui
+  #  - diff
+  #  - dblog
+  drush_commands: []
 
-# Specific settings per environment.
-default_env_settings:
-  - { name: '$conf["stage_file_proxy_origin"]', value: "{{ origin_site_url }}" }
-  - { name: '$conf["error_level"]', value: '2' }
-  - { name: '$conf["cache"]', value: '0' }
-  - { name: '$conf["block_cache"]', value: '0' }
-  - { name: '$conf["preprocess_css"]', value: '0' }
-  - { name: '$conf["preprocess_js"]', value: '0' }
+demo_env:
+  settings:
+    - { name: '$conf["stage_file_proxy_origin"]', value: "{{ origin_site_url }}" }
+    - { name: '$conf["error_level"]', value: '0' }
+  modules: []
+  #  - stage_file_proxy
+  #  - devel
+  #  - views_ui
+  #  - diff
+  #  - dblog
+  drush_commands: []
+    #- { name: 'search-api-clear', arguments: "-l {{ site_url }}" }
+    #- { name: 'search-api-index ', arguments: "-l {{ site_url }}" }
+    #- { name: 'solr-mark-all', arguments: "-l {{ site_url }}" }
+    #- { name: 'solr-index ', arguments: "-l {{ site_url }}" }
 
-demo_env_settings:
-  - { name: '$conf["stage_file_proxy_origin"]', value: "{{ origin_site_url }}" }
-  - { name: '$conf["error_level"]', value: '0' }
+staging_env:
+  settings: []
+  modules: []
+  drush_commands: []
 
-staging_env_settings: []
-production_env_settings: []
+production_env:
+  settings: []
+  modules: []
+  drush_commands: []

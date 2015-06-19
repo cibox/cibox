@@ -34,4 +34,3 @@
   sudo: yes
   shell: "{{ php_env_vars }} drush -y rr -l {{ site_url }} || true"
   when: rebuild_registry
-
