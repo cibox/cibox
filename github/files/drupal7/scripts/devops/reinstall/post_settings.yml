@@ -1,0 +1,26 @@
+---
+- name: Getting name for settings (WINDOWS)
+  set_fact: settings_file=/tmp/reinstall_settings.php
+  when: is_windows == true
+
+- name: Getting name for settings (UNIX)
+  set_fact: settings_file=sites/default/settings.php
+  when: is_windows == false
+
+- name: Copy settings to tmp folder (WINDOWS)
+  shell: cp sites/default/settings.php {{ settings_file }}
+  when: is_windows == true
+
+- name: Add general post-settings to settings.php
+  lineinfile: dest='{{ settings_file }}' line='{{ item.name }} = \"{{ item.value }}\";'
+  when: item.status == true
+  with_items: global_env.post_settings
+
+- name: Add environment specific post-settings
+  lineinfile: dest='{{ settings_file }}' line='{{ item.name }} = \"{{ item.value }}\";'
+  when: item.status == true
+  with_items: env.post_settings
+
+- name: Copy settings back (WINDOWS)
+  shell: cp {{ settings_file }} sites/default/settings.php
+  when: is_windows == true

@@ -6,31 +6,37 @@
   gather_facts: yes
 
   vars_files:
-    - devops/includes/vars/reinstall_vars.yml
+    - devops/reinstall/vars/global_settings.yml
+    - devops/reinstall/vars/environments/global_env.yml
 
   tasks:
-  - include: devops/includes/reinstall/database_backup.yml
+  - include_vars: "devops/reinstall/vars/environments/{{ pp_environment }}_env.yml"
+    tags: [ 'settings', 'pre-settings', 'post-settings', 'modules-enable', 'drush-commands' ]
+
+  - include: devops/reinstall/database_backup.yml
     when: make_backup
-    tags: [ 'backup' ]
+    tags: [ 'database-backup' ]
 
-  - include: devops/includes/reinstall/pre_install_tasks.yml
-    tags: [ 'pre-tasks' ]
+  - include: devops/reinstall/prepare_environment.yml
+    tags: [ 'prepare-environment' ]
 
-  - include: devops/includes/reinstall/sql_workflow.yml
+  - include: devops/reinstall/pre_settings.yml
+    when: workflow_type == "sql"
+    tags: [ 'settings', 'pre-settings', 'sql-workflow' ]
+
+  - include: devops/reinstall/sql_workflow.yml
     when: workflow_type == "sql"
     tags: [ 'sql-workflow' ]
 
-  - include: devops/includes/reinstall/profile_workflow.yml
+  - include: devops/reinstall/profile_workflow.yml
     when: workflow_type == "profile"
     tags: [ 'profile-workflow' ]
 
-  - include: devops/includes/reinstall/settings_windows.yml
-    when: is_windows == true
-    tags: [ 'windows-settings' ]
+  - include: devops/reinstall/post_settings.yml
+    tags: [ 'settings', 'post-settings' ]
 
-  - include: devops/includes/reinstall/settings.yml
-    when: is_windows == false
-    tags: [ 'settings' ]
+  - include: devops/reinstall/modules_enable.yml
+    tags: [ 'modules-enable' ]
 
-  - include: devops/includes/reinstall/post_install_tasks.yml
-    tags: [ 'post-tasks' ]
+  - include: devops/reinstall/drush_commands.yml
+    tags: [ 'drush-commands' ]
