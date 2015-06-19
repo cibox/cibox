@@ -78,6 +78,11 @@
   - name: Create empty readme files for placeholders 5
     file: path={{ repo_subfolder }}/{{ drupal_subfolder }}/sites/all/modules/features/readme.txt state=touch
 
+  - name: Restrict access to YAML files
+    lineinfile:
+      dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/.htaccess'
+      line: '# Restrict access to YAML files.\n<Files ~ "\.yml$">\n  Order Allow,Deny\n  Deny from All\n</Files>'
+
   - name: Injecting behat tests into repo
     synchronize: src=files/tests dest={{ repo_subfolder }}/ recursive=yes archive=no
     when: with_vm == True
