@@ -17,7 +17,7 @@ origin_site_url: 'http://192.168.56.132.xip.io/'
 pp_environment: 'default'
 # This variable allows select type of installation. Can be overridden by CI server.
 # From installation profile = 'profile', from sql dump = 'sql'.
-workflow_type: 'sql'
+workflow_type: 'profile'
 is_windows: false
 ci_server_username: 'jenkins'
 # This variable allows make backup from CI environment before processing.
@@ -31,8 +31,6 @@ backup_user: propeople
 backup_pass: givemebackup
 # Source backup database that will be downloaded to build site.
 # In many cases this is production dump.
-#source_backup_name: latest_prod.sql.gz
-source_backup_name: latest_test.sql.gz
+source_backup_name: latest_prod.sql.gz
 # URL to the source database. Can be overridden by CI server.
-#source_database: http://{{ backup_user }}:{{ backup_pass }}@192.168.56.132/backup/{{ source_backup_name }}
-source_database: http://{{ backup_user }}:{{ backup_pass }}@188.166.53.102/backup/{{ source_backup_name }}
+source_database: http://{{ backup_user }}:{{ backup_pass }}@192.168.56.132/backup/{{ source_backup_name }}
