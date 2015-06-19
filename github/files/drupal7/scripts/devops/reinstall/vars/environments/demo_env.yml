@@ -7,7 +7,7 @@ env:
     - { name: 'devel', status: true }
     - { name: 'views_ui', status: true }
     - { name: 'diff', status: true }
-  drush_commands: []
+  drush_commands:
     - { name: 'search-api-clear', status: false, arguments: "-l {{ site_url }}" }
     - { name: 'search-api-index ', status: false, arguments: "-l {{ site_url }}" }
     - { name: 'solr-mark-all', status: false, arguments: "-l {{ site_url }}" }
