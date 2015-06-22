@@ -73,24 +73,22 @@ Keep in mind we are talking about reinstall.yml playbook only.
  create backups alongside processing playbook.
  
 - ```backup_user```, ```backup_pass``` and ```source_database```: - these variables should be used on Jenkins server for
-pointing out to right place where sql dump archive stored by Jenkins by cron or any other background app.
- Keep in mind that backup should be accessible for webserver via url, injected by ```source_database```
- variable.
+pointing out to right place where sql dump archive stored by Jenkins by cron or any other background app. Keep in mind that backup should be accessible for webserver via url, injected by ```source_database```variable.
  
- - ```ci_server_username```: - name of the user that executest playbooks on your CI server. In most cases should be **jenkins**.
+- ```ci_server_username```: - name of the user that executes playbooks on  CI server. In most cases should be **jenkins**.
 
- - ```rebuild_registry```: - variable to display whether registry should be rebuilt.
+- ```rebuild_registry```: - variable to display whether Drupal registry should be rebuilt. By default this variable is ```false```. If any module has been moved to new directory, this variable should be set to ```true```. After release to production/staging this variable should be set back to ```false```.
 
- - ```local_backup_environment```: - variable to specify source/primary environment. Also set ```make_backup``` to ```true``` to create backup from this environment during reinstall.
+- ```local_backup_environment```: - variable to specify source/primary CI server environment for backups. Also set ```make_backup``` to ```true``` to create backup from this environment during reinstall.
 
- - ```origin_site_url```: - URL of the site where is primary storage of the all assets(images, files and etc.).
+- ```origin_site_url```: - URL of the site that provides all assets(images, files and etc.) for installations where ```stage_file_proxy_origin``` module is enabled.
 
 Configuration per environment
 =====
-CIbox provides flexible configuration per environment. This means that you are able configure specific settings, drush commands and modules that should be added/executed to your environments.
+CIbox provides flexible configuration per environment. This means that you are able configure specific settings, drush commands and modules that should be added/executed on your environments.
 
 - ```global_env.yml``` - global configuration that will be used widely on all environments.
-- ```default_env.yml``` - cofiguration for default environment (PR builds and vagrant instance).
+- ```default_env.yml``` - cofiguration for default environment (PR builds and vagrant instances).
 - ```demo_env.yml``` - cofiguration for demo environment.
 - ```staging_env.yml``` - cofiguration for staging environment.
 - ```production_env.tml``` - cofiguration for production environment.
@@ -130,7 +128,7 @@ env:
 
 ### Configuration status
 
-All configurations have ```status``` attributes. This attribute displays configuration is enabled or disabled.
+Each configuration has ```status``` attribute. This attribute displays whether configuration is enabled or disabled.
 
 Enabled configuration:
 
