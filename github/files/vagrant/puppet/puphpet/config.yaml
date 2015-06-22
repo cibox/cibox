@@ -32,10 +32,10 @@ vagrantfile-local:
                     - '--hiera_config /vagrant/puphpet/puppet/hiera.yaml'
                     - '--parser future'
         synced_folder:
-            8Q9vTs08YuK2:
-                source: ./
-                target: /var/www
-                nfs: 'true'
+            - id: drupal
+              source: ./
+              target: /var/www
+              nfs: 'true'
         usable_port_range: 2200..2250
     ssh:
         host: null
@@ -80,7 +80,7 @@ apache:
     vhosts:
         EYZeANveIIwp:
             servername: drupal.192.168.56.132.xip.io
-            docroot: /var/www/drupal
+            docroot: /var/www/docroot
             port: '80'
             override:
                 - All
@@ -91,7 +91,7 @@ apache:
             ssl_certs_dir: ''
         SYZeANveIIwp:
             servername: drupal.192.168.56.132.xip.io
-            docroot: /var/www/drupal
+            docroot: /var/www/docroot
             port: '443'
             override:
                 - All

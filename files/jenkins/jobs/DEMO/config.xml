@@ -47,8 +47,8 @@
       <command>
 export PYTHONUNBUFFERED=1
 cd new_pull_request
-sudo git log -1 --stat > drupal/git-status.txt
-sudo rsync --delete -ra drupal/ /var/www/demo
+sudo git log -1 --stat > docroot/git-status.txt
+sudo rsync --delete -ra docroot/ /var/www/demo
 sudo chown -R www-data:jenkins /var/www/demo
 sudo chmod -R 775 /var/www/demo/sites/default
 cd /var/www/demo

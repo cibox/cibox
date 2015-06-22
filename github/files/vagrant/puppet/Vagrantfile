@@ -1,29 +1,47 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+VAGRANTFILE_API_VERSION = "2"
+
+# Use rbconfig to determine if we're on a windows host or not.
+require 'rbconfig'
+is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
+
 require 'yaml'
 
 dir = File.dirname(File.expand_path(__FILE__))
 
-configValues = YAML.load_file("#{dir}/puphpet/config.yaml")
+configValues = YAML::load_file("#{dir}/puphpet/config.yaml")
+apacheConfigValues = YAML::load_file("#{dir}/puphpet/ansible/apache.yml")
 data = configValues['vagrantfile-local']
 
 if !data['vm']['provider']['virtualbox'].empty?
   ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 end
-
 if !ENV['VAGRANT_CI'].nil?
   ENV['VAGRANT_DEFAULT_PROVIDER'] = 'lxc'
 end
 
-Vagrant.configure("2") do |config|
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "#{data['vm']['box']}"
   config.vm.box_url = "#{data['vm']['box_url']}"
 
   if !ENV['VAGRANT_CI'].nil?
     config.vm.box = "#{data['vm']['provider']['lxc']['box']}"
-    config.vm.box_url = "#{data['vm']['provider']['lxc']['box_url']}"
   end
 
   if data['vm']['hostname'].to_s != ''
     config.vm.hostname = "#{data['vm']['hostname']}"
+  end
+
+  # If hostsupdater plugin is installed, add all servernames as aliases.
+  if Vagrant.has_plugin?("vagrant-hostsupdater")
+    config.hostsupdater.aliases = []
+    for host in apacheConfigValues[0]['vars']['apache_vhosts']
+      # Add all the hosts that aren't defined as Ansible vars.
+      unless host['servername'].include? "{{"
+        config.hostsupdater.aliases.push(host['servername'])
+      end
+    end
   end
 
   if data['vm']['network']['private_network'].to_s != ''
@@ -36,11 +54,14 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  data['vm']['synced_folder'].each do |i, folder|
-    if folder['source'] != '' && folder['target'] != '' && folder['id'] != ''
-      nfs = (folder['nfs'] == "true") ? "nfs" : nil
-      config.vm.synced_folder "#{folder['source']}", "#{folder['target']}", id: "#{folder['id']}", type: nfs
-    end
+  for folder in data['vm']['synced_folder'];
+    nfs = (folder['nfs'] == "true") ? "nfs" : nil
+    config.vm.synced_folder folder['source'], folder['target'],
+      id: folder['id'],
+      type: nfs,
+      rsync__auto: "true",
+      rsync__exclude: folder['excluded_paths'],
+      rsync__args: ["--verbose", "--archive", "--delete", "-z", "--chmod=ugo=rwX"]
   end
 
   config.vm.usable_port_range = (10200..10500)
@@ -81,5 +102,3 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, :path => "puphpet/shell/execute-files.sh"
 
 end
-
-

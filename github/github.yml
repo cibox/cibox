@@ -13,7 +13,7 @@
 
   vars:
     repo_subfolder: DEMO # name of the future project, should be changed manually
-    drupal_subfolder: drupal
+    drupal_subfolder: docroot
     installation_profile_name: pp
     drupal_version: 7
     with_vm: True
@@ -30,8 +30,8 @@
     file: path={{ repo_subfolder }}/{{ drupal_subfolder }} state=directory
     register: drupal_stat
 
-  - name: Downloading drupal to drupal subfolder
-    shell: "cd {{ repo_subfolder }} && drush -y --drupal-project-rename dl {{ drupal_subfolder }}"
+  - name: Downloading drupal to {{ drupal_subfolder }} subfolder
+    shell: "cd {{ repo_subfolder }} && drush -y --drupal-project-rename={{ drupal_subfolder }} dl drupal"
     when: drupal_stat.changed == True
     register: drupal_dl
 
@@ -100,9 +100,5 @@
   - name: Setting permissions for drupal tree
     file: path={{ repo_subfolder }} state=directory mode=777 recurse=yes
     when: drupal_dl.changed == True or profile_copy.changed == True or vmbox.changed == True
-
-  - name: Unsetting inventory file executable bit
-    file: path={{ repo_subfolder }}/{{ drupal_subfolder }}/hosts mode=666
-    when: with_reinstall == True
 
   handlers:

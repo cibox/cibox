@@ -1,3 +1,5 @@
 #!/bin/sh
 # You should install ansible for ability to run this script
-ansible-playbook -v devops.yml
+export PYTHONUNBUFFERED=1
+time ansible-playbook -vvvv devops.yml -i 'localhost,' --connection=local
+

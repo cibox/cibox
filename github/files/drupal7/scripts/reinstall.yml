@@ -12,10 +12,13 @@
     mysql_user: root
     mysql_pass: root
     mysql_db: drupal
+    drupal_tmp_dir: /tmp
     cache_folder: /var/www/cache
     backup_folder: /var/www/backup
     php_env_vars: 'APP_ENV=dev' # APP_ENV=dev - this varible will be set at PR_BUILDER from CI shell executor.
     site_url: 'http://drupal.192.168.56.132.xip.io/'
+    # Site url to download assets via stage_file_proxy.
+    origin_site_url: 'http://192.168.56.132.xip.io/'
     # This variable will be used for variable_get('environment'). Can be overridden by CI server.
     # development = 'default', demo = 'demo', staging = 'staging', production = 'production'.
     pp_environment: 'default'
@@ -28,6 +31,7 @@
     # htpasswd protection for securing backups.
     backup_user: propeople
     backup_pass: givemebackup
+    is_windows: false
     # URL to the source database. Can be overridden by CI server.
     source_database: http://{{ backup_user }}:{{ backup_pass }}@192.168.56.132/backup/stage_x_dump.sql.gz
 
@@ -116,28 +120,37 @@
     sudo: yes
     shell: "cp sites/default/default.settings.php sites/default/settings.php"
 
+  - include: devops/includes/windows.yml
+
   - name: Adding database variable to settings.php
     sudo: yes
     lineinfile: dest='sites/default/settings.php' line='$databases = array(\"default\" => array (\"default\" => array (\"database\" => \"{{ mysql_db }}\", \"username\" => \"{{ mysql_user }}\", \"password\" => \"{{ mysql_pass }}\", \"host\" => \"127.0.0.1\", \"port\" => \"\", \"driver\" => \"mysql\", \"prefix\" => \"\", ), ), );'
+    when: is_windows == false
 
   - name: Random prefix for memcache to settings.php
     sudo: yes
     lineinfile: dest='sites/default/settings.php' line='$conf[\"memcache_key_prefix\"] = \"{{ pp_environment }}\";'
-    when: pp_environment == "CHANGE_ME"
+    when: pp_environment == "CHANGE_ME" and is_windows == false
 
   - name: Memcache settings to settings.php
     sudo: yes
     lineinfile: dest='sites/default/settings.php' line='$conf[\"cache_backends\"][] = \"sites/all/modules/contrib/memcache/memcache.inc\";'
-    when: pp_environment == "CHANGE_ME"
+    when: pp_environment == "CHANGE_ME" and is_windows == false
 
   - name: Memcache settings to settings.php
     sudo: yes
     lineinfile: dest='sites/default/settings.php' line='$conf[\"cache_default_class\"] = \"MemCacheDrupal\";'
-    when: pp_environment == "CHANGE_ME"
+    when: pp_environment == "CHANGE_ME" and is_windows == false
 
   - name: Adding environment variable to settings.php
     sudo: yes
     lineinfile: dest='sites/default/settings.php' line='$conf[\"pp_environment\"] = \"{{ pp_environment }}\";'
+    when: is_windows == false
+
+  - name: Stage File Proxy settings
+    sudo: yes
+    lineinfile: dest='sites/default/settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"{{ origin_site_url }}\";'
+    when: (pp_environment == "demo" or pp_environment == "default") and is_windows == false
 
   - name: Check if registry_rebuild is installed
     shell: "{{ php_env_vars }} drush | grep -c registry_rebuild"
@@ -156,7 +169,11 @@
 
   - name: Rebuilding drupal registry
     sudo: yes
-    shell: "{{ php_env_vars }} drush -y rr -l {{ site_url }} || true && {{ php_env_vars }} drush -y rr -l {{ site_url }} || true"
+    shell: "{{ php_env_vars }} drush -y rr -l {{ site_url }} || true"
+    when: workflow_type == "sql"
+    
+  - name: Set proper temp dir
+    shell: "{{ php_env_vars }} drush vset file_temporary_path {{ drupal_tmp_dir }}"
     when: workflow_type == "sql"
 
   - name: Updating database
@@ -167,11 +184,6 @@
   - name: Enable module Stage File Proxy
     sudo: yes
     shell: "{{ php_env_vars }} drush -y en stage_file_proxy"
-    when: pp_environment == "demo" or pp_environment == "default"
-
-  - name: Stage File Proxy settings
-    sudo: yes
-    lineinfile: dest='sites/default/settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"{{ site_url }}";'
     when: pp_environment == "demo" or pp_environment == "default"
 
   - name: Creating latest staging backup

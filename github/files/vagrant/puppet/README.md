@@ -1,14 +1,19 @@
-drupal project
+Drupal Vagrant Dev box for CIbox support
 ======
 
-Drupal project is for SPS
+#Installation
+* [Vagrant](https://www.vagrantup.com/downloads.html)
+* [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+* Useful Vagrant's plugins
+  * [Hosts Updater](https://github.com/cogitatio/vagrant-hostsupdater)
+  * [vbguest](https://github.com/dotless-de/vagrant-vbguest)
 
-For obtaining development environment locally You should install vagrant and virtualbox or lxc and from console ran
+
+#Usage
+
 ```sh
 vagrant up && vagrant ssh
 ```
-afterwards.
-You will be logged into virtual machine.
 
 use 
 ```sh
@@ -16,16 +21,10 @@ sh reinstall.sh
 ```
 for drupal reinstallation from scratch
 
-Virtual host for accessing ppdorg drupal installation 
+By default your site will be accessible by using this url. 
 
 ```
-http://drupal.192.168.56.112.xip.io
-```
-
-Adminer for mysql administration (credentials drupal:drupal and root:root)
-
-```
-http://192.168.56.112.xip.io/adminer.php
+http://drupal.192.168.56.132.xip.io/
 ```
 
 
@@ -35,12 +34,31 @@ If ```xip.io``` not working - create row with
 192.168.56.112 drupal.192.168.56.112.xip.io
 ```
 
-in ```/etc/hosts```
+in ```/etc/hosts``` or just use another ServerName in apache.yml
+
+If you have Vagrant HostUpdater plugin, your hosts file will be automatically updated.
+
 
 Tools
 =====
 
-PHP Profiler XHProf
+* XDebug
+* Drush
+* Selenium 2
+* Composer
+* Adminer
+* XHProf
+* PHP Daemon
+* PHP, SASS, JS sniffers/lints/hints
+
+##Adminer
+Adminer for mysql administration (credentials drupal:drupal and root:root)
+
+```
+http://192.168.56.112.xip.io/adminer.php
+```
+
+##PHP Profiler XHProf
 It is installed by default, but to use it as Devel module integration use:
 ```sh
 drush en devel -y
@@ -91,3 +109,41 @@ Do use
 VAGRANT_CI=yes
 ```
 environment variable, if you got issues with all vagrant commands.
+
+
+Windows Containers
+=====
+
+Install [Cygwin](https://servercheck.in/blog/running-ansible-within-windows) according to provided steps.
+
+Run Cygwin as Administrator user.
+
+Use default flow to up Vagrant but run `sh reinstall.yml --windows`
+
+##Windows troubleshooting
+
+If you will see error liek ```...[error 26] file is busy...``` during ```sh reinstall.sh``` modify that line:
+
+before
+
+```yml
+name: Stage File Proxy settings
+sudo: yes
+lineinfile: dest='sites/default/settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"{{ stage_file_proxy_url }}";'
+```
+
+after:
+
+```yml
+name: Copy settings.php
+sudo: yes
+shell: cp sites/default/settings.php /tmp/reinstall_settings.php
+
+name: Stage File Proxy settings
+sudo: yes
+lineinfile: dest='sites/default/settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"{{ stage_file_proxy_url }}\";'
+
+name: Restore settings.php
+sudo: yes
+shell: cp /tmp/reinstall_settings.php sites/default/settings.php
+```

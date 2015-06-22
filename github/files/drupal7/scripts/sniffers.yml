@@ -21,6 +21,7 @@
       - sites/all/themes/custom/nonstandard
     phpcs_features_ignore:
       - sites/all/features/nonstandard
+    phpcs_features_ignore_path: sites/all/features,*.pages_default.inc,*.panelizer.inc,*.features.menu_custom.inc,*.features.webform.inc,*.features.filter.inc,*.strongarm.inc,*.fpp_content_declarations.inc,*.panels_default.inc
     composer_dir: /usr/share/composer
     phpcs_bin: /usr/bin/phpcs
     build_reports_dir: build_reports
@@ -166,7 +167,8 @@
       - ruby
 
   - name: Create directory for build reports
-    file: path={{ build_reports_dir }} state=directory mode=770
+    sudo: yes
+    file: path={{ build_reports_dir }} state=directory mode=0777
 
   tasks:
   - name: PHP CodeSniffer run
@@ -180,7 +182,7 @@
 
   - name: Security Review report build
     ignore_errors: yes
-    shell: 'if grep "error" {{ build_reports_dir }}/{{ item.name }}sniff.txt; then echo "<strong>`wc -l < {{ build_reports_dir }}/{{ item.name }}sniff.txt`</strong> Security Review: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi;'
+    shell: 'if grep "error" {{ build_reports_dir }}/SecurityReview.txt; then echo "<strong>`wc -l < {{ build_reports_dir }}/SecurityReview.txt`</strong> Security Review: Security Review standard file {{ webroot }}/{{ build_reports_dir }}/SecurityReview.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi;'
     with_items: phpcs_standards
 
   - name: PHP CodeSniffer for features run
