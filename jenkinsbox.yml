@@ -78,6 +78,7 @@
     backup_folder_user: propeople
     backup_folder_pass: givemebackup
     cibox_ssl_enable_host: true
+    php_apc_enabled_in_ini: true
 
   pre_tasks:
   - name: Setup initial packages onto clean system for ansible
