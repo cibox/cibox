@@ -1,5 +1,5 @@
 ---
-# Drush commands.
+# This script contains commands to run drush commands that are specified in configuration.
 - name: Run general drush commands
   shell: "{{ php_env_vars }} drush -y {{ item.name }} {{ item.arguments }}"
   when: item.status == true

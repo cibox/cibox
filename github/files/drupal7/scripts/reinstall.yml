@@ -10,7 +10,8 @@
     - devops/reinstall/vars/environments/global_env.yml
 
   tasks:
-  - include_vars: "devops/reinstall/vars/environments/{{ pp_environment }}_env.yml"
+  - name: Include specific variables per environment
+    include_vars: "devops/reinstall/vars/environments/{{ pp_environment }}_env.yml"
     tags: [ 'settings', 'pre-settings', 'post-settings', 'modules-enable', 'drush-commands' ]
 
   - include: devops/reinstall/database_backup.yml

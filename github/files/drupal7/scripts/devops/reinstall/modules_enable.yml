@@ -1,5 +1,5 @@
 ---
-# Enable modules.
+# This script contains commands to enable modules that are specified in configuration.
 - name: Enable general modules
   shell: "{{ php_env_vars }} drush -y en {{ item.name }}"
   when: item.status == true

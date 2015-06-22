@@ -1,4 +1,9 @@
 ---
+# This script contains commands to manage "SQL workflow":
+# - Downloading database from remote host or use local dump
+# - Importing to database
+# - Running registry rebuild (when modules have been moved to new directory)
+# - Running database updates
 - name: Droping drupal database
   mysql_db: name={{ mysql_db }} state=absent login_user={{ mysql_user }} login_password={{ mysql_pass }}
   when: pp_environment == "demo" or pp_environment == "default"

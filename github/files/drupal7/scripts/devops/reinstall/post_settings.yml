@@ -1,4 +1,6 @@
 ---
+# This script contains commands to fill out Drupal settings before installation.
+# Executes only for "SQL workflow".
 - name: Getting name for settings (WINDOWS)
   set_fact: settings_file=/tmp/reinstall_settings.php
   when: is_windows == true

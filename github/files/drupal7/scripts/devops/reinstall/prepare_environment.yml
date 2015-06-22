@@ -1,4 +1,5 @@
 ---
+# Commands to prepare environment.
 - name: Set writable cache dirr
   sudo: yes
   file: path={{ cache_folder }} mode=777 state=directory recurse=yes

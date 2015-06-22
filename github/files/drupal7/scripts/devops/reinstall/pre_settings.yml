@@ -1,4 +1,5 @@
 ---
+# This script contains commands to fill out Drupal settings after installation.
 - name: Getting name for settings (WINDOWS)
   set_fact: settings_file=/tmp/reinstall_settings.php
   when: is_windows == true
