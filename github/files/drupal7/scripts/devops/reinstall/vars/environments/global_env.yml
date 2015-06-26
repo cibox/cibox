@@ -1,6 +1,8 @@
 ---
 global_env:
-  pre_settings: []
+  pre_settings:
+    - { name: '$conf["pp_environment"]', status: true, value: "{{ pp_environment }}" }
+    - { name: '$conf["file_temporary_path"]', status: true, value: '{{ tmp_folder }}' }
   modules: []
   drush_commands: []
   post_settings:
