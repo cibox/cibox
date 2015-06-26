@@ -12,6 +12,10 @@
   sudo: yes
   file: dest={{ backup_folder }} mode=777 state=directory recurse=yes
 
+- name: Set writable default dir
+  sudo: yes
+  file: dest=sites/default mode=777 state=directory recurse=yes
+
 - name: Set writable files dir
   sudo: yes
   file: dest=sites/default/files mode=777 state=directory recurse=yes
