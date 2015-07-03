@@ -4,7 +4,7 @@
   apt_key: url=https://dl-ssl.google.com/linux/linux_signing_key.pub state=present
   tags: behat-selenium
 
-- name: WHAT IS IT? o_O
+- name: Adding Crome APT repo to local database
   shell: sh -c 'echo deb http://dl.google.com/linux/chrome/deb/ stable main > /etc/apt/sources.list.d/google.list'
   tags: behat-selenium
 
