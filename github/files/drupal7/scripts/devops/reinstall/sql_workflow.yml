@@ -16,6 +16,11 @@
   get_url: url={{ source_database }} dest={{ backup_folder }}/latest_remote.sql.gz force=yes
   when: pp_environment == "default" and ((ansible_env.USER is not defined or ansible_env.USER != "{{ ci_server_username }}") and (ansible_env.SUDO_USER is not defined or ansible_env.SUDO_USER != "{{ ci_server_username }}"))
 
+- name: Removing possible abandoned dump
+  shell: rm -rf {{ backup_folder }}/latest_remote.sql
+  sudo: yes
+  when: pp_environment == "default" and ((ansible_env.USER is not defined or ansible_env.USER != "{{ ci_server_username }}") and (ansible_env.SUDO_USER is not defined or ansible_env.SUDO_USER != "{{ ci_server_username }}"))
+
 - name: Importing from remote backup
   mysql_db: name={{ mysql_db }} state=import target={{ backup_folder }}/latest_remote.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
   sudo: yes
