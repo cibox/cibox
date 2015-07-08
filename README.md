@@ -4,7 +4,7 @@ CIBox (Continuous Integration Box)
 
 Known Issues
 =====
-https://github.com/propeoplemd/cibox/issues/223
+https://github.com/propeoplemd/cibox/wiki/Known-Issues
 
 Documentation
 =====
