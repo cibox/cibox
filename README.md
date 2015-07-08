@@ -1,6 +1,13 @@
 CIBox (Continuous Integration Box)
 =====
 
+
+Known Issues
+=====
+https://github.com/propeoplemd/cibox/issues/223
+
+Documentation
+=====
 [RoadMap for CIBOX](https://github.com/propeoplemd/cibox/wiki/RoadMap)
 
 [FAQ](https://github.com/propeoplemd/cibox/blob/master/FAQ.md)
@@ -17,6 +24,7 @@ Kyiv Drupal Cafe session http://druler.com/node/888 (in Ukrainian)
 
 
 TIP:
+=====
 
 Don't forget to setup all http://ci_hostname:8080/configure settings with CHANGE_ME... placeholders to be able meet project requirements.
 Also you should change all CHANGE_ME placeholders for DEMO and PR builders jobs as well.
