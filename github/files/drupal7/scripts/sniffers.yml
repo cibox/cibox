@@ -11,6 +11,7 @@
     artifacts_file: commentinfo.md
     webroot: http://localhost
     installation_profile_name: pp
+    installation_profile_path: "profiles/{{ installation_profile_name }}"
     scan_security: true
     phpcs_extensions: php,inc,install,module
     phpcs_features_extensions: module
@@ -66,7 +67,7 @@
     jshint_folders:
       - { name: 'modules', path: 'sites/all/modules/custom' }
       - { name: 'themes', path: 'sites/all/themes/custom' }
-      - { name: 'profile', path: 'profiles/pp' }
+      - { name: 'profile', path: "{{ installation_profile_path }}" }
 
     scsslint_folders:
       - { name: 'themes', path: 'sites/all/themes/custom' }
@@ -172,7 +173,7 @@
 
   tasks:
   - name: PHP CodeSniffer run
-    shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} profiles/{{ installation_profile_name }} {{ custom_themes_path }} --report-file={{ build_reports_dir }}/{{ item.name }}sniff.txt --ignore={{ phpcs_modules_ignore | join(",") }} || true'
+    shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} {{ installation_profile_path }} {{ custom_themes_path }} --report-file={{ build_reports_dir }}/{{ item.name }}sniff.txt --ignore={{ phpcs_modules_ignore | join(",") }} || true'
     with_items: phpcs_standards
 
   - name: PHP CodeSniffer reports build
