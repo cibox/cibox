@@ -30,7 +30,7 @@
     tags: [ 'sql-workflow' ]
 
   - include: devops/reinstall/profile_workflow.yml
-    when: workflow_type == "profile"
+    when: workflow_type == "profile" and cmf == 'drupal'
     tags: [ 'profile-workflow' ]
 
   - include: devops/reinstall/post_settings.yml
@@ -38,6 +38,8 @@
 
   - include: devops/reinstall/modules_enable.yml
     tags: [ 'modules-enable' ]
+    when: cmf == 'drupal'
 
   - include: devops/reinstall/drush_commands.yml
     tags: [ 'drush-commands' ]
+    when: cmf == 'drupal'

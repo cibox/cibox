@@ -15,11 +15,19 @@
 - name: Set writable default dir
   sudo: yes
   file: dest=sites/default mode=777 state=directory recurse=yes
+  when: cmf == 'drupal'
 
 - name: Set writable files dir
   sudo: yes
   file: dest=sites/default/files mode=777 state=directory recurse=yes
+  when: cmf == 'drupal'
 
 - name: Set writable private dir
   sudo: yes
   file: dest=sites/default/files/private mode=777 state=directory recurse=yes
+  when: cmf == 'drupal'
+
+- name: Make initial symlinks
+  shell: 'ln -fs bigtree/core core'
+  when: cmf == 'bigtree'
+  sudo: yes

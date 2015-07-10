@@ -11,13 +11,12 @@
     artifacts_file: commentinfo.md
     webroot: http://localhost
     installation_profile_name: pp
-    installation_profile_path: "profiles/{{ installation_profile_name }}"
     scan_security: true
     phpcs_extensions: php,inc,install,module
     phpcs_features_extensions: module
-    custom_modules_path: sites/all/modules/custom/
-    custom_themes_path: sites/all/themes/custom
-    features_path: sites/all/modules/features
+    custom_modules_path: custom/inc/modules
+    custom_themes_path: site
+    features_path: ''
     phpcs_modules_ignore:
       - sites/all/themes/custom/nonstandard
     phpcs_features_ignore:
@@ -25,7 +24,7 @@
     phpcs_features_ignore_path: sites/all/features,*.pages_default.inc,*.panelizer.inc,*.features.menu_custom.inc,*.features.webform.inc,*.features.filter.inc,*.strongarm.inc,*.fpp_content_declarations.inc,*.panels_default.inc
     composer_dir: /usr/share/composer
     phpcs_bin: /usr/bin/phpcs
-    build_reports_dir: build_reports
+    build_reports_dir: site/build_reports
 
     composer_global_require:
       - drupal/coder:dev-7.x-2.x
@@ -37,7 +36,7 @@
       - { branch: 'master', repo: 'https://github.com/podarok/Symfony2-coding-standard.git', name: 'Symfony2' }
 
     phpcs_standards:
-      - { path: 'vendor/drupal/coder/coder_sniffer/Drupal', name: 'Drupal' } #/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal Drupal
+#      - { path: 'vendor/drupal/coder/coder_sniffer/Drupal', name: 'Drupal' } #/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal Drupal
       - { path: 'vendor/podarok/DrupalSecure/DrupalSecure', name: 'DrupalSecure' } #/root/.composer/vendor/podarok/DrupalSecure DrupalSecure
       - { path: 'vendor/podarok/Security/Security', name: 'Security' } #/root/.composer/vendor/podarok/Security Security
       - { path: 'vendor/podarok/DrupalPractice/DrupalPractice', name: 'DrupalPractice' } #/root/.composer/vendor/podarok/DrupalPractice DrupalPractice
@@ -65,15 +64,15 @@
       - nodejs
 
     jshint_folders:
-      - { name: 'modules', path: 'sites/all/modules/custom' }
-      - { name: 'themes', path: 'sites/all/themes/custom' }
-      - { name: 'profile', path: "{{ installation_profile_path }}" }
+      - { name: 'modules', path: "{{ custom_modules_path}}" }
+      - { name: 'themes', path: "{{ custom_themes_path }}" }
+#      - { name: 'profile', path: 'profiles/pp' }
 
     scsslint_folders:
-      - { name: 'themes', path: 'sites/all/themes/custom' }
+      - { name: 'themes', path: "{{ custom_themes_path }}" }
 
-  roles:
-    - { role: devops/roles/cibox-security-testing, when: scan_security == true }
+#  roles:
+#    - { role: devops/roles/cibox-security-testing, when: scan_security == true }
 
   pre_tasks:
 
@@ -173,7 +172,7 @@
 
   tasks:
   - name: PHP CodeSniffer run
-    shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} {{ installation_profile_path }} {{ custom_themes_path }} --report-file={{ build_reports_dir }}/{{ item.name }}sniff.txt --ignore={{ phpcs_modules_ignore | join(",") }} || true'
+    shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} {{ custom_themes_path }} --report-file={{ build_reports_dir }}/{{ item.name }}sniff.txt --ignore={{ phpcs_modules_ignore | join(",") }} || true'
     with_items: phpcs_standards
 
   - name: PHP CodeSniffer reports build

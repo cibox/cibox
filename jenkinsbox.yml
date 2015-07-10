@@ -3,7 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: localvm
+- hosts: mvtp
   # connection: local
   gather_facts: no
   remote_user: root
