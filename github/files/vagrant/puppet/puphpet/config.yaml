@@ -120,7 +120,7 @@ nginx:
                 - 'APP_ENV dev'
 php:
     install: '0'
-    version: '54'
+    version: '56'
     composer: '0'
     modules:
         php:
