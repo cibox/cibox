@@ -1,8 +1,8 @@
 ---
 vagrantfile-local:
     vm:
-        box: ubuntu/trusty64
-        box_url: 'https://vagrantcloud.com/ubuntu/boxes/trusty64/versions/20150609.0.10/providers/virtualbox.box'
+        box: ubuntu14.04LTS_cibox.box
+        box_url: 'http://128.199.55.125/ubuntu14.04LTS_cibox.box'
         hostname: null
         network:
             private_network: 192.168.56.132
