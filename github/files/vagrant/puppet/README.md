@@ -38,6 +38,14 @@ in ```/etc/hosts``` or just use another ServerName in apache.yml
 
 If you have Vagrant HostUpdater plugin, your hosts file will be automatically updated.
 
+VirtualBox additions
+=====
+For automatic update additions within guest, please install proper plugin
+
+```sh
+vagrant plugin install vagrant-vbguest
+```
+
 
 Tools
 =====
