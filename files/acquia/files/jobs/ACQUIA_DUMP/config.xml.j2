@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>
+cd /var/www/backup
+
+# Make regular dump.
+DUMP_NAME=`date +%Y_%m_%d_%M_%S`_{{ item.environment_name }}.sql.gz
+
+# Create folder for backups.
+sudo mkdir -p ./{{ item.environment_name }}
+sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "mkdir -p /home/{{ project_name }}/backups/{{ item.environment_name }}"
+
+# Make backup on Acquia server.
+sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "drush @{{ project_name }}.{{ item.environment_name }} sql-dump | gzip -9 > /home/{{ project_name }}/backups/{{ item.environment_name }}/$DUMP_NAME"
+sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "cp /home/{{ project_name }}/backups/{{ item.environment_name }}/$DUMP_NAME /home/{{ project_name }}/backups/latest_{{ item.environment_name }}.sql.gz"
+
+# Copy backup to CI server.
+sudo scp {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }}:/home/{{ project_name }}/backups/latest_{{ item.environment_name }}.sql.gz ./{{ item.environment_name }}/$DUMP_NAME
+sudo cp ./{{ item.environment_name }}/$DUMP_NAME ./latest_{{ item.environment_name }}.sql.gz
+      </command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>
