@@ -12,8 +12,8 @@
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <name>origin</name>
-        <refspec>+refs/pull/*:refs/remotes/origin/pr/*</refspec>
+        <name></name>
+        <refspec></refspec>
         <url>https://github.com/propeoplemd/PROJECTNAME_CHANGE_ME.git</url>
         <credentialsId>c55a496e-7717-4f51-88d5-1a50b478ba55</credentialsId>
       </hudson.plugins.git.UserRemoteConfig>

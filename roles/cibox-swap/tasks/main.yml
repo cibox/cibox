@@ -12,7 +12,6 @@
   - name: Make swapfile as swap
     sudo: yes
     shell: 'mkswap /swapfile1'
-    when: is_swapfile.size != 0
 
   - name: Check if swap enabled as swapon
     sudo: yes
@@ -22,9 +21,8 @@
   - name: Enable swap
     sudo: yes
     shell: 'swapon /swapfile1'
-    when: is_swapfile.size != 0 and swapon.stdout.find('swapfile1') == -1
+    when: swapon.stdout.find('swapfile1') == -1
 
   - name: Add swap to fstab
     sudo: yes
     mount: name=swap src=/swapfile1 fstype=swap opts=default state=present
-    when: is_swapfile.size != 0
