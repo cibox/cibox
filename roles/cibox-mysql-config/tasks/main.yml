@@ -37,6 +37,7 @@
   - name: Setting mysqld to complain mode
     sudo: yes
     shell: aa-complain /usr/sbin/mysqld
+    ignore_errors: yes
 
   - name: Add preconfigured settings to my.cnf file
     ini_file: dest=/etc/mysql/my.cnf section={{ item.section }} option={{ item.option }} value={{ item.value }}
