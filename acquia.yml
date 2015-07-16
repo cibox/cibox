@@ -5,7 +5,6 @@
   remote_user: root
 
   vars:
-    # @todo skip SSH key checking http://xmodulo.com/how-to-accept-ssh-host-keys-automatically-on-linux.html
     # @todo registry rebuild.
     # @todo keep only 10 backups in folder.
     # @todo add description.
@@ -60,6 +59,22 @@
 
     - shell: cat .ssh/id_rsa.pub
       register: jenkins_user_key
+      sudo: yes
+      sudo_user: jenkins
+
+    - name: Accept ssh host keys automatically for root
+      lineinfile:
+        dest: .ssh/config
+        line: 'Host *\nStrictHostKeyChecking no'
+        create: yes
+      sudo: yes
+      sudo_user: root
+
+    - name: Accept ssh host keys automatically for jenkins
+      lineinfile:
+        dest: .ssh/config
+        line: 'Host *\nStrictHostKeyChecking no'
+        create: yes
       sudo: yes
       sudo_user: jenkins
 
