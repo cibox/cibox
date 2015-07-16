@@ -1,0 +1,13 @@
+---
+env:
+  pre_settings:
+    - { name: '$bigtree["config"]["domain"]', status: true, value: '{{ site_url }}' }
+    - { name: '$bigtree["config"]["www_root"]', status: true, value: '{{ site_url }}' }
+    - { name: '$bigtree["config"]["environment_live_url"]', status: true, value: '{{ origin_site_url }}' }
+    - { name: '$bigtree["config"]["db"]["name"]', status: true, value: '{{ mysql_db }}' }
+    - { name: '$bigtree["config"]["db"]["user"]', status: true, value: '{{ mysql_user }}' }
+    - { name: '$bigtree["config"]["db"]["password"]', status: true, value: '{{ mysql_pass }}' }
+    - { name: '$bigtree["config"]["db"]["host"]', status: true, value: '127.0.0.1' }
+  modules: []
+  drush_commands: []
+  post_settings: []

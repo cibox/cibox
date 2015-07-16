@@ -1,4 +1,5 @@
 ---
+cmf: bigtree
 drupal_user: admin
 drupal_pass: propeople
 installation_profile_name: pp
@@ -9,15 +10,16 @@ cache_folder: /var/www/cache
 backup_folder: /var/www/backup
 tmp_folder: /tmp
 php_env_vars: 'APP_ENV=dev' # APP_ENV=dev - this varible will be set at PR_BUILDER from CI shell executor.
-site_url: 'http://drupal.192.168.56.132.xip.io/'
+site_url: 'http://bt.192.168.56.132.xip.io/'
 # Site url to download assets via stage_file_proxy.
 origin_site_url: 'http://192.168.56.132.xip.io/'
 # This variable will be used for variable_get('environment'). Can be overridden by CI server.
 # development = 'default', demo = 'demo', staging = 'staging', production = 'production'.
-pp_environment: 'default'
+# Bigtree-CMS: development = 'bt-dev', demo = 'bt-demo', staging = 'bt-staging', production = 'bt-production'
+pp_environment: 'bt-dev'
 # This variable allows select type of installation. Can be overridden by CI server.
 # From installation profile = 'profile', from sql dump = 'sql'.
-workflow_type: 'profile'
+workflow_type: 'sql'
 is_windows: false
 ci_server_username: 'jenkins'
 # This variable allows make backup from CI environment before processing.
@@ -34,3 +36,13 @@ backup_pass: givemebackup
 source_backup_name: latest_prod.sql.gz
 # URL to the source database. Can be overridden by CI server.
 source_database: http://{{ backup_user }}:{{ backup_pass }}@192.168.56.132/backup/{{ source_backup_name }}
+# Settings file for unix OSes
+unix_settings_file: 'custom/environment.dev-propeople.php'
+# Settings file for Windows OSes
+windows_settings_file: '/tmp/reinstall_settings.php'
+# Source settings file been copied as initial.
+source_settings_file: 'custom/environment.prod-blackmesh.php'
+# Destination settings file been used as working.
+dest_settings_file: 'custom/environment.php'
+# Debug mode status
+debug: false

@@ -1,32 +1,34 @@
 ---
 # This script contains commands to fill out Drupal settings after installation.
 - name: Getting name for settings (WINDOWS)
-  set_fact: settings_file=/tmp/reinstall_settings.php
+  set_fact: settings_file={{ windows_settings_file }}
   when: is_windows == true
 
 - name: Getting name for settings (UNIX)
-  set_fact: settings_file=sites/default/settings.php
-  when: is_windows == false
+  set_fact: settings_file={{ unix_settings_file }}
+  when: not is_windows
 
 - name: Remove settings.php
-  file: name={{ settings_file }} state=absent
+  file: name={{ dest_settings_file }} state=absent
   sudo: yes
 
 - name: Creating settings.php
   sudo: yes
-  shell: "cp sites/default/default.settings.php {{ settings_file }}"
+  shell: "cp {{ settings_file }} {{ dest_settings_file }}"
 
+# @todo Split to {{ cmf }}.yml
 - name: Adding database variable to settings.php
   sudo: yes
-  lineinfile: dest='{{ settings_file }}' line='$databases = array(\"default\" => array (\"default\" => array (\"database\" => \"{{ mysql_db }}\", \"username\" => \"{{ mysql_user }}\", \"password\" => \"{{ mysql_pass }}\", \"host\" => \"127.0.0.1\", \"port\" => \"\", \"driver\" => \"mysql\", \"prefix\" => \"\", ), ), );'
+  lineinfile: dest='{{ dest_settings_file }}' line='$databases = array(\"default\" => array (\"default\" => array (\"database\" => \"{{ mysql_db }}\", \"username\" => \"{{ mysql_user }}\", \"password\" => \"{{ mysql_pass }}\", \"host\" => \"127.0.0.1\", \"port\" => \"\", \"driver\" => \"mysql\", \"prefix\" => \"\", ), ), );'
+  when: cmf == 'drupal'
 
-- name: Add general pre-settings to settings.php
-  lineinfile: dest='{{ settings_file }}' line='{{ item.name }} = \"{{ item.value }}\";'
+- name: Add general pre-settings to {{ settings_file }}
+  lineinfile: dest='{{ dest_settings_file }}' line='{{ item.name }} = \"{{ item.value }}\";'
   when: item.status == true
   with_items: global_env.pre_settings
 
 - name: Add environment specific pre-settings
-  lineinfile: dest='{{ settings_file }}' line='{{ item.name }} = \"{{ item.value }}\";'
+  lineinfile: dest='{{ dest_settings_file }}' line='{{ item.name }} = \"{{ item.value }}\";'
   when: item.status == true
   with_items: env.pre_settings
 

@@ -2,18 +2,18 @@
 # This script contains commands to fill out Drupal settings before installation.
 # Executes only for "SQL workflow".
 - name: Getting name for settings (WINDOWS)
-  set_fact: settings_file=/tmp/reinstall_settings.php
-  when: is_windows == true
+  set_fact: settings_file={{ windows_settings_file }}
+  when: is_windows and settings_file is not defined
 
 - name: Getting name for settings (UNIX)
-  set_fact: settings_file=sites/default/settings.php
-  when: is_windows == false
+  set_fact: settings_file={{ unix_settings_file }}
+  when: not is_windows and settings_file is not defined
 
 - name: Copy settings to tmp folder (WINDOWS)
-  shell: cp sites/default/settings.php {{ settings_file }}
-  when: is_windows == true
+  shell: cp {{ settings_file }} {{ dest_settings_file }}
+  when: is_windows
 
-- name: Add general post-settings to settings.php
+- name: Add general post-settings to {{ settings_file }}
   lineinfile: dest='{{ settings_file }}' line='{{ item.name }} = \"{{ item.value }}\";'
   when: item.status == true
   with_items: global_env.post_settings
@@ -24,5 +24,5 @@
   with_items: env.post_settings
 
 - name: Copy settings back (WINDOWS)
-  shell: cp {{ settings_file }} sites/default/settings.php
-  when: is_windows == true
+  shell: cp {{ settings_file }} {{ dest_settings_file }}
+  when: is_windows
