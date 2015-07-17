@@ -15,12 +15,16 @@ Drupal Vagrant Dev box for CIbox support
 vagrant up && vagrant ssh
 ```
 
-use 
-```sh
-sh reinstall.sh
-```
-for drupal reinstallation from scratch
+**Drupal reinstallation from scratch**
 
+Unix users
+```sh
+sudo sh reinstall.sh
+```
+Windows users
+```sh
+sudo sh reinstall.sh --windows
+```
 By default your site will be accessible by using this url. 
 
 ```
@@ -31,7 +35,7 @@ http://drupal.192.168.56.132.xip.io/
 If ```xip.io``` not working - create row with
 
 ```hosts
-192.168.56.112 drupal.192.168.56.112.xip.io
+192.168.56.112 drupal.192.168.56.132.xip.io
 ```
 
 in ```/etc/hosts``` or just use another ServerName in apache.yml
@@ -127,31 +131,3 @@ Install [Cygwin](https://servercheck.in/blog/running-ansible-within-windows) acc
 Run Cygwin as Administrator user.
 
 Use default flow to up Vagrant but run `sh reinstall.yml --windows`
-
-##Windows troubleshooting
-
-If you will see error liek ```...[error 26] file is busy...``` during ```sh reinstall.sh``` modify that line:
-
-before
-
-```yml
-name: Stage File Proxy settings
-sudo: yes
-lineinfile: dest='sites/default/settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"{{ stage_file_proxy_url }}";'
-```
-
-after:
-
-```yml
-name: Copy settings.php
-sudo: yes
-shell: cp sites/default/settings.php /tmp/reinstall_settings.php
-
-name: Stage File Proxy settings
-sudo: yes
-lineinfile: dest='sites/default/settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"{{ stage_file_proxy_url }}\";'
-
-name: Restore settings.php
-sudo: yes
-shell: cp /tmp/reinstall_settings.php sites/default/settings.php
-```
