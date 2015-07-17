@@ -9,6 +9,8 @@
     # @todo keep only 10 backups in folder.
     # @todo add description.
     # @todo add screenshots from Acquia.
+    # @todo Pull changes from World View, Slack and etc.
+    # @todo create documentation about GitHub HOOKS for PR builder and GitHub plugins.
     root_user: 'root'
     jenkins_user: 'jenkins'
 
