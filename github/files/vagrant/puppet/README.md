@@ -19,11 +19,11 @@ vagrant up && vagrant ssh
 
 Unix users
 ```sh
-sudo sh reinstall.sh
+sh reinstall.sh
 ```
 Windows users
 ```sh
-sudo sh reinstall.sh --windows
+sh reinstall.sh --windows
 ```
 By default your site will be accessible by using this url. 
 
