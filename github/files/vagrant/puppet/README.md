@@ -15,12 +15,16 @@ Drupal Vagrant Dev box for CIbox support
 vagrant up && vagrant ssh
 ```
 
-use 
+**Drupal reinstallation from scratch**
+
+Unix users
 ```sh
 sh reinstall.sh
 ```
-for drupal reinstallation from scratch
-
+Windows users
+```sh
+sh reinstall.sh --windows
+```
 By default your site will be accessible by using this url. 
 
 ```
@@ -31,7 +35,7 @@ http://drupal.192.168.56.132.xip.io/
 If ```xip.io``` not working - create row with
 
 ```hosts
-192.168.56.112 drupal.192.168.56.112.xip.io
+192.168.56.112 drupal.192.168.56.132.xip.io
 ```
 
 in ```/etc/hosts``` or just use another ServerName in apache.yml
