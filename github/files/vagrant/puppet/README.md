@@ -131,3 +131,31 @@ Install [Cygwin](https://servercheck.in/blog/running-ansible-within-windows) acc
 Run Cygwin as Administrator user.
 
 Use default flow to up Vagrant but run `sh reinstall.yml --windows`
+
+##Windows troubleshooting
+
+If you will see error liek ```...[error 26] file is busy...``` during ```sh reinstall.sh``` modify that line:
+
+before
+
+```yml
+name: Stage File Proxy settings
+sudo: yes
+lineinfile: dest='sites/default/settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"{{ stage_file_proxy_url }}";'
+```
+
+after:
+
+```yml
+name: Copy settings.php
+sudo: yes
+shell: cp sites/default/settings.php /tmp/reinstall_settings.php
+
+name: Stage File Proxy settings
+sudo: yes
+lineinfile: dest='sites/default/settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"{{ stage_file_proxy_url }}\";'
+
+name: Restore settings.php
+sudo: yes
+shell: cp /tmp/reinstall_settings.php sites/default/settings.php
+```
