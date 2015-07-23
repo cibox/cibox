@@ -11,6 +11,7 @@
     # @todo add screenshots from Acquia.
     # @todo Pull changes from World View, Slack and etc.
     # @todo create documentation about GitHub HOOKS for PR builder and GitHub plugins.
+    # @todo Drush rr before update
     root_user: 'root'
     jenkins_user: 'jenkins'
 
