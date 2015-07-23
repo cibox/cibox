@@ -33,6 +33,9 @@
     when: workflow_type == "profile"
     tags: [ 'profile-workflow' ]
 
+  - include: devops/reinstall/prepare_environment.yml
+    tags: [ 'prepare-environment' ]
+
   - include: devops/reinstall/post_settings.yml
     tags: [ 'settings', 'post-settings' ]
 
