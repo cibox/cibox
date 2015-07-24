@@ -6,7 +6,6 @@
 
   vars:
     # @todo registry rebuild.
-    # @todo keep only 10 backups in folder.
     # @todo add description.
     # @todo add screenshots from Acquia.
     # @todo Pull changes from World View, Slack and etc.
@@ -51,6 +50,101 @@
         origin_environment: 'prod'
       }
 
+  tasks:
+
+    - name: Create folders for DUMP jobs
+      file: path=/var/lib/jenkins/jobs/ACQUIA_DUMP_{{ item.environment_name }} state=directory
+      with_items: servers
+      tags:
+        - dump-jobs
+
+    - name: Copy DUMP jobs
+      template: src=files/acquia/jobs/ACQUIA_DUMP/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_DUMP_{{ item.environment_name }}/config.xml
+      with_items: servers
+      notify:
+        - 'Restart Jenkins'
+      tags:
+        - dump-jobs
+
+    - name: Create folders for GIT jobs
+      file: path=/var/lib/jenkins/jobs/ACQUIA_DEPLOY_BRANCH_{{ item.environment_name }} state=directory
+      with_items: servers
+      tags:
+        - git-jobs
+
+    - name: Copy GIT jobs
+      template: src=files/acquia/jobs/ACQUIA_DEPLOY_BRANCH/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_DEPLOY_BRANCH_{{ item.environment_name }}/config.xml
+      with_items: servers
+      notify:
+        - 'Restart Jenkins'
+      tags:
+        - git-jobs
+
+    - name: Create folders for FILES jobs
+      file: path=/var/lib/jenkins/jobs/ACQUIA_SYNC_FILES_{{ item.environment_name }} state=directory
+      with_items: servers
+      tags:
+        - files-jobs
+
+    - name: Copy FILES jobs
+      template: src=files/acquia/jobs/ACQUIA_SYNC_FILES/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_SYNC_FILES_{{ item.environment_name }}/config.xml
+      with_items: servers
+      notify:
+        - 'Restart Jenkins'
+      tags:
+        - files-jobs
+
+    - name: Create folders for UPDATE jobs
+      file: path=/var/lib/jenkins/jobs/ACQUIA_UPDATE_{{ item.environment_name }} state=directory
+      with_items: servers
+      tags:
+        - update-jobs
+
+    - name: Copy UPDATE jobs
+      template: src=files/acquia/jobs/ACQUIA_UPDATE/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_UPDATE_{{ item.environment_name }}/config.xml
+      with_items: servers
+      notify:
+        - 'Restart Jenkins'
+      tags:
+        - update-jobs
+
+    - name: Create folders for SYNC DB jobs
+      file: path=/var/lib/jenkins/jobs/ACQUIA_SYNC_DB_{{ item.environment_name }} state=directory
+      with_items: servers
+      tags:
+        - db-jobs
+
+    - name: Copy SYNC DB jobs
+      template: src=files/acquia/jobs/ACQUIA_SYNC_DB/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_SYNC_DB_{{ item.environment_name }}/config.xml
+      with_items: servers
+      notify:
+        - 'Restart Jenkins'
+      tags:
+        - db-jobs
+
+    - name: Create folders for RELEASE DB jobs
+      file: path=/var/lib/jenkins/jobs/ACQUIA_RELEASE_{{ item.environment_name }} state=directory
+      with_items: servers
+      tags:
+        - release-jobs
+
+    - name: Copy RELEASE jobs
+      template: src=files/acquia/jobs/ACQUIA_RELEASE/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_RELEASE_{{ item.environment_name }}/config.xml
+      with_items: servers
+      notify:
+        - 'Restart Jenkins'
+      tags:
+        - release-jobs
+
+    - name: Set permissions for jobs
+      file: path=/var/lib/jenkins/jobs owner=jenkins group=jenkins recurse=yes state=directory
+      tags:
+        - release-jobs
+        - db-jobs
+        - files-jobs
+        - dump-jobs
+        - git-jobs
+
   post_tasks:
     - user: name={{ root_user }} generate_ssh_key=yes ssh_key_bits=2048 ssh_key_file=.ssh/id_rsa
     - user: name={{ jenkins_user }} generate_ssh_key=yes ssh_key_bits=2048 ssh_key_file=.ssh/id_rsa
@@ -81,73 +175,9 @@
       sudo: yes
       sudo_user: jenkins
 
-    - debug: msg=Please attach following SSH keys to Acquia user
+    - debug: msg='Please attach following SSH keys to Acquia user'
     - debug: var=root_user_key.stdout
     - debug: var=jenkins_user_key.stdout
-
-  tasks:
-    - name: Create folders for DUMP jobs
-      file: path=/var/lib/jenkins/jobs/ACQUIA_DUMP_{{ item.environment_name }} state=directory
-      with_items: servers
-
-    - name: Copy DUMP jobs
-      template: src=files/acquia/jobs/ACQUIA_DUMP/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_DUMP_{{ item.environment_name }}/config.xml
-      with_items: servers
-      notify:
-        - 'Restart Jenkins'
-
-    - name: Create folders for GIT jobs
-      file: path=/var/lib/jenkins/jobs/ACQUIA_DEPLOY_BRANCH_{{ item.environment_name }} state=directory
-      with_items: servers
-
-    - name: Copy GIT jobs
-      template: src=files/acquia/jobs/ACQUIA_DEPLOY_BRANCH/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_DEPLOY_BRANCH_{{ item.environment_name }}/config.xml
-      with_items: servers
-      notify:
-        - 'Restart Jenkins'
-
-    - name: Create folders for FILES jobs
-      file: path=/var/lib/jenkins/jobs/ACQUIA_SYNC_FILES_{{ item.environment_name }} state=directory
-      with_items: servers
-
-    - name: Copy FILES jobs
-      template: src=files/acquia/jobs/ACQUIA_SYNC_FILES/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_SYNC_FILES_{{ item.environment_name }}/config.xml
-      with_items: servers
-      notify:
-        - 'Restart Jenkins'
-
-    - name: Create folders for UPDATE jobs
-      file: path=/var/lib/jenkins/jobs/ACQUIA_UPDATE_{{ item.environment_name }} state=directory
-      with_items: servers
-
-    - name: Copy UPDATE jobs
-      template: src=files/acquia/jobs/ACQUIA_UPDATE/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_UPDATE_{{ item.environment_name }}/config.xml
-      with_items: servers
-      notify:
-        - 'Restart Jenkins'
-
-    - name: Create folders for SYNC DB jobs
-      file: path=/var/lib/jenkins/jobs/ACQUIA_SYNC_DB_{{ item.environment_name }} state=directory
-      with_items: servers
-
-    - name: Copy SYNC DB jobs
-      template: src=files/acquia/jobs/ACQUIA_SYNC_DB/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_SYNC_DB_{{ item.environment_name }}/config.xml
-      with_items: servers
-      notify:
-        - 'Restart Jenkins'
-
-    - name: Create folders for RELEASE DB jobs
-      file: path=/var/lib/jenkins/jobs/ACQUIA_RELEASE_{{ item.environment_name }} state=directory
-      with_items: servers
-
-    - name: Copy RELEASE jobs
-      template: src=files/acquia/jobs/ACQUIA_RELEASE/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_RELEASE_{{ item.environment_name }}/config.xml
-      with_items: servers
-      notify:
-        - 'Restart Jenkins'
-
-    - name: Set permissions for jobs
-      file: path=/var/lib/jenkins/jobs owner=jenkins group=jenkins recurse=yes state=directory
 
   handlers:
     - name: Restart Jenkins
