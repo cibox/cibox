@@ -11,6 +11,7 @@
     # @todo Pull changes from World View, Slack and etc.
     # @todo create documentation about GitHub HOOKS for PR builder and GitHub plugins.
     # @todo Drush rr before update
+    # @todo clear varnish
     root_user: 'root'
     jenkins_user: 'jenkins'
 
@@ -18,6 +19,7 @@
     project_name: 'CHANGE_ME'
     acquia_git_url: 'CHANGE_ME'
     github_git_url: 'CHANGE_ME'
+    build_origin_environment: 'prod'
 
     # Cloud hosting in most cases prod.hosting.acquia.com or devcloud.hosting.acquia.com,
     servers:
@@ -61,6 +63,19 @@
     - name: Copy DUMP jobs
       template: src=files/acquia/jobs/ACQUIA_DUMP/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_DUMP_{{ item.environment_name }}/config.xml
       with_items: servers
+      notify:
+        - 'Restart Jenkins'
+      tags:
+        - dump-jobs
+
+    - name: Create folders for NIGHTLY DUMP jobs
+      file: path=/var/lib/jenkins/jobs/NIGHTLY_DATABASE_DUMP state=directory
+      with_items: servers
+      tags:
+        - dump-jobs
+
+    - name: Copy NIGHTLY DUMP jobs
+      template: src=files/acquia/jobs/NIGHTLY_DATABASE_DUMP/config.xml.j2 dest=/var/lib/jenkins/jobs/NIGHTLY_DATABASE_DUMP/config.xml
       notify:
         - 'Restart Jenkins'
       tags:
