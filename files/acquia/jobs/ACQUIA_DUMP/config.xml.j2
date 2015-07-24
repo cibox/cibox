@@ -27,9 +27,15 @@ sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ 
 sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "drush @{{ project_name }}.{{ item.environment_name }} sql-dump | gzip -9 > /home/{{ project_name }}/backups/{{ item.environment_name }}/$DUMP_NAME"
 sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "cp /home/{{ project_name }}/backups/{{ item.environment_name }}/$DUMP_NAME /home/{{ project_name }}/backups/latest_{{ item.environment_name }}.sql.gz"
 
+# Keep only 20 backups on Acquia in env directory.
+sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "cd /home/{{ project_name }}/backups/{{ item.environment_name }} &amp;&amp; ls -C1 -t | awk 'NR>20' | sed -e "s/^/rm '/" -e "s/$/'/" | sh"
+
 # Copy backup to CI server.
 sudo scp {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }}:/home/{{ project_name }}/backups/latest_{{ item.environment_name }}.sql.gz ./{{ item.environment_name }}/$DUMP_NAME
 sudo cp ./{{ item.environment_name }}/$DUMP_NAME ./latest_{{ item.environment_name }}.sql.gz
+
+# Keep only 20 backups on CI server in env directory.
+cd ./{{ item.environment_name }} &amp;&amp; ls -C1 -t | awk 'NR>20' | sed -e "s/^/rm '/" -e "s/$/'/" | sh
       </command>
     </hudson.tasks.Shell>
   </builders>
