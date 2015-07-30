@@ -20,6 +20,8 @@
     acquia_git_url: 'CHANGE_ME'
     github_git_url: 'CHANGE_ME'
     build_origin_environment: 'prod'
+    acquia_user_email: ''
+    acquia_user_api_key: ''
 
     # Cloud hosting in most cases prod.hosting.acquia.com or devcloud.hosting.acquia.com,
     servers:
@@ -28,28 +30,32 @@
         server: 'CHANGE_ME',
         cloud_hosting: 'prod.hosting.acquia.com',
         git_branch: 'master',
-        origin_environment: 'prod'
+        origin_environment: 'prod',
+        domains: []
       }
       - {
         environment_name: 'test',
         server: 'CHANGE_ME',
         cloud_hosting: 'prod.hosting.acquia.com',
         git_branch: 'staging',
-        origin_environment: 'prod'
+        origin_environment: 'prod',
+        domains: []
       }
       - {
         environment_name: 'prod',
         server: 'CHANGE_ME',
         cloud_hosting: 'prod.hosting.acquia.com',
         git_branch: 'production',
-        origin_environment: ''
+        origin_environment: '',
+        domains: []
       }
       - {
         environment_name: 'ra',
         server: 'CHANGE_ME',
         cloud_hosting: 'prod.hosting.acquia.com',
         git_branch: 'production',
-        origin_environment: 'prod'
+        origin_environment: 'prod',
+        domains: []
       }
 
   tasks:

@@ -19,6 +19,11 @@ sleep 30
 
 sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "drush @{{ project_name }}.{{ item.environment_name }} updatedb -y"
 sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "drush @{{ project_name }}.{{ item.environment_name }} cc all -y"
+
+# Clear Varnish cache.
+{% for domain in item.domains %}
+sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "drush @{{ project_name }}.{{ item.environment_name }} ac-domain-purge {{ domain }} --email={{ acquia_user_email }} --key={{ acquia_user_api_key }} || true"
+{% endfor %}
       </command>
     </hudson.tasks.Shell>
   </builders>
