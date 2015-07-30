@@ -35,6 +35,7 @@ sudo scp {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ ite
 sudo cp ./{{ item.environment_name }}/$DUMP_NAME ./latest_{{ item.environment_name }}.sql.gz
 
 # Keep only 20 backups on CI server in env directory.
+sudo chmod 777 -R ./{{ item.environment_name }} 777
 cd ./{{ item.environment_name }} &amp;&amp; ls -C1 -t | awk 'NR>20' | sed -e "s/^/rm '/" -e "s/$/'/" | sh
       </command>
     </hudson.tasks.Shell>
