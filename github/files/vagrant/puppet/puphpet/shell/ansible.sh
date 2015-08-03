@@ -3,13 +3,13 @@
 echo 'Installing base packages for ansible'
 export "DEBIAN_FRONTEND=noninteractive"
 # ansible needs python.
-apt-get -y install python python-dev python-simplejson sudo curl make rsync git libmysqlclient-dev apparmor-utils >/dev/null
+apt-get -y --force-yes install python python-dev python-simplejson sudo curl make rsync git libmysqlclient-dev apparmor-utils >/dev/null
 
 # because basic ubuntu is too stripped down we need to add logging.
-apt-get --reinstall install -y bsdutils >/dev/null
+apt-get --reinstall install -y --force-yes bsdutils >/dev/null
 
 # needed to use apt-add-repository.
-apt-get -y install software-properties-common python-software-properties >/dev/null
+apt-get -y --force-yes install software-properties-common python-software-properties >/dev/null
 
 echo 'Finished installing base packages for ansible'
 
