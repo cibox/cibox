@@ -16,6 +16,13 @@
   with_items: apache_mods_enabled
   notify: restart apache
 
+- name: Disable Apache mods.
+  file:
+    path: "{{ apache_server_root }}/mods-enabled/{{ item }}"
+    state: absent
+  with_items: apache_mods_disabled
+  notify: restart apache
+
 - name: Add apache vhosts configuration.
   template:
     src: "vhosts-{{ apache_vhosts_version }}.conf.j2"
@@ -31,4 +38,12 @@
     src: "{{ apache_conf_path }}/sites-available/{{ apache_vhosts_filename }}"
     dest: "{{ apache_conf_path }}/sites-enabled/{{ apache_vhosts_filename }}"
     state: link
+  notify: restart apache
   when: apache_create_vhosts
+
+- name: Remove default vhost in sites-enabled.
+  file:
+    path: "{{ apache_conf_path }}/sites-enabled/{{ apache_default_vhost_filename }}"
+    state: absent
+  notify: restart apache
+  when: apache_remove_default_vhost
