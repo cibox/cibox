@@ -3,15 +3,15 @@ env:
   pre_settings: []
   modules: []
     - { name: 'dblog', status: true }
-    - { name: 'stage_file_proxy', status: true }
-    - { name: 'devel', status: true }
-    - { name: 'views_ui', status: true }
-    - { name: 'diff', status: true }
+    - { name: 'stage_file_proxy', status: false }
+    - { name: 'devel', status: false }
+    - { name: 'views_ui', status: false }
+    - { name: 'diff', status: false }
   drush_commands:
     - { name: 'search-api-clear', status: false, arguments: "-l {{ site_url }}" }
     - { name: 'search-api-index ', status: false, arguments: "-l {{ site_url }}" }
     - { name: 'solr-mark-all', status: false, arguments: "-l {{ site_url }}" }
     - { name: 'solr-index ', status: false, arguments: "-l {{ site_url }}" }
   post_settings:
-    - { name: '$conf["stage_file_proxy_origin"]', status: true, value: "{{ origin_site_url }}" }
     - { name: '$conf["error_level"]', status: true, value: '0' }
+    - { name: '$conf["stage_file_proxy_origin"]', status: false, value: "{{ origin_site_url }}" }
