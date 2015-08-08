@@ -1,7 +1,6 @@
 ---
 - name: Update apt cache.
   apt: update_cache=yes cache_valid_time=86400
-  ignore_errors: yes
 
 - name: Ensure Apache is installed.
   apt: "name={{ item }} state=installed"

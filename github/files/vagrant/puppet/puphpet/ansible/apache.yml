@@ -11,15 +11,21 @@
     apache_listen_port_ssl: 443
     apache_create_vhosts: true
     apache_vhosts_filename: "vhosts.conf"
+    apache_remove_default_vhost: true
     cibox_ssl_folder: /etc/apache/ssl
+    cibox_server_ip: 192.168.56.132
     apache_vhosts:
       - {
-        servername: "drupal.192.168.56.132.xip.io",
+        servername: "{{ cibox_server_ip }}.xip.io",
+        documentroot: "/var/www"
+      }
+      - {
+        servername: "drupal.{{ cibox_server_ip }}.xip.io",
         documentroot: "/var/www/docroot"
       }
     apache_vhosts_ssl:
       - {
-        servername: "drupal.192.168.56.132.xip.io",
+        servername: "drupal.{{ cibox_server_ip }}.xip.io",
         documentroot: "/var/www/docroot",
         certificate_file: "{{ cibox_ssl_folder }}/apache.crt",
         certificate_key_file: "{{ cibox_ssl_folder }}/apache.key",

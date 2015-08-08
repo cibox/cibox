@@ -44,6 +44,18 @@
     mode: 0644
   notify: restart webserver
 
+- name: Check for separate apache2 xdebug.ini
+  stat: path=/etc/php5/apache2/conf.d/xdebug.ini
+  register: php_apache_xdebug_ini
+
+- name: Symlink xdebug.ini into separate Apache2 directory.
+  file:
+    src: "{{ php_extension_conf_path }}/xdebug.ini"
+    dest: /etc/php5/apache2/conf.d/xdebug.ini
+    state: link
+  when: php_apache_xdebug_ini.stat.exists is defined and not php_apache_xdebug_ini.stat.exists
+  notify: restart webserver
+
 - name: Check for separate cli php conf.d directory.
   stat: path=/etc/php5/cli/conf.d
   register: php_cli_path
@@ -55,3 +67,4 @@
     dest: /etc/php5/cli/conf.d/xdebug.ini
     state: link
   when: php_xdebug_cli_enable and php_cli_path.stat.isdir is defined and php_cli_path.stat.isdir
+  notify: restart webserver

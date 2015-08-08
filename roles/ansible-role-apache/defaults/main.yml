@@ -7,6 +7,10 @@ apache_listen_port_ssl: 443
 apache_create_vhosts: true
 apache_vhosts_filename: "vhosts.conf"
 
+# On Debian/Ubuntu, a default virtualhost is included in Apache's configuration.
+# Set this to `true` to remove that default.
+apache_remove_default_vhost: false
+
 apache_vhosts:
   # Additional properties: 'serveradmin, serveralias, extra_parameters'.
   - {servername: "local.dev", documentroot: "/var/www/html"}
@@ -25,6 +29,8 @@ apache_vhosts_ssl: []
 apache_ssl_protocol: "All -SSLv2 -SSLv3"
 apache_ssl_cipher_suite: "AES256+EECDH:AES256+EDH"
 
+# Only used on Debian/Ubuntu.
 apache_mods_enabled:
   - rewrite.load
   - ssl.load
+apache_mods_disabled: []
