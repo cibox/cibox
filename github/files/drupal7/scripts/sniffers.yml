@@ -191,6 +191,7 @@
     with_items: phpcs_standards
 
   - name: PHP CodeSniffer for features reports build
+    ignore_errors: yes
     shell: 'if grep "FOUND" {{ build_reports_dir }}/Features{{ item.name }}sniff.txt; then echo "<strong>`wc -l < {{ build_reports_dir }}/Features{{ item.name }}sniff.txt`</strong> CodeSniffer: Features {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/Features{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
     with_items: phpcs_standards
 
