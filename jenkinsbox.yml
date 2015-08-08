@@ -81,6 +81,15 @@
     php_apc_enabled_in_ini: true
 
   pre_tasks:
+  - name: Update apt cache
+    sudo: yes
+    apt: update_cache=yes
+    ignore_errors: yes
+    tags:
+      - php-stack
+      - mysql
+      - apache
+
   - name: Setup initial packages onto clean system for ansible
     sudo: yes
     # Installing sudo on small ubuntu install.
@@ -110,15 +119,6 @@
     lineinfile: dest=/etc/sudoers line="jenkins ALL=(ALL) NOPASSWD:ALL"
     tags:
       - cibox-jenkins
-
-  - name: Update apt cache
-    sudo: yes
-    apt: update_cache=yes
-    ignore_errors: yes
-    tags:
-      - php-stack
-      - mysql
-      - apache
 
   - name: Install apt packages
     apt: name={{ item }} state=present
