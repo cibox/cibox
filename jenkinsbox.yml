@@ -35,7 +35,7 @@
       - 'git'
       - 'github-api'
       - 'github'
-      - 'ghprb'
+      - 'http://updates.jenkins-ci.org/download/plugins/ghprb/1.24.4/ghprb.hpi'
       - 'htmlpublisher'
       - 'jquery'
       - 'matrix-auth'
