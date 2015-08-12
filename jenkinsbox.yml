@@ -43,7 +43,7 @@
       - 'php'
       - 'project-description-setter'
       - 'ssh-credentials'
-      - 'hipchat'
+      - 'https://updates.jenkins-ci.org/download/plugins/hipchat/0.1.9/hipchat.hpi'
       - 'scripttrigger'
       - 'parameterized-trigger'
 
