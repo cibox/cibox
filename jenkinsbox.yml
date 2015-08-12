@@ -3,7 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: ct
+- hosts: CHANGE_ME
   # connection: local
   gather_facts: no
   remote_user: root
@@ -38,6 +38,9 @@
       - org.jenkinsci.plugins.ghprb.GhprbTrigger.xml
       - jobs/{{ project_name }}_PR_BUILDER/config.xml
       - jobs/DEMO/config.xml
+    
+    project_name: CHANGE_ME
+    
     backup_folder: /var/www/backup
     backup_folder_user: propeople
     backup_folder_pass: givemebackup
