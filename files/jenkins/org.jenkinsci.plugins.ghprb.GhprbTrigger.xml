@@ -12,10 +12,10 @@
   <msgSuccess>Test PASSed.</msgSuccess>
   <msgFailure>Test FAILed.</msgFailure>
   <autoCloseFailedPullRequests>false</autoCloseFailedPullRequests>
-  <username>CHANGE_ME_to_botname</username>
+  <username></username>
   <password>CHANGE_ME</password>
   <accessToken>CHANGE_ME</accessToken>
-  <adminlist>CHANGE_ME_to_botname
+  <adminlist>
 podarok
 ygerasimov</adminlist>
   <publishedURL>http://ci_server_ip_address:8080/</publishedURL>
