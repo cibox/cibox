@@ -7,10 +7,14 @@
 - include: dependencies_deb.yml
   when: ansible_distribution in [ 'Debian', 'Ubuntu' ]
 
+# Download Jenkins package
+- name: Download Jenkins deb
+  get_url: url={{ jenkins_pkg_version }} dest={{ jenkins_dest }}/jenkins.deb mode=440
+
 # Install Jenkins
 - name: Install Jenkins
   sudo: yes
-  action: "{{ ansible_pkg_mgr }} pkg=jenkins state=latest"
+  shell: "dpkg -i {{ jenkins_dest }}/jenkins.deb"
   when: ansible_distribution in [ 'Debian', 'Ubuntu' ]
   register: jenkins_install
 

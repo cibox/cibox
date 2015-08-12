@@ -1,8 +1,27 @@
 ---
 placeholder: 'placeholder'
-# plugins:
-#   - 'ldap'
-#   - 'github'
-#   - 'translation'
-#   - 'preSCMbuildstep'
-#   - 'gravatar'
+
+# We are using unix pam autentification module for jenkins.
+plugins:
+  - 'https://updates.jenkins-ci.org/download/plugins/ansicolor/0.4.1/ansicolor.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/credentials/1.16.1/credentials.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/git-client/1.10.1/git-client.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/git/2.2.5/git.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/github-api/1.58/github-api.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/github/1.9.1/github.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/ghprb/1.15-0/ghprb.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/htmlpublisher/1.5/htmlpublisher.phi'
+  - 'https://updates.jenkins-ci.org/download/plugins/jquery/1.11.2-0/jquery.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/matrix-auth/1.2/matrix-auth.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/matrix-project/1.4/matrix-project.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/php/1.0/php.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/project-description-setter/1.1/project-description-setter.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/ssh-credentials/1.9/ssh-credentials.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/hipchat/0.1.9/hipchat.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/scripttrigger/0.31/scripttrigger.hpi'
+  - 'https://updates.jenkins-ci.org/download/plugins/parameterized-trigger/2.28/parameterized-trigger.hpi'
+
+jenkins_pkg_version: 'http://pkg.jenkins-ci.org/debian/binary/jenkins_1.624_all.deb'
+
+# Delay before jenkins up and running. Sometimes it is not enouph.
+startup_delay_s: 40

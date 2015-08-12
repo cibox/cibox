@@ -24,28 +24,7 @@
     - { role: cibox-behat-selenium2, tags: ["cibox-behat-selenium", "behat-selenium"] }
 
   vars:
-    # We are using unix pam autentification module for jenkins.
-    plugins:
-      - 'ansicolor'
-      - 'credentials'
-      - 'https://updates.jenkins-ci.org/download/plugins/git-client/1.10.1/git-client.hpi'
-      - 'https://updates.jenkins-ci.org/download/plugins/git/2.2.5/git.hpi'
-      - 'https://updates.jenkins-ci.org/download/plugins/github-api/1.58/github-api.hpi'
-      - 'https://updates.jenkins-ci.org/download/plugins/github/1.9.1/github.hpi'
-      - 'https://updates.jenkins-ci.org/download/plugins/ghprb/1.15-0/ghprb.hpi'
-      - 'htmlpublisher'
-      - 'jquery'
-      - 'matrix-auth'
-      - 'matrix-project'
-      - 'php'
-      - 'project-description-setter'
-      - 'ssh-credentials'
-      - 'https://updates.jenkins-ci.org/download/plugins/hipchat/0.1.9/hipchat.hpi'
-      - 'scripttrigger'
-      - 'parameterized-trigger'
 
-    # Delay before jenkins up and running. Sometimes it is not enouph.
-    startup_delay_s: 40
     pear_channels:
       - pear.drush.org
     pear_packages:
