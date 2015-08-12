@@ -10,7 +10,7 @@ plugins:
   - 'https://updates.jenkins-ci.org/download/plugins/github-api/1.58/github-api.hpi'
   - 'https://updates.jenkins-ci.org/download/plugins/github/1.9.1/github.hpi'
   - 'https://updates.jenkins-ci.org/download/plugins/ghprb/1.15-0/ghprb.hpi'
-  - 'https://updates.jenkins-ci.org/download/plugins/htmlpublisher/1.5/htmlpublisher.phi'
+  - 'https://updates.jenkins-ci.org/download/plugins/htmlpublisher/1.5/htmlpublisher.hpi'
   - 'https://updates.jenkins-ci.org/download/plugins/jquery/1.11.2-0/jquery.hpi'
   - 'https://updates.jenkins-ci.org/download/plugins/matrix-auth/1.2/matrix-auth.hpi'
   - 'https://updates.jenkins-ci.org/download/plugins/matrix-project/1.4/matrix-project.hpi'

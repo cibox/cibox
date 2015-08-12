@@ -3,7 +3,7 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: localvm
+- hosts: ct
   # connection: local
   gather_facts: no
   remote_user: root
@@ -29,18 +29,10 @@
       - pear.drush.org
     pear_packages:
       - drush/drush
-    cibox_apt_packages:
-      - apache2
-      - php5
-      - php5-gd
-      - php5-mcrypt
-      - libapache2-mod-php5
-      - php5-mysql
-      - php5-curl
-      - php5-memcached
-      - php5-imagick
-    apache2_modules:
-      - rewrite
+    cibox_apt_packages: []
+
+    apache2_modules: []
+
     jenkins_configs:
       - jenkins.model.JenkinsLocationConfiguration.xml
       - org.jenkinsci.plugins.ghprb.GhprbTrigger.xml

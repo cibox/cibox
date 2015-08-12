@@ -12,6 +12,10 @@ __php_packages:
   - php-pear
   - php-apc
   - libpcre3-dev
+  - php5-mysql
+  - php5-memcached
+  - php5-imagick
+  - libapache2-mod-php5
 __php_webserver_daemon: "apache2"
 
 # Vendor-specific configuration paths on Debian/Ubuntu make my brain asplode.
