@@ -23,9 +23,6 @@
     - { role: cibox-ssl-config, tags: ["apache", "php-stack", "ssl", "cibox-ssl-config"] }
     - { role: cibox-behat-selenium2, tags: ["cibox-behat-selenium", "behat-selenium"] }
 
-  vars_prompt:
-    jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
-    jenkins_pass: "Enter linux root user pass that will be used as superuser in jenkins UI"
   vars:
     # We are using unix pam autentification module for jenkins.
     plugins:
