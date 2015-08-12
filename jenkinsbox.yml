@@ -31,11 +31,11 @@
     plugins:
       - 'ansicolor'
       - 'credentials'
-      - 'git-client'
-      - 'git'
-      - 'github-api'
-      - 'github'
-      - 'ghprb'
+      - 'https://updates.jenkins-ci.org/download/plugins/git-client/1.10.1/git-client.hpi'
+      - 'https://updates.jenkins-ci.org/download/plugins/git/2.2.5/git.hpi'
+      - 'https://updates.jenkins-ci.org/download/plugins/github-api/1.58/github-api.hpi'
+      - 'https://updates.jenkins-ci.org/download/plugins/github/1.9.1/github.hpi'
+      - 'https://updates.jenkins-ci.org/download/plugins/ghprb/1.15-0/ghprb.hpi'
       - 'htmlpublisher'
       - 'jquery'
       - 'matrix-auth'
@@ -46,12 +46,7 @@
       - 'hipchat'
       - 'scripttrigger'
       - 'parameterized-trigger'
-    # @todo not uset yet
-    project_name: CHANGE_ME
-    # @todo not uset yet
-    project_url: https://github.com/podarok/{{ project_name }}
-    # @todo not uset yet
-    project_repo_url: https://github.com/podarok/{{ project_name }}.git
+
     # Delay before jenkins up and running. Sometimes it is not enouph.
     startup_delay_s: 40
     pear_channels:
