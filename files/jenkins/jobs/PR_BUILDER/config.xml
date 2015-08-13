@@ -50,10 +50,7 @@
     <triggers>
         <org.jenkinsci.plugins.ghprb.GhprbTrigger plugin="ghprb@1.15-0">
             <spec>H/3 * * * *</spec>
-            <adminlist>
-                podarok
-                ygerasimov
-            </adminlist>
+            <adminlist></adminlist>
             <allowMembersOfWhitelistedOrgsAsAdmin>true</allowMembersOfWhitelistedOrgsAsAdmin>
             <orgslist>propeoplemd</orgslist>
             <cron>H/3 * * * *</cron>

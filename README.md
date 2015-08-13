@@ -1,6 +1,9 @@
 CIBox (Continuous Integration Box)
 =====
 
+Quick Start
+=====
+https://github.com/propeoplemd/cibox/wiki/QUICKSTART
 
 Known Issues
 =====
