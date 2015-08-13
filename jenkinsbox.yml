@@ -24,6 +24,8 @@
     - { role: cibox-behat-selenium2, tags: ["cibox-behat-selenium", "behat-selenium"] }
 
   vars:
+  
+    project_name: CHANGE_ME
 
     pear_channels:
       - pear.drush.org
@@ -38,8 +40,6 @@
       - org.jenkinsci.plugins.ghprb.GhprbTrigger.xml
       - jobs/{{ project_name }}_PR_BUILDER/config.xml
       - jobs/DEMO/config.xml
-    
-    project_name: CHANGE_ME
     
     backup_folder: /var/www/backup
     backup_folder_user: propeople
