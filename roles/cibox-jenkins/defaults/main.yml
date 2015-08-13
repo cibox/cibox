@@ -12,7 +12,7 @@ plugins:
   - 'http://mirrors.jenkins-ci.org/plugins/git/2.4.0/git.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/github-api/1.69/github-api.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/github/1.12.1/github.hpi'
-  - 'http://mirrors.jenkins-ci.org/plugins/ghprb/1.24.4/ghprb.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/ghprb/1.15-0/ghprb.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/htmlpublisher/1.5/htmlpublisher.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/jquery/1.11.2-0/jquery.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/matrix-auth/1.2/matrix-auth.hpi'
