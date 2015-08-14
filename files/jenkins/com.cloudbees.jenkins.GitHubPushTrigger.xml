@@ -3,7 +3,7 @@
   <manageHook>true</manageHook>
   <credentials>
     <com.cloudbees.jenkins.Credential>
-      <username>CHANGE_ME_to_botname</username>
+      <username></username>
       <apiUrl>https://api.github.com</apiUrl>
       <oauthAccessToken>CHANGE_ME</oauthAccessToken>
     </com.cloudbees.jenkins.Credential>
