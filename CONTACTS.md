@@ -10,3 +10,11 @@ Senior DevOps Alexandr Schedrov https://github.com/Sanchiz alexander.schedrov@gm
 Senior Developer Artem Miroshnik https://github.com/M1r1k
 
 Senior Developer Yurii Gerasimov https://github.com/ygerasimov
+
+CIBox mailing list
+=====
+
+- To post to this group, send email to ci_box@googlegroups.com
+- To unsubscribe from this group, send email to ci_box+unsubscribe@googlegroups.com
+- Visit and Join this group at https://groups.google.com/d/forum/ci_box
+- For more options, visit https://groups.google.com/d/optout
