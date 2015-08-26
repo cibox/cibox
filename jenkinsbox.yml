@@ -4,12 +4,10 @@
 # command
 # Developed for ansible version >= 1.7
 - hosts: CHANGE_ME
-  # connection: local
   gather_facts: no
   remote_user: root
 
   vars:
-  
     project_name: CHANGE_ME
 
     pear_channels:
@@ -17,7 +15,6 @@
     pear_packages:
       - drush/drush
     cibox_apt_packages: []
-
     apache2_modules: []
 
     jenkins_configs:
@@ -31,22 +28,6 @@
     backup_folder_pass: givemebackup
     cibox_ssl_enable_host: true
     php_apc_enabled_in_ini: true
-
-  roles:
-    - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
-    - { role: cibox-misc, tags: ["misc"] }
-    - { role: ansible-role-php, tags: ["php-stack"] }
-    - { role: ansible-php-pear, tags: ["ansible-php-pear", "php-stack"] }
-    - { role: ansible-role-php-xhprof, tags: ["ansible-php-xhprof", "php-stack"] }
-    - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
-    - { role: ansible-role-mysql, tags: ["mysql", "php-stack", "ansible-role-mysql"] }
-    - { role: cibox-jenkins, tags: ["cibox-jenkins"] }
-    - { role: cibox-jetty-solr, tags: ["cibox-jetty-solr"] }
-    - { role: cibox-sniffers, tags: ["cibox-sniffers", "php-stack"] }
-    - { role: cibox-mysql-config, tags: ["mysql", "php-stack", "cibox-mysql-config"] }
-    - { role: cibox-ssl-config, tags: ["apache", "php-stack", "ssl", "cibox-ssl-config"] }
-    - { role: cibox-behat-selenium2, tags: ["cibox-behat-selenium", "behat-selenium"] }
-
 
   pre_tasks:
   - name: Update apt cache
@@ -112,6 +93,21 @@
       - php-stack
       - mysql
       - apache
+
+  roles:
+    - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
+    - { role: cibox-misc, tags: ["misc"] }
+    - { role: ansible-role-php, tags: ["php-stack"] }
+    - { role: ansible-php-pear, tags: ["ansible-php-pear", "php-stack"] }
+    - { role: ansible-role-php-xhprof, tags: ["ansible-php-xhprof", "php-stack"] }
+    - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
+    - { role: ansible-role-mysql, tags: ["mysql", "php-stack", "ansible-role-mysql"] }
+    - { role: cibox-jenkins, tags: ["cibox-jenkins"] }
+    - { role: cibox-jetty-solr, tags: ["cibox-jetty-solr"] }
+    - { role: cibox-sniffers, tags: ["cibox-sniffers", "php-stack"] }
+    - { role: cibox-mysql-config, tags: ["mysql", "php-stack", "cibox-mysql-config"] }
+    - { role: cibox-ssl-config, tags: ["apache", "php-stack", "ssl", "cibox-ssl-config"] }
+    - { role: cibox-behat-selenium2, tags: ["cibox-behat-selenium", "behat-selenium"] }
 
   tasks:
     # @todo More smart way to upload jobs. Move job names to options.
