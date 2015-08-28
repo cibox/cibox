@@ -4,12 +4,10 @@
 # command
 # Developed for ansible version >= 1.7
 - hosts: CHANGE_ME
-  # connection: local
   gather_facts: no
   remote_user: root
 
   vars:
-  
     project_name: CHANGE_ME
 
     pear_channels:
@@ -17,7 +15,6 @@
     pear_packages:
       - drush/drush
     cibox_apt_packages: []
-
     apache2_modules: []
 
     jenkins_configs:
@@ -46,7 +43,6 @@
     - { role: cibox-mysql-config, tags: ["mysql", "php-stack", "cibox-mysql-config"] }
     - { role: cibox-ssl-config, tags: ["apache", "php-stack", "ssl", "cibox-ssl-config"] }
     - { role: cibox-behat-selenium2, tags: ["cibox-behat-selenium", "behat-selenium"] }
-
 
   pre_tasks:
   - name: Update apt cache
