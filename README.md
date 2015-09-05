@@ -1,6 +1,17 @@
 CIBox (Continuous Integration Box)
 =====
 
+CIBox mailing list
+=====
+
+- To post to this group, send email to ci_box@googlegroups.com
+- To unsubscribe from this group, send email to ci_box+unsubscribe@googlegroups.com
+- Visit and Join this group at https://groups.google.com/d/forum/ci_box
+- For more options, visit https://groups.google.com/d/optout
+
+Quick Start
+=====
+https://github.com/propeoplemd/cibox/wiki/QUICKSTART
 
 Known Issues
 =====

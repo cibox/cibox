@@ -3,10 +3,31 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: localvm
-  # connection: local
+- hosts: CHANGE_ME
   gather_facts: no
   remote_user: root
+
+  vars:
+    project_name: CHANGE_ME
+
+    pear_channels:
+      - pear.drush.org
+    pear_packages:
+      - drush/drush
+    cibox_apt_packages: []
+    apache2_modules: []
+
+    jenkins_configs:
+      - jenkins.model.JenkinsLocationConfiguration.xml
+      - org.jenkinsci.plugins.ghprb.GhprbTrigger.xml
+      - jobs/{{ project_name }}_PR_BUILDER/config.xml
+      - jobs/DEMO/config.xml
+    
+    backup_folder: /var/www/backup
+    backup_folder_user: propeople
+    backup_folder_pass: givemebackup
+    cibox_ssl_enable_host: true
+    php_apc_enabled_in_ini: true
 
   roles:
     - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
@@ -23,64 +44,16 @@
     - { role: cibox-ssl-config, tags: ["apache", "php-stack", "ssl", "cibox-ssl-config"] }
     - { role: cibox-behat-selenium2, tags: ["cibox-behat-selenium", "behat-selenium"] }
 
-  vars_prompt:
-    jenkins_user: "Enter linux root user username that will be used as superuser in jenkins UI"
-    jenkins_pass: "Enter linux root user pass that will be used as superuser in jenkins UI"
-  vars:
-    # We are using unix pam autentification module for jenkins.
-    plugins:
-      - 'ansicolor'
-      - 'credentials'
-      - 'git-client'
-      - 'git'
-      - 'github-api'
-      - 'github'
-      - 'ghprb'
-      - 'htmlpublisher'
-      - 'jquery'
-      - 'matrix-auth'
-      - 'matrix-project'
-      - 'php'
-      - 'project-description-setter'
-      - 'ssh-credentials'
-      - 'hipchat'
-      - 'scripttrigger'
-      - 'parameterized-trigger'
-    # @todo not uset yet
-    project_name: CHANGE_ME
-    # @todo not uset yet
-    project_url: https://github.com/podarok/{{ project_name }}
-    # @todo not uset yet
-    project_repo_url: https://github.com/podarok/{{ project_name }}.git
-    # Delay before jenkins up and running. Sometimes it is not enouph.
-    startup_delay_s: 40
-    pear_channels:
-      - pear.drush.org
-    pear_packages:
-      - drush/drush
-    cibox_apt_packages:
-      - apache2
-      - php5
-      - php5-gd
-      - php5-mcrypt
-      - libapache2-mod-php5
-      - php5-mysql
-      - php5-curl
-      - php5-memcached
-      - php5-imagick
-    apache2_modules:
-      - rewrite
-    jenkins_configs:
-      - jenkins.model.JenkinsLocationConfiguration.xml
-      - org.jenkinsci.plugins.ghprb.GhprbTrigger.xml
-      - jobs/{{ project_name }}_PR_BUILDER/config.xml
-    backup_folder: /var/www/backup
-    backup_folder_user: propeople
-    backup_folder_pass: givemebackup
-    cibox_ssl_enable_host: true
-    php_apc_enabled_in_ini: true
-
   pre_tasks:
+  - name: Update apt cache
+    sudo: yes
+    apt: update_cache=yes
+    ignore_errors: yes
+    tags:
+      - php-stack
+      - mysql
+      - apache
+
   - name: Setup initial packages onto clean system for ansible
     sudo: yes
     # Installing sudo on small ubuntu install.
@@ -110,15 +83,6 @@
     lineinfile: dest=/etc/sudoers line="jenkins ALL=(ALL) NOPASSWD:ALL"
     tags:
       - cibox-jenkins
-
-  - name: Update apt cache
-    sudo: yes
-    apt: update_cache=yes
-    ignore_errors: yes
-    tags:
-      - php-stack
-      - mysql
-      - apache
 
   - name: Install apt packages
     apt: name={{ item }} state=present
