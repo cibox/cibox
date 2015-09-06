@@ -15,7 +15,8 @@
     pear_packages:
       - drush/drush
     cibox_apt_packages: []
-    apache2_modules: []
+    apache2_modules:
+      - rewrite
 
     jenkins_configs:
       - jenkins.model.JenkinsLocationConfiguration.xml
