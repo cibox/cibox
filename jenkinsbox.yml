@@ -24,9 +24,11 @@
       - jobs/{{ project_name }}_PR_BUILDER/config.xml
       - jobs/DEMO/config.xml
     
-    backup_folder: /var/www/backup
-    backup_folder_user: propeople
-    backup_folder_pass: givemebackup
+    protected_folders:
+      - /var/www/backup
+      - /var/www/cache
+    protected_folders_user: propeople
+    protected_folders_pass: givemebackup
     cibox_ssl_enable_host: true
     php_apc_enabled_in_ini: true
 
@@ -180,14 +182,17 @@
     shell: rngd -r /dev/urandom
     when: ansible_virtualization_type != "openvz"
 
-  - name: Create backup folder
-    file: path={{ backup_folder }} owner=www-data group=jenkins state=directory
+  - name: Create protected folders
+    file: path={{ item }} owner=www-data group=jenkins state=directory
+    with_items: protected_folders
 
-  - name: Copy .htaccess to the backup folder
-    synchronize: src=files/backup-folder/.htaccess dest={{ backup_folder }}/.htaccess
+  - name: Copy .htaccess to the protected folders
+    synchronize: src=files/backup-folder/.htaccess dest={{ item }}/.htaccess
+    with_items: protected_folders
 
-  - name: Generate .htpasswd
-    htpasswd: path={{ backup_folder }}/.htpasswd name={{ backup_folder_user }} password={{ backup_folder_pass }}
+  - name: Generate .htpasswd in protected folders
+    htpasswd: path={{ item }}/.htpasswd name={{ protected_folders_user }} password={{ protected_folders_pass }}
+    with_items: protected_folders
 
   handlers:
   - name: Restart apache
