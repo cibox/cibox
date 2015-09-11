@@ -101,6 +101,4 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.insert_key = "false"
   config.ssh.forward_agent = true
 
-  config.vm.provision :shell, :path => "puphpet/shell/execute-files.sh"
-
 end
