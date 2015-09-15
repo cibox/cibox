@@ -13,26 +13,9 @@ Quick Start
 =====
 https://github.com/propeoplemd/cibox/wiki/QUICKSTART
 
-Known Issues
+WIKI
 =====
-https://github.com/propeoplemd/cibox/wiki/Known-Issues
-
-Documentation
-=====
-[RoadMap for CIBOX](https://github.com/propeoplemd/cibox/wiki/RoadMap)
-
-[FAQ](https://github.com/propeoplemd/cibox/blob/master/FAQ.md)
-
-[PHP/Javascript/SASS Best Practices](https://github.com/propeoplemd/cibox/wiki/PHP-JavaScript-SCSS-SASS-best-practices) we are following
-
-Wiki https://github.com/propeoplemd/cibox/wiki
-
-Introduction video http://youtu.be/EJZcqTcycf0
-
-DrupalCon Los Angeles session https://www.youtube.com/watch?v=o0pqKqnhWgw
-
-Kyiv Drupal Cafe session http://druler.com/node/888 (in Ukrainian)
-
+https://github.com/propeoplemd/cibox/wiki
 
 TIP:
 =====
