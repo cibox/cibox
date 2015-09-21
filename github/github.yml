@@ -19,7 +19,6 @@
     with_vm: True
     with_tests: True
     with_reinstall: True
-    vm_provisioner: puppet
 
   pre_tasks:
 
@@ -89,12 +88,12 @@
     register: vmbox
 
   - name: Injecting vmbox into repo
-    synchronize: src=files/vagrant/{{ vm_provisioner }}/ dest={{ repo_subfolder }}/ recursive=yes archive=no
+    synchronize: src=files/vagrant/box/ dest={{ repo_subfolder }}/ recursive=yes archive=no
     when: with_tests == True
     register: tests
 
   - name: Add ansible roles to vagrant box
-    synchronize: src=../roles/ dest={{ repo_subfolder }}/puphpet/ansible/roles/ recursive=yes archive=no
+    synchronize: src=../roles/ dest={{ repo_subfolder }}/provisioning/ansible/roles/ recursive=yes archive=no
     when: with_vm == True
     register: vmbox
 
