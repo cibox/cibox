@@ -10,8 +10,8 @@ require 'yaml'
 
 dir = File.dirname(File.expand_path(__FILE__))
 
-configValues = YAML::load_file("#{dir}/puphpet/config.yaml")
-apacheConfigValues = YAML::load_file("#{dir}/puphpet/ansible/apache.yml")
+configValues = YAML::load_file("#{dir}/provisioning/config.yaml")
+apacheConfigValues = YAML::load_file("#{dir}/provisioning/ansible/apache.yml")
 data = configValues['vagrantfile-local']
 
 if !data['vm']['provider']['virtualbox'].empty?
@@ -80,19 +80,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   config.vm.provision "shell" do |s|
-    s.path = "puphpet/shell/initial-setup.sh"
-    s.args = "/vagrant/puphpet"
+    s.path = "provisioning/shell/initial-setup.sh"
+    s.args = "/vagrant/provisioning"
   end
 
   # Install ansible inside the box.
-  config.vm.provision :shell, :path => "puphpet/shell/ansible.sh"
+  config.vm.provision :shell, :path => "provisioning/shell/ansible.sh"
 
   # Install ansible playbooks inside the box.
-  config.vm.provision :shell, :path => "puphpet/ansible/run-ansible-playbook.sh"
+  config.vm.provision :shell, :path => "provisioning/ansible/run-ansible-playbook.sh"
 
   # Install drupal within vm for testing.
     if !ENV['VAGRANT_CI'].nil?
-      config.vm.provision :shell, :path => "puphpet/ansible/run-drupal-playbook.sh"
+      config.vm.provision :shell, :path => "provisioning/ansible/run-drupal-playbook.sh"
     end
 
   config.ssh.username = "vagrant"
