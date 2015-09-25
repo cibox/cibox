@@ -5,7 +5,7 @@ export PYTHONUNBUFFERED=1
 playbooks=(
 /vagrant/provisioning/ansible/sendmail.yml \
 /vagrant/provisioning/ansible/misc.yml \
-/vagrant/provisioning/ansible/apache.yml \
+/vagrant/provisioning/ansible/www.yml \
 /vagrant/provisioning/ansible/php.yml \
 /vagrant/provisioning/ansible/php-xdebug.yml \
 /vagrant/provisioning/ansible/mysql.yml \

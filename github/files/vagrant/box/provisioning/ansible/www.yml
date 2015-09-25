@@ -7,13 +7,17 @@
   sudo: yes
 
   vars:
-    apache_listen_port: 80
-    apache_listen_port_ssl: 443
+    # Varnish configuration.
+    varnish_secret: "14bac2e6-1e34-4770-8078-974373b76c90"
+
+    # SSL configuration.
+    cibox_ssl_folder: /etc/apache/ssl
+    cibox_server_ip: 192.168.56.132
+
+    # Apache configuration.
     apache_create_vhosts: true
     apache_vhosts_filename: "vhosts.conf"
     apache_remove_default_vhost: true
-    cibox_ssl_folder: /etc/apache/ssl
-    cibox_server_ip: 192.168.56.132
     apache_vhosts:
       - {
         servername: "{{ cibox_server_ip }}.xip.io",
@@ -35,5 +39,6 @@
       - ssl.load
 
   roles:
+    - { role: cibox-varnish }
     - { role: cibox-ssl-config }
     - { role: ansible-role-apache }
