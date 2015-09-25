@@ -1,0 +1,35 @@
+---
+
+- include: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Ensure Varnish config path exists.
+  file:
+    path: "{{ varnish_config_path }}"
+    state: directory
+
+- name: Copy Varnish default VCL.
+  template:
+    src: "{{ varnish_default_vcl_template_path }}"
+    dest: "{{ varnish_config_path }}/default.vcl"
+    owner: root
+    group: root
+    mode: 0644
+  when: varnish_use_default_vcl
+  notify: restart varnish
+
+- name: Copy varnish secret.
+  template:
+    src: secret.j2
+    dest: "{{ varnish_config_path }}/secret"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart varnish
+
+- name: Ensure Varnish is started and set to run on startup.
+  service: name=varnish state=started enabled=yes
+
+- name: Update apache listen ports
+  set_fact:
+    apache_listen_port: 8070
