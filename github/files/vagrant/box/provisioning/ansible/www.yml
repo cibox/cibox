@@ -8,6 +8,7 @@
 
   vars:
     # Varnish configuration.
+    # Use this secret in your client(Drupal Varnish module) in order to connect to Varnish.
     varnish_secret: "14bac2e6-1e34-4770-8078-974373b76c90"
 
     # SSL configuration.
