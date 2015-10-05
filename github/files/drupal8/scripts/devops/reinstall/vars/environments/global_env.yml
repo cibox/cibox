@@ -1,0 +1,14 @@
+---
+global_env:
+  pre_settings:
+    - { name: '$conf["pp_environment"]', status: true, value: "{{ pp_environment }}" }
+    - { name: '$conf["file_temporary_path"]', status: true, value: '{{ tmp_folder }}' }
+  modules: []
+  drush_commands: []
+  post_settings:
+    - { name: '$conf["pp_environment"]', status: true, value: "{{ pp_environment }}" }
+    - { name: '$base_url', status: true, value: "{{ site_url }}" }
+    - { name: '$conf["file_temporary_path"]', status: true, value: '{{ tmp_folder }}' }
+    - { name: '$conf["cache_default_class"]', status: false, value: "{{ pp_environment }}" }
+    - { name: '$conf["cache_backends"][]', status: false, value: 'sites/all/modules/contrib/memcache/memcache.inc' }
+    - { name: '$conf["cache_default_class"]', status: false, value: 'MemCacheDrupal' }

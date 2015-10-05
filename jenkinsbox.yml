@@ -31,12 +31,18 @@
     protected_folders_pass: givemebackup
     cibox_ssl_enable_host: true
     php_apc_enabled_in_ini: true
+    drushrc:
+      drush_usage_log: 1
+      drush_usage_send: 1
+      php-notices: warning
+
 
   roles:
     - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
     - { role: cibox-misc, tags: ["misc"] }
     - { role: ansible-role-php, tags: ["php-stack"] }
-    - { role: ansible-php-pear, tags: ["ansible-php-pear", "php-stack"] }
+    - { role: cibox-drush, tags: ["php-stack"] }
+#    - { role: ansible-php-pear, tags: ["ansible-php-pear", "php-stack"] }
     - { role: ansible-role-php-xhprof, tags: ["ansible-php-xhprof", "php-stack"] }
     - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
     - { role: ansible-role-mysql, tags: ["mysql", "php-stack", "ansible-role-mysql"] }
