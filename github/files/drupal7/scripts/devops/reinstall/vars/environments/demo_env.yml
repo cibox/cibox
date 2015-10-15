@@ -9,7 +9,7 @@ env:
     - { name: 'diff', status: false }
   drush_commands:
     - { name: 'search-api-clear', status: false, arguments: "-l {{ site_url }}" }
-    - { name: 'search-api-index ', status: false, arguments: "-l {{ site_url }}" }
+    - { name: 'search-api-index', status: false, arguments: "-l {{ site_url }}" }
     - { name: 'solr-mark-all', status: false, arguments: "-l {{ site_url }}" }
     - { name: 'solr-index ', status: false, arguments: "-l {{ site_url }}" }
   post_settings:
