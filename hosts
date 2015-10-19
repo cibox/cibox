@@ -1,21 +1,8 @@
-[localvm]
-188.166.22.170
-
-[spsbox]
-104.131.17.54
-
-[myspsbox]
-178.62.153.157
-
-[spsvmbox]
-192.168.56.132
-
-[nasbox]
-104.131.17.180
-
-[mynasbox]
-104.131.20.201
-
-[demobox]
-104.131.65.251
-
+# This is CIBox inventory file. It includes all hosts the playbook will run on.
+# Servers from this file are used in playbooks in "hosts" line.
+# You can specify in playbook list of one or more groups or host patterns.
+#
+# Example:
+#
+# [my_server]
+# 192.168.1.1
