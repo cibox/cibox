@@ -14,4 +14,4 @@
   shell: echo " " >> {{ build_reports_dir }}/SecurityReview.txt
 
 - name: Run Security Review
-  shell: "drush secrev 2>&1 | grep error | tee -a {{ build_reports_dir }}/SecurityReview.txt"
+  shell: "sudo drush secrev 2>&1 | grep error | tee -a {{ build_reports_dir }}/SecurityReview.txt"
