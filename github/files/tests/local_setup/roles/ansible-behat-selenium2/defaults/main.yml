@@ -1,5 +1,6 @@
 ---
 behat_selenium2_dependencies:
+  - openjdk-7-jre-headless 
   - xfonts-100dpi
   - xfonts-75dpi
   - xfonts-scalable
