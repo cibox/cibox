@@ -18,7 +18,7 @@
 
 - name: Adding database variable to settings.php
   sudo: yes
-  lineinfile: dest='{{ platform_settings_file }}' line='$databases = array(\"default\" => array (\"default\" => array (\"database\" => \"{{ mysql_db }}\", \"username\" => \"{{ mysql_user }}\", \"password\" => \"{{ mysql_pass }}\", \"host\" => \"127.0.0.1\", \"port\" => \"\", \"driver\" => \"mysql\", \"prefix\" => \"\", ), ), );'
+  lineinfile: dest='{{ platform_settings_file }}' line='$databases = array(\"default\" => array (\"default\" => array (\"database\" => \"{{ mysql_db }}\", \"username\" => \"{{ mysql_user }}\", \"password\" => \"{{ mysql_pass }}\", \"host\" => \"{{ mysql_host }}\", \"port\" => \"\", \"driver\" => \"mysql\", \"prefix\" => \"\", ), ), );'
 
 - name: Add general pre-settings to settings.php
   lineinfile: dest='{{ platform_settings_file }}' line='{{ item.name }} = \"{{ item.value }}\";'
