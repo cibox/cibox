@@ -1,4 +1,4 @@
-CIBox (Continuous Integration Box)
+CIBox (Continuous Integration company operations toolBox)
 =====
 
 CIBox mailing list
