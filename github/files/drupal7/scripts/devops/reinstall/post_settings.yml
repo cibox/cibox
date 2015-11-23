@@ -23,6 +23,14 @@
   when: item.status == true
   with_items: env.post_settings
 
+- name: Finding a domain module
+  shell: 'find . -name domain -type d | grep contrib | cut -d. -f2 || true'
+  register: found
+
+- name: Add specific domain settings
+  lineinfile: dest='{{ platform_settings_file }}' line='include DRUPAL_ROOT . "{{ found.stdout }}/settings.inc";'
+  when: found.stdout != ""
+
 - name: Copy settings back (WINDOWS)
   shell: cp {{ platform_settings_file }} {{ settings_file_path }}
   when: is_windows
