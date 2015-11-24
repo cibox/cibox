@@ -10,20 +10,22 @@
   vars:
     project_name: CHANGE_ME
 
-    pear_channels:
-      - pear.drush.org
-    pear_packages:
-      - drush/drush
+    pear_channels: []
+    pear_packages: []
     cibox_apt_packages: []
     apache2_modules:
       - rewrite
+
+    drushrc:
+      drush_usage_log: 1
+      drush_usage_send: 1
 
     jenkins_configs:
       - jenkins.model.JenkinsLocationConfiguration.xml
       - org.jenkinsci.plugins.ghprb.GhprbTrigger.xml
       - jobs/{{ project_name }}_PR_BUILDER/config.xml
       - jobs/DEMO/config.xml
-    
+
     protected_folders:
       - /var/www/backup
       - /var/www/cache
@@ -36,9 +38,10 @@
     - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
     - { role: cibox-misc, tags: ["misc"] }
     - { role: ansible-role-php, tags: ["php-stack"] }
+    - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
+    - { role: cibox-drush, tags: ["php-stack"] }
     - { role: ansible-php-pear, tags: ["ansible-php-pear", "php-stack"] }
     - { role: ansible-role-php-xhprof, tags: ["ansible-php-xhprof", "php-stack"] }
-    - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
     - { role: ansible-role-mysql, tags: ["mysql", "php-stack", "ansible-role-mysql"] }
     - { role: cibox-jenkins, tags: ["cibox-jenkins"] }
     - { role: cibox-jetty-solr, tags: ["cibox-jetty-solr"] }
