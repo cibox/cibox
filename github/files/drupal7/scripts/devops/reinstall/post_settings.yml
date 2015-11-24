@@ -23,6 +23,18 @@
   when: item.status == true
   with_items: env.post_settings
 
+- name: Checking a domain_access is enabled
+  shell: 'drush pml --status=enabled -l {{ site_url }} | grep -c "(domain)" || true'
+  register: drupal_domain_access_enabled
+
+- name: Finding a domain_access module path
+  shell: 'find . -name "domain.info" | head -n 1 |cut -d"." -f2-3 | rev | cut -d"/" -f2- | rev || true'
+  register: drupal_domain_access_path
+
+- name: Add specific domain_access settings
+  lineinfile: dest='{{ platform_settings_file }}' line='include DRUPAL_ROOT . "{{ drupal_domain_access_path.stdout }}/settings.inc";'
+  when: drupal_domain_access_enabled.stdout != "0" and drupal_domain_access_path.stdout != ""
+
 - name: Copy settings back (WINDOWS)
   shell: cp {{ platform_settings_file }} {{ settings_file_path }}
   when: is_windows
