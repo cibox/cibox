@@ -10,8 +10,6 @@
   vars:
     project_name: CHANGE_ME
 
-    pear_channels: []
-    pear_packages: []
     cibox_apt_packages: []
     apache2_modules:
       - rewrite
