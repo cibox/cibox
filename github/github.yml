@@ -30,7 +30,7 @@
     register: drupal_stat
 
   - name: Downloading drupal to {{ drupal_subfolder }} subfolder
-    shell: "cd {{ repo_subfolder }} && drush -y --drupal-project-rename={{ drupal_subfolder }} dl drupal"
+    shell: "cd {{ repo_subfolder }} && drush -y --drupal-project-rename={{ drupal_subfolder }} dl drupal-7.x"
     when: drupal_stat.changed == True
     register: drupal_dl
 
