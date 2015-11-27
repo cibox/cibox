@@ -1,44 +1,51 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Cibox by propeoplemd</title>
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/github-dark.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="javascripts/main.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=640">
 
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen">
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
+    </script>
+    <title>Cibox by propeoplemd</title>
   </head>
+
   <body>
+    <a id="forkme_banner" href="https://github.com/propeoplemd/cibox">View on GitHub</a>
+    <div class="shell">
 
       <header>
-        <h1>Cibox</h1>
-        <p>Continuous Integration toolbox</p>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>Cibox</h1>
+            <h2>Continuous Integration toolbox</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
       </header>
 
-      <div id="banner">
-        <span id="logo"></span>
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/propeoplemd/cibox/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/propeoplemd/cibox/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
 
-        <a href="https://github.com/propeoplemd/cibox" class="button fork"><strong>View On GitHub</strong></a>
-        <div class="downloads">
-          <span>Downloads:</span>
-          <ul>
-            <li><a href="https://github.com/propeoplemd/cibox/zipball/master" class="button">ZIP</a></li>
-            <li><a href="https://github.com/propeoplemd/cibox/tarball/master" class="button">TAR</a></li>
-          </ul>
-        </div>
-      </div><!-- end banner -->
 
-    <div class="wrapper">
-      <nav>
-        <ul></ul>
-      </nav>
-      <section>
+      <span class="banner-fix"></span>
+
+
+      <section id="main_content">
         <h1>
 <a id="cibox-continuous-integration-box" class="anchor" href="#cibox-continuous-integration-box" aria-hidden="true"><span class="octicon octicon-link"></span></a>CIBox (Continuous Integration Box)</h1>
 
@@ -97,19 +104,19 @@ Also you should change all CHANGE_ME placeholders for DEMO and PR builders jobs 
 <h1>
 <a id="install-solr-only" class="anchor" href="#install-solr-only" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install SOLR only</h1>
 
-<div class="highlight highlight-sh"><pre>ansible-playbook jenkinsbox.yml --tags <span class="pl-s"><span class="pl-pds">"</span>ansible-jetty-solr<span class="pl-pds">"</span></span></pre></div>
+<div class="highlight highlight-source-shell"><pre>ansible-playbook jenkinsbox.yml --tags <span class="pl-s"><span class="pl-pds">"</span>ansible-jetty-solr<span class="pl-pds">"</span></span></pre></div>
 
 <h1>
 <a id="install-php-stack" class="anchor" href="#install-php-stack" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install php stack.</h1>
 
-<div class="highlight highlight-sh"><pre>ansible-playbook jenkinsbox.yml --tags <span class="pl-s"><span class="pl-pds">"</span>php-stack<span class="pl-pds">"</span></span></pre></div>
+<div class="highlight highlight-source-shell"><pre>ansible-playbook jenkinsbox.yml --tags <span class="pl-s"><span class="pl-pds">"</span>php-stack<span class="pl-pds">"</span></span></pre></div>
 
 <h1>
 <a id="other-tags-self-explained" class="anchor" href="#other-tags-self-explained" aria-hidden="true"><span class="octicon octicon-link"></span></a>Other tags self-explained</h1>
 
 <p>run them as</p>
 
-<div class="highlight highlight-sh"><pre>ansible-playbook jenkinsbox.yml --tags <span class="pl-s"><span class="pl-pds">"</span>TAGNAME<span class="pl-pds">"</span></span></pre></div>
+<div class="highlight highlight-source-shell"><pre>ansible-playbook jenkinsbox.yml --tags <span class="pl-s"><span class="pl-pds">"</span>TAGNAME<span class="pl-pds">"</span></span></pre></div>
 
 <ul>
 <li>ansible-jenkins</li>
@@ -132,11 +139,11 @@ it with using fakeswap.sh file within files/fakeswap directory</p>
 
 <p>for use this script run on remote system console</p>
 
-<div class="highlight highlight-sh"><pre>chmod a+x fakeswap.sh</pre></div>
+<div class="highlight highlight-source-shell"><pre>chmod a+x fakeswap.sh</pre></div>
 
 <p>and</p>
 
-<div class="highlight highlight-sh"><pre>sh ./fakeswap.sh 4086</pre></div>
+<div class="highlight highlight-source-shell"><pre>sh ./fakeswap.sh 4086</pre></div>
 
 <p>for adding 4086MB swap size</p>
 
@@ -152,12 +159,21 @@ not used by default</p>
 dependency from his php playbook. Can be used for installing pecl packages.</li>
 </ul>
       </section>
+
       <footer>
-        <p>Project maintained by <a href="https://github.com/propeoplemd">propeoplemd</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></small></p>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/propeoplemd">propeoplemd</a> can be found on <a href="https://github.com/propeoplemd/cibox">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="https://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
       </footer>
+
     </div>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
     
   </body>
 </html>
