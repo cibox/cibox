@@ -13,7 +13,7 @@
 
 - name: Making regular backup from {{ local_backup_environment }} environment
   sudo: yes
-  mysql_db: name={{ local_backup_environment }} state=dump target={{ backup_folder }}/{{ local_backup_environment }}_local/{{ backup_name }}.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
+  mysql_db: name={{ local_backup_environment }} state=dump target={{ backup_folder }}/{{ local_backup_environment }}_local/{{ backup_name }}.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }} login_host={{ mysql_host }}
 
 - name: Make new backup as latest
   sudo: yes

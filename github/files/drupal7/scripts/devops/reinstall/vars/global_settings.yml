@@ -5,6 +5,7 @@ installation_profile_name: pp
 mysql_user: root
 mysql_pass: root
 mysql_db: drupal
+mysql_host: 127.0.0.1
 cache_folder: /var/www/cache
 backup_folder: /var/www/backup
 tmp_folder: /tmp
