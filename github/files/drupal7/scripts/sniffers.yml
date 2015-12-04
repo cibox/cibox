@@ -15,24 +15,24 @@
     scan_security: true
     phpcs_extensions: php,inc,install,module
     phpcs_features_extensions: module
-    custom_modules_path: sites/all/modules/custom/
-    custom_themes_path: sites/all/themes/custom
-    features_path: sites/all/modules/features
+    custom_modules_path: modules/custom/
+    custom_themes_path: themes/custom
+    features_path: modules/features
     phpcs_modules_ignore:
-      - sites/all/themes/custom/nonstandard
+      - themes/custom/nonstandard
     phpcs_features_ignore:
-      - sites/all/features/nonstandard
-    phpcs_features_ignore_path: sites/all/features,*.pages_default.inc,*.panelizer.inc,*.features.menu_custom.inc,*.features.webform.inc,*.features.filter.inc,*.strongarm.inc,*.fpp_content_declarations.inc,*.panels_default.inc
+      - modules/features/nonstandard
+    phpcs_features_ignore_path: modules/features,*.pages_default.inc,*.panelizer.inc,*.features.menu_custom.inc,*.features.webform.inc,*.features.filter.inc,*.strongarm.inc,*.fpp_content_declarations.inc,*.panels_default.inc
     composer_dir: /usr/share/composer
     phpcs_bin: /usr/bin/phpcs
     build_reports_dir: build_reports
 
     composer_global_require:
-      - drupal/coder:dev-7.x-2.x
-      - squizlabs/php_codesniffer=1.5.6
+      - squizlabs/php_codesniffer=dev-master
+      - drupal/coder:dev-8.x-2.x
     git_repos:
       - { branch: 'master', repo: 'http://git.drupal.org/sandbox/coltrane/1921926.git', name: 'DrupalSecure' } # git clone --branch master http://git.drupal.org/sandbox/coltrane/1921926.git DrupalSecure
-      - { branch: '7.x-1.x', repo: 'https://github.com/klausi/drupalpractice.git', name: 'DrupalPractice' } #git clone --branch 7.x-1.x https://github.com/klausi/drupalpractice.git DrupalPractice
+      - { branch: '8.x-1.x', repo: 'https://github.com/klausi/drupalpractice.git', name: 'DrupalPractice' } #git clone --branch 7.x-1.x https://github.com/klausi/drupalpractice.git DrupalPractice
       - { branch: 'master', repo: 'https://github.com/podarok/phpcs-security-audit.git', name: 'Security' } #git clone --branch master https://github.com/podarok/phpcs-security-audit.git Security
       - { branch: 'master', repo: 'https://github.com/podarok/Symfony2-coding-standard.git', name: 'Symfony2' }
 
@@ -65,15 +65,15 @@
       - nodejs
 
     jshint_folders:
-      - { name: 'modules', path: 'sites/all/modules/custom' }
-      - { name: 'themes', path: 'sites/all/themes/custom' }
+      - { name: 'modules', path: 'modules/custom' }
+      - { name: 'themes', path: 'themes/custom' }
       - { name: 'profile', path: "{{ installation_profile_path }}" }
 
     scsslint_folders:
-      - { name: 'themes', path: 'sites/all/themes/custom' }
+      - { name: 'themes', path: 'themes/custom' }
 
   roles:
-    - { role: devops/roles/cibox-security-testing, when: scan_security == true }
+#    - { role: devops/roles/cibox-security-testing, when: scan_security == true }
 
   pre_tasks:
 
@@ -109,6 +109,15 @@
     when: is_composer_dir.stat.exists == false
     tags:
       - sniffers
+
+  - name: Ensure composer files are absent
+    sudo: yes
+    file:
+      path: "{{ composer_dir }}/{{ item }}"
+      state: absent
+    with_items:
+      - composer.lock
+      - composer.json
 
   - name: Install composer global requires
     sudo: yes
@@ -178,12 +187,12 @@
 
   - name: PHP CodeSniffer reports build
     ignore_errors: yes
-    shell: 'if grep "FOUND" {{ build_reports_dir }}/{{ item.name }}sniff.txt; then echo "<strong>`wc -l < {{ build_reports_dir }}/{{ item.name }}sniff.txt`</strong> CodeSniffer: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi;'
+    shell: 'if grep "FOUND" {{ build_reports_dir }}/{{ item.name }}sniff.txt; then echo "<strong>`grep -o "\<\| ERROR \|\>" {{ build_reports_dir }}/{{ item.name }}sniff.txt | wc -l`</strong>  errors for CodeSniffer: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi;'
     with_items: phpcs_standards
 
   - name: Security Review report build
     ignore_errors: yes
-    shell: 'if grep "error" {{ build_reports_dir }}/SecurityReview.txt; then echo "<strong>`wc -l < {{ build_reports_dir }}/SecurityReview.txt`</strong> Security Review: Security Review standard file {{ webroot }}/{{ build_reports_dir }}/SecurityReview.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi;'
+    shell: 'if grep "error" {{ build_reports_dir }}/SecurityReview.txt; then echo "<strong>`<strong>`grep -o "\<error\>" {{ build_reports_dir }}/SecurityReview.txt | wc -l`</strong>  errors for Security Review: Security Review standard file {{ webroot }}/{{ build_reports_dir }}/SecurityReview.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi;'
 
   - name: PHP CodeSniffer for features run
     shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_features_extensions }} -n {{ features_path }} --report-file={{ build_reports_dir }}/Features{{ item.name }}sniff.txt --ignore={{ phpcs_features_ignore | join(",") }} || true'
@@ -191,7 +200,7 @@
 
   - name: PHP CodeSniffer for features reports build
     ignore_errors: yes
-    shell: 'if grep "FOUND" {{ build_reports_dir }}/Features{{ item.name }}sniff.txt; then echo "<strong>`wc -l < {{ build_reports_dir }}/Features{{ item.name }}sniff.txt`</strong> CodeSniffer: Features {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/Features{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
+    shell: 'if grep "FOUND" {{ build_reports_dir }}/Features{{ item.name }}sniff.txt; then echo "<strong>`grep -o "\<\| ERROR \|\>" {{ build_reports_dir }}/Features{{ item.name }}sniff.txt | wc -l`</strong> errors for CodeSniffer: Features {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/Features{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
     with_items: phpcs_standards
 
   - name: JSHint run
@@ -209,7 +218,7 @@
 
   - name: SCSS lint build reports
     ignore_errors: yes
-    shell: 'if [ -s {{ build_reports_dir }}/scsslint{{ item.name }}.txt ]; then echo "<strong>`wc -l < {{ build_reports_dir }}/scsslint{{ item.name }}.txt`</strong> " && echo "SCSS-lint: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/scsslint{{ item.name }}.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
+    shell: 'if grep -o "\<[E]\>" {{ build_reports_dir }}/scsslint{{ item.name }}.txt; then echo "<strong>`grep -o "\<[E]\>" {{ build_reports_dir }}/scsslint{{ item.name }}.txt | wc -l`</strong> errors for SCSS-lint {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/scsslint{{ item.name }}.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
     with_items: scsslint_folders
 
   - name: Website credentials
