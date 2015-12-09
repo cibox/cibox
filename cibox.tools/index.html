@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=640">
+
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen">
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
+    </script>
+    <title>Cibox by propeoplemd</title>
+  </head>
+
+  <body>
+    <a id="forkme_banner" href="https://github.com/propeoplemd/cibox">View on GitHub</a>
+    <div class="shell">
+
+      <header>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>Cibox</h1>
+            <h2>Continuous Integration toolbox</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+      </header>
+
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/propeoplemd/cibox/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/propeoplemd/cibox/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
+
+
+      <span class="banner-fix"></span>
+
+
+      <section id="main_content">
+        <h1>
+<a id="cibox-continuous-integration-box" class="anchor" href="index.html#cibox-continuous-integration-box" aria-hidden="true"><span class="octicon octicon-link"></span></a>CIBox (Continuous Integration Box)</h1>
+
+<h1>
+<a id="quick-start" class="anchor" href="index.html#quick-start" aria-hidden="true"><span class="octicon octicon-link"></span></a>Quick Start</h1>
+
+<p><a href="https://github.com/propeoplemd/cibox/wiki/QUICKSTART">https://github.com/propeoplemd/cibox/wiki/QUICKSTART</a></p>
+
+<h1>
+<a id="known-issues" class="anchor" href="index.html#known-issues" aria-hidden="true"><span class="octicon octicon-link"></span></a>Known Issues</h1>
+
+<p><a href="https://github.com/propeoplemd/cibox/wiki/Known-Issues">https://github.com/propeoplemd/cibox/wiki/Known-Issues</a></p>
+
+<h1>
+<a id="documentation" class="anchor" href="index.html#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation</h1>
+
+<p><a href="https://github.com/propeoplemd/cibox/wiki/RoadMap">RoadMap for CIBOX</a></p>
+
+<p><a href="https://github.com/propeoplemd/cibox/blob/master/FAQ.md">FAQ</a></p>
+
+<p><a href="https://github.com/propeoplemd/cibox/wiki/PHP-JavaScript-SCSS-SASS-best-practices">PHP/Javascript/SASS Best Practices</a> we are following</p>
+
+<p>Wiki <a href="https://github.com/propeoplemd/cibox/wiki">https://github.com/propeoplemd/cibox/wiki</a></p>
+
+<p>Introduction video <a href="http://youtu.be/EJZcqTcycf0">http://youtu.be/EJZcqTcycf0</a></p>
+
+<p>DrupalCon Los Angeles session <a href="https://www.youtube.com/watch?v=o0pqKqnhWgw">https://www.youtube.com/watch?v=o0pqKqnhWgw</a></p>
+
+<p>Kyiv Drupal Cafe session <a href="http://druler.com/node/888">http://druler.com/node/888</a> (in Ukrainian)</p>
+
+<h1>
+<a id="tip" class="anchor" href="index.html#tip" aria-hidden="true"><span class="octicon octicon-link"></span></a>TIP:</h1>
+
+<p>Don't forget to setup all http://ci_hostname:8080/configure settings with CHANGE_ME... placeholders to be able meet project requirements.
+Also you should change all CHANGE_ME placeholders for DEMO and PR builders jobs as well.</p>
+
+<p>This repo consists basically from two playbooks</p>
+
+<ul>
+<li>CI server installation/provisioning jenkinsbox.yml</li>
+<li>github.yml repo builder with drupal, vagrant, puppet, drupal pp installation profile, scripts for reinstalling and sniffing with sniffers</li>
+</ul>
+
+<p>You have to use <em>64bit</em> Ubuntu 12.04 LTS or 14.04 LTS systems for CI server</p>
+
+<h1>
+<a id="common-and-base-apps-and-packages" class="anchor" href="index.html#common-and-base-apps-and-packages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Common and base apps and packages</h1>
+
+<p>cibox-misc role contains all basic packages required for cibox and vagrant installation.</p>
+
+<h1>
+<a id="possible-variations" class="anchor" href="index.html#possible-variations" aria-hidden="true"><span class="octicon octicon-link"></span></a>Possible variations</h1>
+
+<p>Currently jenkinsbox.yml playbook powered with tags, so you can run only part of it.</p>
+
+<h1>
+<a id="install-solr-only" class="anchor" href="index.html#install-solr-only" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install SOLR only</h1>
+
+<div class="highlight highlight-source-shell"><pre>ansible-playbook jenkinsbox.yml --tags <span class="pl-s"><span class="pl-pds">"</span>ansible-jetty-solr<span class="pl-pds">"</span></span></pre></div>
+
+<h1>
+<a id="install-php-stack" class="anchor" href="index.html#install-php-stack" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install php stack.</h1>
+
+<div class="highlight highlight-source-shell"><pre>ansible-playbook jenkinsbox.yml --tags <span class="pl-s"><span class="pl-pds">"</span>php-stack<span class="pl-pds">"</span></span></pre></div>
+
+<h1>
+<a id="other-tags-self-explained" class="anchor" href="index.html#other-tags-self-explained" aria-hidden="true"><span class="octicon octicon-link"></span></a>Other tags self-explained</h1>
+
+<p>run them as</p>
+
+<div class="highlight highlight-source-shell"><pre>ansible-playbook jenkinsbox.yml --tags <span class="pl-s"><span class="pl-pds">"</span>TAGNAME<span class="pl-pds">"</span></span></pre></div>
+
+<ul>
+<li>ansible-jenkins</li>
+<li>ansible-composer</li>
+<li>ansible-php-pear</li>
+<li>ansible-php-xhprof</li>
+<li>ansible-sniffers</li>
+<li>apache</li>
+<li>mysql</li>
+<li>cibox-mysql-config</li>
+<li>cibox-swap</li>
+<li>cibox-ssl-config</li>
+</ul>
+
+<h1>
+<a id="openvz-support" class="anchor" href="index.html#openvz-support" aria-hidden="true"><span class="octicon octicon-link"></span></a>OpenVZ support</h1>
+
+<p>If your system build on OpenVZ stack and swap is disabled you may bypass
+it with using fakeswap.sh file within files/fakeswap directory</p>
+
+<p>for use this script run on remote system console</p>
+
+<div class="highlight highlight-source-shell"><pre>chmod a+x fakeswap.sh</pre></div>
+
+<p>and</p>
+
+<div class="highlight highlight-source-shell"><pre>sh ./fakeswap.sh 4086</pre></div>
+
+<p>for adding 4086MB swap size</p>
+
+<h1>
+<a id="roles-not-used-by-default" class="anchor" href="index.html#roles-not-used-by-default" aria-hidden="true"><span class="octicon octicon-link"></span></a>Roles not used by default</h1>
+
+<p>Within a roles/ subfolder there are roles, been imported from some projects but
+not used by default</p>
+
+<ul>
+<li>cibox-phpdaemon: - role from HP project for installing phpdaemon</li>
+<li>ansible-role-php-pecl: - role, originally developed by geerlingguy but without
+dependency from his php playbook. Can be used for installing pecl packages.</li>
+</ul>
+      </section>
+
+      <footer>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/propeoplemd">propeoplemd</a> can be found on <a href="https://github.com/propeoplemd/cibox">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="https://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
+      </footer>
+
+    </div>
+
+    
+  </body>
+</html>
