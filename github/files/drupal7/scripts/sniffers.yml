@@ -204,7 +204,7 @@
     with_items: jshint_folders
 
   - name: SCSS lint run
-    shell: 'find {{ item.path }} -name "*.scss" -print0 | xargs -0 -r scss-lint > {{ build_reports_dir }}/scsslint{{ item.name }}.txt || true'
+    shell: 'find {{ item.path }} -name "*.scss" -print0 | xargs -0 -r scss-lint -c scss-lint.yml > {{ build_reports_dir }}/scsslint{{ item.name }}.txt || true'
     with_items: scsslint_folders
 
   - name: SCSS lint build reports
