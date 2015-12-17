@@ -159,3 +159,40 @@ name: Restore settings.php
 sudo: yes
 shell: cp /tmp/reinstall_settings.php sites/default/settings.php
 ```
+
+MacOS users
+=====
+
+Install vagrant
+```
+https://www.vagrantup.com/downloads.html
+```
+
+Install Virtualbox from here:
+```
+https://www.virtualbox.org/wiki/Downloads
+```
+
+cd to project folder
+
+```
+vagrant up && vagrant ssh
+```
+
+You will be logged into virtual machine.
+
+Go to this path
+
+```
+/vagrant/docroot
+```
+
+and run the script
+
+```
+sh reinstall.sh
+```
+
+for drupal reinstall from scratch.
+
+Configure Stage File Proxy to use the files from the correct source.
