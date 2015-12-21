@@ -19,4 +19,4 @@
   register: installed_drush_version
 
 - name: Display drush version
-  debug: msg={{ installed_drush_version.stdout }}
+  debug: msg={{ installed_drush_version.stdout_lines }}
