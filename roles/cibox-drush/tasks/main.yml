@@ -16,3 +16,7 @@
 
 - name: Drush version
   shell: drush --version
+  register: installed_drush_version
+
+- name: Display drush version
+  debug: msg={{ installed_drush_version.stdout }}
