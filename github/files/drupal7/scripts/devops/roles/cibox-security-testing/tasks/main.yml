@@ -15,3 +15,4 @@
 
 - name: Run Security Review
   shell: "drush secrev 2>&1 | grep error | tee -a {{ build_reports_dir }}/SecurityReview.txt"
+  sudo: yes
