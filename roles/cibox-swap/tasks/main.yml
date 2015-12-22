@@ -11,6 +11,7 @@
 
   - name: Make swapfile as swap
     sudo: yes
+    ignore_errors: yes
     shell: 'mkswap /swapfile1'
 
   - name: Check if swap enabled as swapon
