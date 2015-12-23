@@ -43,7 +43,7 @@
 - name: Copy Jenkins configs
   template:
     src: configs/{{ item | basename }}
-    dest: /var/lib/jenkins/{{ item | basename | regex_replace('\.xml','') }}
+    dest: /var/lib/jenkins/{{ item | basename | regex_replace('\.j2','') }}
     owner: jenkins
     group: jenkins
     force: yes
