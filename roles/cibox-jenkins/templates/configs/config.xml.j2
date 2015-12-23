@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hudson>
+  <disabledAdministrativeMonitors/>
+  <version>1.577</version>
+  <numExecutors>2</numExecutors>
+  <mode>NORMAL</mode>
+  <useSecurity>true</useSecurity>
+  <authorizationStrategy class="hudson.security.GlobalMatrixAuthorizationStrategy">
+    <permission>com.cloudbees.plugins.credentials.CredentialsProvider.Create:root</permission>
+    <permission>com.cloudbees.plugins.credentials.CredentialsProvider.Delete:root</permission>
+    <permission>com.cloudbees.plugins.credentials.CredentialsProvider.ManageDomains:root</permission>
+    <permission>com.cloudbees.plugins.credentials.CredentialsProvider.Update:root</permission>
+    <permission>com.cloudbees.plugins.credentials.CredentialsProvider.View:root</permission>
+    <permission>hudson.model.Computer.Build:root</permission>
+    <permission>hudson.model.Computer.Configure:root</permission>
+    <permission>hudson.model.Computer.Connect:root</permission>
+    <permission>hudson.model.Computer.Create:root</permission>
+    <permission>hudson.model.Computer.Delete:root</permission>
+    <permission>hudson.model.Computer.Disconnect:root</permission>
+    <permission>hudson.model.Hudson.Administer:root</permission>
+    <permission>hudson.model.Hudson.ConfigureUpdateCenter:root</permission>
+    <permission>hudson.model.Hudson.Read:anonymous</permission>
+    <permission>hudson.model.Hudson.Read:root</permission>
+    <permission>hudson.model.Hudson.RunScripts:anonymous</permission>
+    <permission>hudson.model.Hudson.RunScripts:root</permission>
+    <permission>hudson.model.Hudson.UploadPlugins:anonymous</permission>
+    <permission>hudson.model.Hudson.UploadPlugins:root</permission>
+    <permission>hudson.model.Item.Build:root</permission>
+    <permission>hudson.model.Item.Cancel:root</permission>
+    <permission>hudson.model.Item.Configure:root</permission>
+    <permission>hudson.model.Item.Create:root</permission>
+    <permission>hudson.model.Item.Delete:root</permission>
+    <permission>hudson.model.Item.Discover:root</permission>
+    <permission>hudson.model.Item.Read:anonymous</permission>
+    <permission>hudson.model.Item.Read:root</permission>
+    <permission>hudson.model.Item.Workspace:root</permission>
+    <permission>hudson.model.Run.Delete:root</permission>
+    <permission>hudson.model.Run.Update:root</permission>
+    <permission>hudson.model.View.Configure:root</permission>
+    <permission>hudson.model.View.Create:root</permission>
+    <permission>hudson.model.View.Delete:root</permission>
+    <permission>hudson.model.View.Read:anonymous</permission>
+    <permission>hudson.model.View.Read:root</permission>
+    <permission>hudson.scm.SCM.Tag:root</permission>
+  </authorizationStrategy>
+  <securityRealm class="hudson.security.PAMSecurityRealm" plugin="pam-auth@1.2">
+    <serviceName>sshd</serviceName>
+  </securityRealm>
+  <disableRememberMe>false</disableRememberMe>
+  <projectNamingStrategy class="jenkins.model.ProjectNamingStrategy$DefaultProjectNamingStrategy"/>
+  <workspaceDir>${ITEM_ROOTDIR}/workspace</workspaceDir>
+  <buildsDir>${ITEM_ROOTDIR}/builds</buildsDir>
+  <markupFormatter class="hudson.markup.EscapedMarkupFormatter"/>
+  <jdks/>
+  <viewsTabBar class="hudson.views.DefaultViewsTabBar"/>
+  <myViewsTabBar class="hudson.views.DefaultMyViewsTabBar"/>
+  <clouds/>
+  <slaves/>
+  <quietPeriod>3</quietPeriod>
+  <scmCheckoutRetryCount>0</scmCheckoutRetryCount>
+  <views>
+    <hudson.model.AllView>
+      <owner class="hudson" reference="../../.."/>
+      <name>All</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+    </hudson.model.AllView>
+  </views>
+  <primaryView>All</primaryView>
+  <slaveAgentPort>0</slaveAgentPort>
+  <label></label>
+  <nodeProperties/>
+  <globalNodeProperties/>
+</hudson>

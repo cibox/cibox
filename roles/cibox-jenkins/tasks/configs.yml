@@ -46,3 +46,17 @@
     - jobs
   with_fileglob:
     - ../templates/users/*.j2
+
+# Automatically scan configs directory.
+- name: Copy Jenkins configs
+  template:
+    src: configs/{{ item | basename }}
+    dest: /var/lib/jenkins/{{ item | basename | regex_replace('\.xml','') }}
+    owner: jenkins
+    group: jenkins
+    force: yes
+  notify: Restart Jenkins
+  tags:
+    - jobs
+  with_fileglob:
+    - ../templates/configs/*.j2
