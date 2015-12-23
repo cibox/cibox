@@ -23,6 +23,7 @@
       drush_usage_log: 1
       drush_usage_send: 1
 
+    # @todo should be used template engine.
     jenkins_configs:
       - jenkins.model.JenkinsLocationConfiguration.xml
       - org.jenkinsci.plugins.ghprb.GhprbTrigger.xml
@@ -47,7 +48,7 @@
     - { role: ansible-role-php-xhprof, tags: ["ansible-php-xhprof", "php-stack"] }
     - { role: ansible-role-mysql, tags: ["mysql", "php-stack", "ansible-role-mysql"] }
     - { role: cibox-jenkins, tags: ["cibox-jenkins"] }
-    - { role: cibox-jetty-solr, tags: ["cibox-jetty-solr"] }
+    #- { role: cibox-jetty-solr, tags: ["cibox-jetty-solr"] }
     - { role: cibox-sniffers, tags: ["cibox-sniffers", "php-stack"] }
     - { role: cibox-mysql-config, tags: ["mysql", "php-stack", "cibox-mysql-config"] }
     - { role: cibox-ssl-config, tags: ["apache", "php-stack", "ssl", "cibox-ssl-config"] }
@@ -119,6 +120,7 @@
       - apache
 
   tasks:
+  # @todo should be used template engine.
   - name: Change host IP address in jenkins configs
     replace: dest=/var/lib/jenkins/{{ item }} regexp='ci_server_ip_address' replace={{ allmy.ansible_facts.ansible_default_ipv4.address }}
     with_items: jenkins_configs
