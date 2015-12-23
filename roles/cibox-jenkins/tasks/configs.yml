@@ -5,8 +5,6 @@
     state: directory
     owner: jenkins
     group: jenkins
-  tags:
-    - jobs
   with_items: jenkins_jobs
 
 - name: Copy Jenkins jobs
@@ -17,8 +15,6 @@
     group: jenkins
     force: yes
   notify: Restart Jenkins
-  tags:
-    - jobs
   with_items: jenkins_jobs
 
 # Automatically scan users directory.
@@ -28,8 +24,6 @@
     state: directory
     owner: jenkins
     group: jenkins
-  tags:
-    - jobs
   with_fileglob:
     - ../templates/users/*.j2
 
@@ -42,8 +36,6 @@
     mode: 0755
     force: yes
   notify: Restart Jenkins
-  tags:
-    - jobs
   with_fileglob:
     - ../templates/users/*.j2
 
@@ -56,7 +48,5 @@
     group: jenkins
     force: yes
   notify: Restart Jenkins
-  tags:
-    - jobs
   with_fileglob:
     - ../templates/configs/*.j2
