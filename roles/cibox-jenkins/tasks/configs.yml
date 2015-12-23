@@ -20,3 +20,29 @@
   tags:
     - jobs
   with_items: jenkins_jobs
+
+# Automatically scan users directory.
+- name: Create folders for users
+  file:
+    path: /var/lib/jenkins/users/{{ item | basename | regex_replace('\.xml.j2','') }}
+    state: directory
+    owner: jenkins
+    group: jenkins
+  tags:
+    - jobs
+  with_fileglob:
+    - ../templates/users/*.j2
+
+- name: Copy user configs
+  template:
+    src: users/{{ item | basename }}
+    dest: /var/lib/jenkins/users/{{ item | basename | regex_replace('\.xml.j2','') }}/config.xml
+    owner: jenkins
+    group: jenkins
+    mode: 0755
+    force: yes
+  notify: Restart Jenkins
+  tags:
+    - jobs
+  with_fileglob:
+    - ../templates/users/*.j2
