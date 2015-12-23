@@ -48,7 +48,7 @@
     - { role: ansible-role-php-xhprof, tags: ["ansible-php-xhprof", "php-stack"] }
     - { role: ansible-role-mysql, tags: ["mysql", "php-stack", "ansible-role-mysql"] }
     - { role: cibox-jenkins, tags: ["cibox-jenkins"] }
-    #- { role: cibox-jetty-solr, tags: ["cibox-jetty-solr"] }
+    - { role: cibox-jetty-solr, tags: ["cibox-jetty-solr"] }
     - { role: cibox-sniffers, tags: ["cibox-sniffers", "php-stack"] }
     - { role: cibox-mysql-config, tags: ["mysql", "php-stack", "cibox-mysql-config"] }
     - { role: cibox-ssl-config, tags: ["apache", "php-stack", "ssl", "cibox-ssl-config"] }
