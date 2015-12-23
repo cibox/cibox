@@ -1,0 +1,22 @@
+---
+- name: Create folders for Jenkins jobs
+  file:
+    path: /var/lib/jenkins/jobs/{{ item.name }}
+    state: directory
+    owner: jenkins
+    group: jenkins
+  tags:
+    - jobs
+  with_items: jenkins_jobs
+
+- name: Copy Jenkins jobs
+  template:
+    src: jobs/{{ item.template }}
+    dest: /var/lib/jenkins/jobs/{{ item.name }}/config.xml
+    owner: jenkins
+    group: jenkins
+    force: yes
+  notify: Restart Jenkins
+  tags:
+    - jobs
+  with_items: jenkins_jobs

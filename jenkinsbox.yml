@@ -120,12 +120,6 @@
 
   tasks:
     # @todo More smart way to upload jobs. Move job names to options.
-  - name: Check if job already renamed.
-    stat: path=/var/lib/jenkins/jobs/{{ project_name }}_PR_BUILDER
-    register: prbuilder_stat
-    tags:
-      - cibox-jenkins
-
   - name: Copy local files for enabling jenkins permissions
     sudo: yes
     synchronize: src=files/jenkins/ dest=/var/lib/jenkins recursive=yes archive=no
