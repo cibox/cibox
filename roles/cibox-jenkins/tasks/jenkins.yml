@@ -24,3 +24,6 @@
 
 # Install/update Jenkins plugins
 - include: plugins.yml
+
+# Copy configs, jobs and users.
+- include: configs.yml

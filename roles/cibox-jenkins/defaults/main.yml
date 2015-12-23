@@ -28,3 +28,11 @@ jenkins_pkg_version: 'http://pkg.jenkins-ci.org/debian/binary/jenkins_1.624_all.
 
 # Delay before jenkins up and running. Sometimes it is not enouph.
 startup_delay_s: 40
+
+jenkins_jobs:
+  - { name: 'BACKUP_PROD_DB', template: 'backup_prod_db.xml.j2' }
+  - { name: 'DEMO', template: 'demo.xml.j2' }
+  - { name: 'DISK_USAGE_TRIGGER', template: 'disk_usage_trigger.xml.j2' }
+  # @todo project_name should be reqired variable. We should have layer of cibox-wide required variables.
+  - { name: '{{ project_name }}_PR_BUILDER', template: 'pr_builder.xml.j2' }
+  - { name: 'SERVER_CLEANER', template: 'server_cleaner.xml.j2' }

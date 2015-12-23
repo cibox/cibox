@@ -23,6 +23,7 @@
       drush_usage_log: 1
       drush_usage_send: 1
 
+    # @todo should be used template engine.
     jenkins_configs:
       - jenkins.model.JenkinsLocationConfiguration.xml
       - org.jenkinsci.plugins.ghprb.GhprbTrigger.xml
@@ -119,40 +120,7 @@
       - apache
 
   tasks:
-    # @todo More smart way to upload jobs. Move job names to options.
-  - name: Check if job already renamed.
-    stat: path=/var/lib/jenkins/jobs/{{ project_name }}_PR_BUILDER
-    register: prbuilder_stat
-    tags:
-      - cibox-jenkins
-
-  - name: Copy local files for enabling jenkins permissions
-    sudo: yes
-    synchronize: src=files/jenkins/ dest=/var/lib/jenkins recursive=yes archive=no
-    when: prbuilder_stat.stat.exists == false
-    tags:
-      - cibox-jenkins
-
-  - name: Change owner for jenkins files.
-    file: path=/var/lib/jenkins owner=jenkins group=jenkins force=yes recurse=yes state=directory
-    tags:
-      - cibox-jenkins
-
-  - name: Rename jenkins jobs to meet project name.
-    sudo: yes
-    shell: "mv /var/lib/jenkins/jobs/PR_BUILDER /var/lib/jenkins/jobs/{{ project_name }}_PR_BUILDER"
-    when: prbuilder_stat.stat.exists == false
-    tags:
-      - cibox-jenkins
-
-  - name: Remove PR_BUILDER from remote.
-    sudo: yes
-    file: path=/var/lib/jenkins/jobs/PR_BUILDER state=absent
-    when: prbuilder_stat.stat.exists == true
-    tags:
-      - cibox-jenkins
-    # end of @todo More smart way to upload jobs. Move job names to options.
-
+  # @todo should be used template engine.
   - name: Change host IP address in jenkins configs
     replace: dest=/var/lib/jenkins/{{ item }} regexp='ci_server_ip_address' replace={{ allmy.ansible_facts.ansible_default_ipv4.address }}
     with_items: jenkins_configs
