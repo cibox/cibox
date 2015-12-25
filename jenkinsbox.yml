@@ -30,14 +30,19 @@
       - jobs/{{ project_name }}_PR_BUILDER/config.xml
       - jobs/DEMO/config.xml
 
+    # @tag security.
     protected_folders:
       - /var/www/backup
       - /var/www/cache
     protected_folders_user: propeople
     protected_folders_pass: givemebackup
+
+    # @tag security.
+    # @todo decide where we should place/define features configs.
     cibox_ssl_enable_host: true
     php_apc_enabled_in_ini: true
 
+  # @todo cleanup old tags.
   roles:
     - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
     - { role: cibox-misc, tags: ["misc"] }
@@ -55,6 +60,7 @@
     - { role: cibox-behat-selenium2, tags: ["cibox-behat-selenium", "behat-selenium"] }
 
   pre_tasks:
+  # @tag environment.
   - name: Update apt cache
     sudo: yes
     apt: update_cache=yes
@@ -64,36 +70,44 @@
       - mysql
       - apache
 
+  # @tag environment.
+  # @todo should be tested with DO 14.04 Ubuntu.
   - name: Setup initial packages onto clean system for ansible
     sudo: yes
     # Installing sudo on small ubuntu install.
     raw: "apt-get -y install python-simplejson sudo curl"
 
+  # @tag environment.
   - name: Fixing logger not found
     sudo: yes
     shell: "apt-get --reinstall install -y bsdutils"
 
+  # @todo should be removed.
   - name: Setup - get environment data for later usage
     setup:
     register: allmy
     tags:
       - cibox-jenkins
 
+  # @tag security.
   - name: Adding jenkins user to group shadow
     user: name=jenkins groups=shadow append=yes
     tags:
       - cibox-jenkins
 
+  # @tag security.
   - name: Adding jenkins user to group adm
     user: name=jenkins groups=adm append=yes
     tags:
       - cibox-jenkins
 
+  # @tag security.
   - name: Adding jenkins user to nopasswd sudoers
     lineinfile: dest=/etc/sudoers line="jenkins ALL=(ALL) NOPASSWD:ALL"
     tags:
       - cibox-jenkins
 
+  # @tag environment.
   - name: Install apt packages
     apt: name={{ item }} state=present
     with_items: cibox_apt_packages
@@ -104,6 +118,7 @@
 
     # We have to disable mail sending from CI box.
     # Does not create a link if sendmail is installed.
+    # @tag environment.
   - name: Check for sendmail.
     file: path=/usr/sbin/sendmail src=/bin/true state=link force=no
     tags:
@@ -111,6 +126,7 @@
       - mysql
       - apache
 
+  # @tag environment.
   - name: Create ansible config directory
     sudo: yes
     file: path=/etc/ansible state=directory mode=775
@@ -127,6 +143,7 @@
     tags:
       - cibox-jenkins
 
+  # @tag environment.
   - name: apt-get update
     apt: update_cache=yes
     ignore_errors: yes
@@ -135,6 +152,7 @@
       - mysql
       - apache
 
+  # @tag apache role.
   - name: Apache2 modules
     apache2_module: state=present name={{ item }}
     with_items: apache2_modules
@@ -143,6 +161,7 @@
       - php-stack
     notify: Restart apache
 
+  # @tag apache role.
   - name: Copy apache vhost file
     synchronize: src=files/sites-enabled/000-default.conf dest=/etc/apache2/sites-enabled/000-default.conf
     sudo: yes
@@ -151,23 +170,28 @@
       - php-stack
     notify: Restart apache
 
+  # @tag security.
   - name: Starting random rnd-tools service
     sudo: yes
     shell: rngd -r /dev/urandom
     when: ansible_virtualization_type != "openvz"
 
+  # @tag security.
   - name: Create protected folders
     file: path={{ item }} owner=www-data group=jenkins state=directory
     with_items: protected_folders
 
+  # @tag security.
   - name: Copy .htaccess to the protected folders
     synchronize: src=files/backup-folder/.htaccess dest={{ item }}/.htaccess
     with_items: protected_folders
 
+  # @tag security.
   - name: Generate .htpasswd in protected folders
     htpasswd: path={{ item }}/.htpasswd name={{ protected_folders_user }} password={{ protected_folders_pass }}
     with_items: protected_folders
 
+  # @todo should be removed.
   handlers:
   - name: Restart apache
     service: name=apache2 state=restarted

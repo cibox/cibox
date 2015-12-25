@@ -36,3 +36,5 @@ jenkins_jobs:
   # @todo project_name should be reqired variable. We should have layer of cibox-wide required variables.
   - { name: '{{ project_name }}_PR_BUILDER', template: 'pr_builder.xml.j2' }
   - { name: 'SERVER_CLEANER', template: 'server_cleaner.xml.j2' }
+  # @todo add states for each config.
+  # @todo add user configs here.
