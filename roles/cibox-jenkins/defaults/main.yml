@@ -1,5 +1,9 @@
 ---
 placeholder: 'placeholder'
+project_name: 'cibox'
+jenkins_admin_email: 'noreply@cibox.tools'
+# Jenkins server IP. Should be overridden outside of role.
+jenkins_server_ip: '192.168.77.77'
 
 # We are using unix pam autentification module for jenkins.
 plugins:
@@ -30,11 +34,11 @@ jenkins_pkg_version: 'http://pkg.jenkins-ci.org/debian/binary/jenkins_1.624_all.
 startup_delay_s: 40
 
 jenkins_jobs:
-  - { name: 'BACKUP_PROD_DB', template: 'backup_prod_db.xml.j2' }
-  - { name: 'DEMO', template: 'demo.xml.j2' }
-  - { name: 'DISK_USAGE_TRIGGER', template: 'disk_usage_trigger.xml.j2' }
-  # @todo project_name should be reqired variable. We should have layer of cibox-wide required variables.
-  - { name: '{{ project_name }}_PR_BUILDER', template: 'pr_builder.xml.j2' }
-  - { name: 'SERVER_CLEANER', template: 'server_cleaner.xml.j2' }
-  # @todo add states for each config.
-  # @todo add user configs here.
+  - { name: 'BACKUP_PROD_DB', template: 'backup_prod_db.xml.j2', status: true }
+  - { name: 'DEMO', template: 'demo.xml.j2', status: true }
+  - { name: 'DISK_USAGE_TRIGGER', template: 'disk_usage_trigger.xml.j2', status: true }
+  - { name: '{{ project_name }}_PR_BUILDER', template: 'pr_builder.xml.j2', status: true }
+  - { name: 'SERVER_CLEANER', template: 'server_cleaner.xml.j2', status: true }
+
+jenkins_users:
+  - { name: 'root', template: 'root.xml.j2', status: true }

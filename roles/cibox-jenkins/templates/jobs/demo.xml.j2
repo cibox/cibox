@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>This job will scan new PR in SRS github repo and executes Ci stuff</description>
+  <description>Build demo site based on latest codebase.</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.9.1">
@@ -53,7 +53,7 @@ sudo chown -R www-data:jenkins /var/www/demo
 sudo chmod -R 775 /var/www/demo/sites/default
 cd /var/www/demo
 sudo chown -R www-data:jenkins *
-ansible-playbook reinstall.yml -i 'localhost,' --connection=local --extra-vars &quot;mysql_user=root mysql_pass=root mysql_db=demo site_url=http://ci_server_ip_address/demo pp_environment=&apos;demo&apos;&quot;
+ansible-playbook reinstall.yml -i 'localhost,' --connection=local --extra-vars "php_env_vars='APP_ENV=dev' mysql_user=root mysql_pass=root mysql_db=demo site_url=http://{{ jenkins_server_ip }}/demo pp_environment='demo'"
 sudo chown -R www-data:jenkins ../demo</command>
     </hudson.tasks.Shell>
   </builders>
