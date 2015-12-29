@@ -53,7 +53,7 @@ sudo chown -R www-data:jenkins /var/www/demo
 sudo chmod -R 775 /var/www/demo/sites/default
 cd /var/www/demo
 sudo chown -R www-data:jenkins *
-ansible-playbook reinstall.yml -i 'localhost,' --connection=local --extra-vars &quot;mysql_user=root mysql_pass=root mysql_db=demo site_url=http://ci_server_ip_address/demo pp_environment=&apos;demo&apos;&quot;
+ansible-playbook reinstall.yml -i 'localhost,' --connection=local --extra-vars &quot;mysql_user=root mysql_pass=root mysql_db=demo site_url=http://{{ jenkins_server_ip }}/demo pp_environment=&apos;demo&apos;&quot;
 sudo chown -R www-data:jenkins ../demo</command>
     </hudson.tasks.Shell>
   </builders>

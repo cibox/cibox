@@ -2,6 +2,8 @@
 placeholder: 'placeholder'
 project_name: 'cibox'
 jenkins_admin_email: 'admin@cibox.tools'
+# Jenkins server IP. Should be overridden outside of role.
+jenkins_server_ip: '192.168.1.1'
 
 # We are using unix pam autentification module for jenkins.
 plugins:

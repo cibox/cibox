@@ -4,7 +4,7 @@
 # command
 # Developed for ansible version >= 1.7
 - hosts: CHANGE_ME
-  gather_facts: no
+  gather_facts: yes
   remote_user: root
 
   vars:
@@ -22,13 +22,6 @@
     drushrc:
       drush_usage_log: 1
       drush_usage_send: 1
-
-    # @todo should be used template engine.
-    jenkins_configs:
-      - jenkins.model.JenkinsLocationConfiguration.xml
-      - org.jenkinsci.plugins.ghprb.GhprbTrigger.xml
-      - jobs/{{ project_name }}_PR_BUILDER/config.xml
-      - jobs/DEMO/config.xml
 
     # @tag security.
     protected_folders:
@@ -71,6 +64,11 @@
       - apache
 
   # @tag environment.
+  - name: Set Jenkins server IP
+    set_fact:
+      jenkins_server_ip: "{{ ansible_default_ipv4.address }}"
+
+  # @tag environment.
   # @todo should be tested with DO 14.04 Ubuntu.
   - name: Setup initial packages onto clean system for ansible
     sudo: yes
@@ -81,13 +79,6 @@
   - name: Fixing logger not found
     sudo: yes
     shell: "apt-get --reinstall install -y bsdutils"
-
-  # @todo should be removed.
-  - name: Setup - get environment data for later usage
-    setup:
-    register: allmy
-    tags:
-      - cibox-jenkins
 
   # @tag security.
   - name: Adding jenkins user to group shadow
@@ -136,13 +127,6 @@
       - apache
 
   tasks:
-  # @todo should be used template engine.
-  - name: Change host IP address in jenkins configs
-    replace: dest=/var/lib/jenkins/{{ item }} regexp='ci_server_ip_address' replace={{ allmy.ansible_facts.ansible_default_ipv4.address }}
-    with_items: jenkins_configs
-    tags:
-      - cibox-jenkins
-
   # @tag environment.
   - name: apt-get update
     apt: update_cache=yes
