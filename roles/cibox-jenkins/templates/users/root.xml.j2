@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <user>
-  <fullName>Jenkins Propeople root account</fullName>
+  <fullName>CIbox root user</fullName>
   <properties>
     <hudson.model.PaneStatusProperties>
       <collapsed/>
@@ -29,7 +29,7 @@
       <passwordHash>#jbcrypt:$2a$10$wHB.zg7ClXEaVS6qzE25I.L85DgLA/CHANGE_ME</passwordHash>
     </hudson.security.HudsonPrivateSecurityRealm_-Details>
     <hudson.tasks.Mailer_-UserProperty plugin="mailer@1.11">
-      <emailAddress>CHANGE_ME_to_maintainence_email</emailAddress>
+      <emailAddress>{{ jenkins_admin_email }}</emailAddress>
     </hudson.tasks.Mailer_-UserProperty>
     <jenkins.security.LastGrantedAuthoritiesProperty>
       <roles>

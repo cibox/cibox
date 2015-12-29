@@ -1,6 +1,7 @@
 ---
 placeholder: 'placeholder'
 project_name: 'cibox'
+jenkins_admin_email: 'admin@cibox.tools'
 
 # We are using unix pam autentification module for jenkins.
 plugins:
