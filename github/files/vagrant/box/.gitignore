@@ -3,3 +3,4 @@
 .vagrant
 backup
 index.html
+docroot/build_reports
