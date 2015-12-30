@@ -1,4 +1,8 @@
 ---
+- name: Recover from possible fail
+  sudo: yes
+  shell: 'dpkg --configure -a'
+  ignore_errors: yes
 
 - name: Install apt repos
   sudo: yes
