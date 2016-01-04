@@ -37,8 +37,8 @@
 
   # @todo cleanup old tags.
   roles:
+    - { role: cibox-env }
     - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
-    - { role: cibox-misc, tags: ["misc"] }
     - { role: ansible-role-php, tags: ["php-stack"] }
     - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
     - { role: cibox-drush, tags: ["php-stack"] }
@@ -54,31 +54,9 @@
 
   pre_tasks:
   # @tag environment.
-  - name: Update apt cache
-    sudo: yes
-    apt: update_cache=yes
-    ignore_errors: yes
-    tags:
-      - php-stack
-      - mysql
-      - apache
-
-  # @tag environment.
   - name: Set Jenkins server IP
     set_fact:
       jenkins_server_ip: "{{ ansible_default_ipv4.address }}"
-
-  # @tag environment.
-  # @todo should be tested with DO 14.04 Ubuntu.
-  - name: Setup initial packages onto clean system for ansible
-    sudo: yes
-    # Installing sudo on small ubuntu install.
-    raw: "apt-get -y install python-simplejson sudo curl"
-
-  # @tag environment.
-  - name: Fixing logger not found
-    sudo: yes
-    shell: "apt-get --reinstall install -y bsdutils"
 
   # @tag security.
   - name: Adding jenkins user to group shadow
@@ -98,44 +76,7 @@
     tags:
       - cibox-jenkins
 
-  # @tag environment.
-  - name: Install apt packages
-    apt: name={{ item }} state=present
-    with_items: cibox_apt_packages
-    tags:
-      - php-stack
-      - mysql
-      - apache
-
-    # We have to disable mail sending from CI box.
-    # Does not create a link if sendmail is installed.
-    # @tag environment.
-  - name: Check for sendmail.
-    file: path=/usr/sbin/sendmail src=/bin/true state=link force=no
-    tags:
-      - php-stack
-      - mysql
-      - apache
-
-  # @tag environment.
-  - name: Create ansible config directory
-    sudo: yes
-    file: path=/etc/ansible state=directory mode=775
-    tags:
-      - php-stack
-      - mysql
-      - apache
-
   tasks:
-  # @tag environment.
-  - name: apt-get update
-    apt: update_cache=yes
-    ignore_errors: yes
-    tags:
-      - php-stack
-      - mysql
-      - apache
-
   # @tag apache role.
   - name: Apache2 modules
     apache2_module: state=present name={{ item }}
