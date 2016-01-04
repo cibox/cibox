@@ -1,0 +1,43 @@
+---
+- name: Recover from possible fail
+  sudo: yes
+  shell: 'dpkg --configure -a'
+  ignore_errors: yes
+
+- name: Update apt cache
+  sudo: yes
+  apt: update_cache=yes
+  ignore_errors: yes
+
+# @todo should be tested with DO 14.04 Ubuntu.
+- name: Setup initial packages onto clean system for ansible
+  sudo: yes
+  # Installing sudo on small ubuntu install.
+  raw: "apt-get -y install python-simplejson sudo curl"
+
+- name: Fixing logger not found
+  sudo: yes
+  shell: "apt-get --reinstall install -y bsdutils"
+
+# We have to disable mail sending from CI box.
+# Does not create a link if sendmail is installed.
+- name: Check for sendmail.
+  file: path=/usr/sbin/sendmail src=/bin/true state=link force=no
+
+- name: Create ansible config directory
+  sudo: yes
+  file: path=/etc/ansible state=directory mode=775
+
+- name: Install apt repos
+  sudo: yes
+  apt_repository: repo={{ item }} validate_certs=no
+  with_items: apt_repos
+
+- name: Update apt
+  apt: update_cache=yes
+  sudo: yes
+
+- name: Install packages
+  action: apt pkg={{ item }} state=latest
+  sudo: yes
+  with_items: apt_packages
