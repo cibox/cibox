@@ -1,4 +1,9 @@
 ---
+- name: Recover from possible fail
+  sudo: yes
+  shell: 'dpkg --configure -a'
+  ignore_errors: yes
+
 - name: Update apt cache
   sudo: yes
   apt: update_cache=yes
