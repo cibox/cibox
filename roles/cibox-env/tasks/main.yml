@@ -1,8 +1,4 @@
 ---
-- name: Set Jenkins server IP
-  set_fact:
-    jenkins_server_ip: "{{ ansible_default_ipv4.address }}"
-
 - name: Recover from possible fail
   sudo: yes
   shell: 'dpkg --configure -a'
