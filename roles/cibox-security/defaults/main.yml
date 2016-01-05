@@ -1,0 +1,6 @@
+---
+protected_folders:
+  - /var/www/backup
+  - /var/www/cache
+protected_folders_user: cibox
+protected_folders_pass: givemebackup
