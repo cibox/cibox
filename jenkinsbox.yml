@@ -3,12 +3,12 @@
 # ansible-playbook jenkinsbox.yml
 # command
 # Developed for ansible version >= 1.7
-- hosts: CHANGE_ME
+- hosts: cibox_server
   gather_facts: yes
   remote_user: root
 
   vars:
-    project_name: CHANGE_ME
+    project_name: __CHANGE__project_name__
 
     cibox_apt_packages: []
     apache2_modules:

@@ -2,7 +2,5 @@
 # Servers from this file are used in playbooks in "hosts" line.
 # You can specify in playbook list of one or more groups or host patterns.
 #
-# Example:
-#
-# [my_server]
-# 192.168.1.1
+[cibox_server]
+__CHANGE__server_ip__
