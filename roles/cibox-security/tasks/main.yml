@@ -18,7 +18,10 @@
   with_items: protected_folders
 
 - name: Copy .htaccess to the protected folders
-  synchronize: src=files/backup-folder/.htaccess dest={{ item }}/.htaccess
+  template:
+      src: ".htaccess.j2"
+      dest: "{{ item }}/.htaccess"
+      force: yes
   with_items: protected_folders
 
 - name: Generate .htpasswd in protected folders
