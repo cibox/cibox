@@ -28,7 +28,7 @@ rebuild_registry: false
 # Local environment that will be used from backup.
 local_backup_environment: 'staging'
 # htpasswd protection for securing backups.
-backup_user: propeople
+backup_user: cibox
 backup_pass: givemebackup
 # Source backup database that will be downloaded to build site.
 # In many cases this is production dump.

@@ -3,7 +3,8 @@ placeholder: 'placeholder'
 project_name: 'cibox'
 jenkins_admin_email: 'noreply@cibox.tools'
 # Jenkins server IP. Should be overridden outside of role.
-jenkins_server_ip: '192.168.77.77'
+# "gather_facts" option should be enabled.
+jenkins_server_ip: "{{ ansible_default_ipv4.address }}"
 
 # We are using unix pam autentification module for jenkins.
 plugins:
