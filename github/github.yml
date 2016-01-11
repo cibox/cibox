@@ -19,6 +19,8 @@
     with_vm: True
     with_tests: True
     with_reinstall: True
+    static_pull_requests_file: static_pull_requests.txt
+    static_pull_requests_info: "A list of static pull requests, use branch name as identifier.\rExample:\rTask-201\rTask-210"
 
   pre_tasks:
 
@@ -88,5 +90,8 @@
   - name: Setting permissions for drupal tree
     file: path={{ repo_subfolder }} state=directory mode=777 recurse=yes
     when: drupal_dl.changed == True or profile_copy.changed == True or vmbox.changed == True
+
+  - name: Generate static pull requests file
+    copy: content="{{ static_pull_requests_info }}" dest={{ repo_subfolder }}/{{ drupal_subfolder }}/devops/{{ static_pull_requests_file }}
 
   handlers:
