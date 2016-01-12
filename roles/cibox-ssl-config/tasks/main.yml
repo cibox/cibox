@@ -7,14 +7,3 @@
   - name: Create self-signed SSL cert
     sudo: yes
     command: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "/C=US" -keyout {{ cibox_ssl_folder }}/apache.key -out {{ cibox_ssl_folder }}/apache.crt
-
-  # @TODO should be used apache template and apache role. Currently used only for CI server.
-  - name: Copy SSL apache vhost file
-    synchronize: src=files/sites-enabled/default-ssl.conf dest=/etc/apache2/sites-enabled/default-ssl.conf
-    sudo: yes
-    tags:
-      - apache
-      - php-stack
-      - ssl
-    notify: Restart apache
-    when: cibox_ssl_enable_host == true
