@@ -1,0 +1,15 @@
+---
+- name: Test update
+  shell: /bin/true
+
+- name: Run updates
+  shell: "cd {{ role_path }} && bash files/updates.sh"
+#  args:
+#    chdir: {{ role_path }}
+
+#- name: Run update 106
+#  shell: ansible-playbook {{ role_path }}/updates/hook_update_106.yml
+
+#- name: Run update 107
+
+#  shell: ansible-playbook -vvvv {{ role_path }}/updates/hook_update_107.yml
