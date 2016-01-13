@@ -1,0 +1,12 @@
+---
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: no
+
+  tasks:
+
+  - name: Check ansible full version
+    shell: ansible --version | grep -o -E "([0-9].*)"
+    register: ansible_full_version
+
+  - debug: var=ansible_full_version.stdout

@@ -1,0 +1,23 @@
+---
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: no
+
+  vars:
+    ansible_1: 1.9.4
+
+  tasks:
+
+  - name: Hotfix - downgrade ansible to 1.x from 2.x
+    shell: /bin/true
+
+  - name: Check ansible major version
+    shell: ansible --version | grep -o -E ' [0-9{1}]'
+    register: ansible_bin_version
+
+  - debug: var=ansible_bin_version.stdout
+
+  - name: Uninstall ansible 2.X
+    when: ansible_bin_version.stdout == 2 or ansible_bin_version.stdout == ' 2'
+    shell: echo y | sudo pip -q uninstall ansible && sudo pip -q install ansible=={{ ansible_1 }}
+
