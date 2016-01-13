@@ -1,4 +1,9 @@
 ---
+# This playbook adds new jobs to jenkins server for Acuia deployment.
+# For additional information see screencast below.
+#############################################
+# https://www.youtube.com/watch?v=ihXb2PoWScY
+#############################################
 - hosts: CHANGE_ME
   # connection: local
   gather_facts: no
