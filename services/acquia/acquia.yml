@@ -1,0 +1,206 @@
+---
+- hosts: CHANGE_ME
+  # connection: local
+  gather_facts: no
+  remote_user: root
+
+  vars:
+    # @todo registry rebuild.
+    # @todo add description.
+    # @todo add screenshots from Acquia.
+    # @todo Pull changes from World View, Slack and etc.
+    # @todo create documentation about GitHub HOOKS for PR builder and GitHub plugins.
+    # @todo Drush rr before update
+    # @todo clear varnish
+    root_user: 'root'
+    jenkins_user: 'jenkins'
+
+    # ssh [PROJECT_NAME].[dev/test/prod/ra]@[SERVERS_VAR].[ACQUIA_CLOUD_HOSTING]
+    project_name: 'CHANGE_ME'
+    acquia_git_url: 'CHANGE_ME'
+    github_git_url: 'CHANGE_ME'
+    build_origin_environment: 'prod'
+    acquia_user_email: ''
+    acquia_user_api_key: ''
+
+    # Cloud hosting in most cases prod.hosting.acquia.com or devcloud.hosting.acquia.com,
+    servers:
+      - {
+        environment_name: 'dev',
+        server: 'CHANGE_ME',
+        cloud_hosting: 'prod.hosting.acquia.com',
+        git_branch: 'master',
+        origin_environment: 'prod',
+        domains: []
+      }
+      - {
+        environment_name: 'test',
+        server: 'CHANGE_ME',
+        cloud_hosting: 'prod.hosting.acquia.com',
+        git_branch: 'staging',
+        origin_environment: 'prod',
+        domains: []
+      }
+      - {
+        environment_name: 'prod',
+        server: 'CHANGE_ME',
+        cloud_hosting: 'prod.hosting.acquia.com',
+        git_branch: 'production',
+        origin_environment: '',
+        domains: []
+      }
+      - {
+        environment_name: 'ra',
+        server: 'CHANGE_ME',
+        cloud_hosting: 'prod.hosting.acquia.com',
+        git_branch: 'production',
+        origin_environment: 'prod',
+        domains: []
+      }
+
+  tasks:
+
+    - name: Create folders for DUMP jobs
+      file: path=/var/lib/jenkins/jobs/ACQUIA_DUMP_{{ item.environment_name }} state=directory
+      with_items: servers
+      tags:
+        - dump-jobs
+
+    - name: Copy DUMP jobs
+      template: src=files/acquia/jobs/ACQUIA_DUMP/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_DUMP_{{ item.environment_name }}/config.xml
+      with_items: servers
+      notify:
+        - 'Restart Jenkins'
+      tags:
+        - dump-jobs
+
+    - name: Create folders for NIGHTLY DUMP jobs
+      file: path=/var/lib/jenkins/jobs/NIGHTLY_DATABASE_DUMP state=directory
+      with_items: servers
+      tags:
+        - dump-jobs
+
+    - name: Copy NIGHTLY DUMP jobs
+      template: src=files/acquia/jobs/NIGHTLY_DATABASE_DUMP/config.xml.j2 dest=/var/lib/jenkins/jobs/NIGHTLY_DATABASE_DUMP/config.xml
+      notify:
+        - 'Restart Jenkins'
+      tags:
+        - dump-jobs
+
+    - name: Create folders for GIT jobs
+      file: path=/var/lib/jenkins/jobs/ACQUIA_DEPLOY_BRANCH_{{ item.environment_name }} state=directory
+      with_items: servers
+      tags:
+        - git-jobs
+
+    - name: Copy GIT jobs
+      template: src=files/acquia/jobs/ACQUIA_DEPLOY_BRANCH/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_DEPLOY_BRANCH_{{ item.environment_name }}/config.xml
+      with_items: servers
+      notify:
+        - 'Restart Jenkins'
+      tags:
+        - git-jobs
+
+    - name: Create folders for FILES jobs
+      file: path=/var/lib/jenkins/jobs/ACQUIA_SYNC_FILES_{{ item.environment_name }} state=directory
+      with_items: servers
+      tags:
+        - files-jobs
+
+    - name: Copy FILES jobs
+      template: src=files/acquia/jobs/ACQUIA_SYNC_FILES/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_SYNC_FILES_{{ item.environment_name }}/config.xml
+      with_items: servers
+      notify:
+        - 'Restart Jenkins'
+      tags:
+        - files-jobs
+
+    - name: Create folders for UPDATE jobs
+      file: path=/var/lib/jenkins/jobs/ACQUIA_UPDATE_{{ item.environment_name }} state=directory
+      with_items: servers
+      tags:
+        - update-jobs
+
+    - name: Copy UPDATE jobs
+      template: src=files/acquia/jobs/ACQUIA_UPDATE/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_UPDATE_{{ item.environment_name }}/config.xml
+      with_items: servers
+      notify:
+        - 'Restart Jenkins'
+      tags:
+        - update-jobs
+
+    - name: Create folders for SYNC DB jobs
+      file: path=/var/lib/jenkins/jobs/ACQUIA_SYNC_DB_{{ item.environment_name }} state=directory
+      with_items: servers
+      tags:
+        - db-jobs
+
+    - name: Copy SYNC DB jobs
+      template: src=files/acquia/jobs/ACQUIA_SYNC_DB/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_SYNC_DB_{{ item.environment_name }}/config.xml
+      with_items: servers
+      notify:
+        - 'Restart Jenkins'
+      tags:
+        - db-jobs
+
+    - name: Create folders for RELEASE DB jobs
+      file: path=/var/lib/jenkins/jobs/ACQUIA_RELEASE_{{ item.environment_name }} state=directory
+      with_items: servers
+      tags:
+        - release-jobs
+
+    - name: Copy RELEASE jobs
+      template: src=files/acquia/jobs/ACQUIA_RELEASE/config.xml.j2 dest=/var/lib/jenkins/jobs/ACQUIA_RELEASE_{{ item.environment_name }}/config.xml
+      with_items: servers
+      notify:
+        - 'Restart Jenkins'
+      tags:
+        - release-jobs
+
+    - name: Set permissions for jobs
+      file: path=/var/lib/jenkins/jobs owner=jenkins group=jenkins recurse=yes state=directory
+      tags:
+        - release-jobs
+        - db-jobs
+        - files-jobs
+        - dump-jobs
+        - git-jobs
+
+  post_tasks:
+    - user: name={{ root_user }} generate_ssh_key=yes ssh_key_bits=2048 ssh_key_file=.ssh/id_rsa
+    - user: name={{ jenkins_user }} generate_ssh_key=yes ssh_key_bits=2048 ssh_key_file=.ssh/id_rsa
+
+    - shell: cat .ssh/id_rsa.pub
+      register: root_user_key
+      sudo: yes
+      sudo_user: root
+
+    - shell: cat .ssh/id_rsa.pub
+      register: jenkins_user_key
+      sudo: yes
+      sudo_user: jenkins
+
+    - name: Accept ssh host keys automatically for root
+      lineinfile:
+        dest: .ssh/config
+        line: 'Host *\nStrictHostKeyChecking no'
+        create: yes
+      sudo: yes
+      sudo_user: root
+
+    - name: Accept ssh host keys automatically for jenkins
+      lineinfile:
+        dest: .ssh/config
+        line: 'Host *\nStrictHostKeyChecking no'
+        create: yes
+      sudo: yes
+      sudo_user: jenkins
+
+    - debug: msg='Please attach following SSH keys to Acquia user'
+    - debug: var=root_user_key.stdout
+    - debug: var=jenkins_user_key.stdout
+
+  handlers:
+    - name: Restart Jenkins
+      sudo: yes
+      service: name=jenkins state=restarted
