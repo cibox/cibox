@@ -1,7 +1,7 @@
 CIBOX maintainence team
 =====
 
-Please, contact anyone from below with any questions.
+Please, contact anyone from below with any questions:
 
 - Team Lead Andrii Podanenko https://github.com/podarok podarokua@gmail.com
 - Senior DevOps Alexandr Schedrov https://github.com/Sanchiz alexander.schedrov@gmail.com
