@@ -47,6 +47,6 @@
   sudo: yes
 
 - name: Install Pip packages
-  shell: pip install {{ item }}
+  pip: name={{ item }} state=present
   sudo: yes
   with_items: pip_packages

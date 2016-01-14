@@ -29,7 +29,7 @@ apt_packages:
   - git
 
 pip_packages:
-  - "setuptools --no-use-wheel --upgrade"
+  - setuptools
   - paramiko
   - pyyaml
   - jinja2
