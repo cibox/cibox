@@ -7,6 +7,7 @@ apt_packages:
   - imagemagick
   - libmagickcore-dev
   - libmagickwand-dev
+  - libmysqlclient-dev
   - htop
   - vim
   - time
@@ -14,12 +15,24 @@ apt_packages:
   - make
   - apparmor-utils
   - python-software-properties
+  - python-dev
+  - python-setuptools
+  - python
+  - python-simplejson
+  - python-passlib
   - software-properties-common
   - rsync
   - libssl-dev
   - zlib1g-dev
-  - ansible
   - rng-tools
-  - python-passlib
   - cgroup-bin
   - git
+
+pip_packages:
+  - setuptools
+  - paramiko
+  - pyyaml
+  - jinja2
+  - markupsafe
+  - MySQL-python
+  - ansible==1.9.4

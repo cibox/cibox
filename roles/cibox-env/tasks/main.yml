@@ -41,3 +41,12 @@
   action: apt pkg={{ item }} state=latest
   sudo: yes
   with_items: apt_packages
+
+- name: Install Pip
+  shell: easy_install pip
+  sudo: yes
+
+- name: Install Pip packages
+  pip: name={{ item }} state=present
+  sudo: yes
+  with_items: pip_packages
