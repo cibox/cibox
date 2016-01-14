@@ -19,5 +19,4 @@
 
   - name: Uninstall ansible 2.X
     when: ansible_bin_version.stdout == 2 or ansible_bin_version.stdout == ' 2'
-    shell: echo y | sudo pip -q uninstall ansible && sudo pip -q install ansible=={{ ansible_1 }}
-
+    shell: echo y | sudo pip -q uninstall ansible && sudo pip -q install ansible=={{ ansible_1 }} && sudo apt-get remove -y ansible
