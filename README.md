@@ -1,5 +1,8 @@
-CIBox (Continuous Integration company operations toolBox)
+CIBox
 =====
+
+CIBox is a short name for Continuous Integration company operations toolBox
+
 
 ```ascii
   ██████╗ ██╗     ██████╗   ██████╗  ██╗  ██╗
