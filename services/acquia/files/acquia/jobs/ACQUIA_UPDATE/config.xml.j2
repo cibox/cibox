@@ -16,9 +16,14 @@
       <command>
 # Add waiting, because code on Acquia updated asynchronously.
 sleep 30
-
-sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "drush @{{ project_name }}.{{ item.environment_name }} updatedb -y"
+# Drupal 7 (comment out for Drupal 8)
+sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "drush @{{ project_name }}.{{ item.environment_name }} rr -y"
 sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "drush @{{ project_name }}.{{ item.environment_name }} cc all -y"
+sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "drush @{{ project_name }}.{{ item.environment_name }} updatedb -y"
+
+# Drupal 8 (uncomment to get into work)
+# sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "drush @{{ project_name }}.{{ item.environment_name }} cr -y"
+# sudo ssh -t {{ project_name }}.{{ item.environment_name }}@{{ item.server }}.{{ item.cloud_hosting }} "drush @{{ project_name }}.{{ item.environment_name }} updatedb -y"
 
 # Clear Varnish cache.
 {% for domain in item.domains %}
