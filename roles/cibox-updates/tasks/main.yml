@@ -1,0 +1,24 @@
+---
+- name: Install needed software
+  sudo: yes
+  shell: apt-get -y install python-pip
+
+- name: Run host updates
+  shell: "cd {{ role_path }} && bash files/updates.sh"
+  tags:
+    - host
+
+- name: Run vm updates
+  # @todo run this.
+  debug: var=vm_path
+  tags:
+    - vm
+#  args:
+#    chdir: {{ role_path }}
+
+#- name: Run update 106
+#  shell: ansible-playbook {{ role_path }}/updates/hook_update_106.yml
+
+#- name: Run update 107
+
+#  shell: ansible-playbook -vvvv {{ role_path }}/updates/hook_update_107.yml

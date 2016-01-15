@@ -2,17 +2,17 @@
 
 export PYTHONUNBUFFERED=1
 
+pwd
+
 playbooks=(
-/var/www/docroot/reinstall.yml \
-/var/www/docroot/devops.yml \
-/var/www/docroot/sniffers.yml \
-/var/www/docroot/tests.yml \
+updates/hook_update_106.yml \
+updates/hook_update_107.yml \
 )
 
 for i in "${playbooks[@]}"
 do
    echo "Install "${i}
-   ansible-playbook ${i}  -i 'localhost,' --connection=local
+   ansible-playbook -i 'localhost,' ${i} --connection=local
    if [ "$?" == "0" ]; then
     echo "Finished installing "${i}
    else
