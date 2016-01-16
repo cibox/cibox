@@ -1,4 +1,4 @@
-# CIBox Core: CI Server
+# CIBox Core: Jenkinsbox
 
 Main Ansible Role that installs Jenkins server.
 

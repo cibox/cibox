@@ -50,4 +50,4 @@
       when: project_name is not defined
 
   roles:
-    - { role: '../core/cibox-core-ci-server' }
+    - { role: '../core/cibox-core-jenkinsbox' }
