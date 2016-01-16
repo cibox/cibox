@@ -2,6 +2,7 @@
 
 apt_repos:
   - ppa:ansible/ansible
+  - ppa:ondrej/apache2
 
 apt_packages:
   - imagemagick
