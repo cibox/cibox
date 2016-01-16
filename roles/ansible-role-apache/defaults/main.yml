@@ -33,4 +33,6 @@ apache_ssl_cipher_suite: "AES256+EECDH:AES256+EDH"
 apache_mods_enabled:
   - rewrite.load
   - ssl.load
-apache_mods_disabled: []
+apache_mods_disabled:
+  - authz_default
+  - mod_authz_default
