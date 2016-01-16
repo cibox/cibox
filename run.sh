@@ -3,6 +3,7 @@
 export PYTHONUNBUFFERED=1
 
 # Get server IP from config.yml
-IP=`cat config.yml | grep -oP "^server_ip:\s*(?:[0-9]{1,3}\.){3}[0-9]{1,3}" | grep -oP "(?:[0-9]{1,3}\.){3}[0-9]{1,3}"`
+REGEX_IP="(?:[0-9]{1,3}\.){3}[0-9]{1,3}"
+IP=`cat config.yml | grep -oP "^server_ip:\s*$REGEX_IP" | grep -oP "$REGEX_IP"`
 
 ansible-playbook -vvvv -i $IP, jenkinsbox.yml --extra-vars "@config.yml"
