@@ -77,7 +77,7 @@
     register: tests
 
   - name: Add CIBox core and contrib roles to vagrant box
-    shell: mkdir -p {{ repo_subfolder }}/provisioning/ansible/roles && cp -R ../core/ ../contrib/ {{ repo_subfolder }}/provisioning/ansible/roles/
+    shell: mkdir -p {{ repo_subfolder }}/provisioning/ansible/roles && cp -R ../core/* ../contrib/* {{ repo_subfolder }}/provisioning/ansible/roles/
     when: with_vm == True
 
   - name: Copying installation scripts - reinstall.sh and playbook reinstall.yml
