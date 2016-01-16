@@ -12,7 +12,7 @@ playbooks=(
 for i in "${playbooks[@]}"
 do
    echo "Install "${i}
-   ansible-playbook ${i}
+   ansible-playbook ${i}  -i 'localhost,' --connection=local
    if [ "$?" == "0" ]; then
     echo "Finished installing "${i}
    else

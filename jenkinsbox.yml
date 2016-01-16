@@ -10,10 +10,6 @@
   vars:
     project_name: __CHANGE__project_name__
 
-    cibox_apt_packages: []
-    apache2_modules:
-      - rewrite
-
     # Drush for Drupal 7.
     drush_composer_version: 6.*
     # Drush for Drupal 8.
@@ -23,22 +19,38 @@
       drush_usage_log: 1
       drush_usage_send: 1
 
-    # @tag security.
-    protected_folders:
-      - /var/www/backup
-      - /var/www/cache
-    protected_folders_user: propeople
-    protected_folders_pass: givemebackup
-
-    # @tag security.
-    # @todo decide where we should place/define features configs.
-    cibox_ssl_enable_host: true
+    # PHP configs.
     php_apc_enabled_in_ini: true
+
+    # Apache config.
+    cibox_ssl_folder: /etc/apache/ssl
+    apache_create_vhosts: true
+    apache_vhosts_filename: "vhosts.conf"
+    apache_remove_default_vhost: true
+    apache_default_vhost_filename: "000-default.conf"
+    apache_vhosts:
+      - {
+        servername: "cibox",
+        serveralias: "*.*",
+        documentroot: "/var/www"
+      }
+    apache_vhosts_ssl:
+      - {
+        servername: "cibox",
+        serveralias: "*.*",
+        documentroot: "/var/www",
+        certificate_file: "{{ cibox_ssl_folder }}/apache.crt",
+        certificate_key_file: "{{ cibox_ssl_folder }}/apache.key",
+      }
+    apache_mods_enabled:
+      - rewrite.load
+      - ssl.load
 
   # @todo cleanup old tags.
   roles:
     - { role: cibox-env }
     - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
+    - { role: ansible-role-apache }
     - { role: ansible-role-php, tags: ["php-stack"] }
     - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
     - { role: cibox-drush, tags: ["php-stack"] }
@@ -51,76 +63,4 @@
     - { role: cibox-mysql-config, tags: ["mysql", "php-stack", "cibox-mysql-config"] }
     - { role: cibox-ssl-config, tags: ["apache", "php-stack", "ssl", "cibox-ssl-config"] }
     - { role: cibox-behat-selenium2, tags: ["cibox-behat-selenium", "behat-selenium"] }
-
-  pre_tasks:
-  # @tag environment.
-  - name: Set Jenkins server IP
-    set_fact:
-      jenkins_server_ip: "{{ ansible_default_ipv4.address }}"
-
-  # @tag security.
-  - name: Adding jenkins user to group shadow
-    user: name=jenkins groups=shadow append=yes
-    tags:
-      - cibox-jenkins
-
-  # @tag security.
-  - name: Adding jenkins user to group adm
-    user: name=jenkins groups=adm append=yes
-    tags:
-      - cibox-jenkins
-
-  # @tag security.
-  - name: Adding jenkins user to nopasswd sudoers
-    lineinfile: dest=/etc/sudoers line="jenkins ALL=(ALL) NOPASSWD:ALL"
-    tags:
-      - cibox-jenkins
-
-  tasks:
-  # @tag apache role.
-  - name: Apache2 modules
-    apache2_module: state=present name={{ item }}
-    with_items: apache2_modules
-    tags:
-      - apache
-      - php-stack
-    notify: Restart apache
-
-  # @tag apache role.
-  - name: Copy apache vhost file
-    synchronize: src=files/sites-enabled/000-default.conf dest=/etc/apache2/sites-enabled/000-default.conf
-    sudo: yes
-    tags:
-      - apache
-      - php-stack
-    notify: Restart apache
-
-  # @tag security.
-  - name: Starting random rnd-tools service
-    sudo: yes
-    shell: rngd -r /dev/urandom
-    when: ansible_virtualization_type != "openvz"
-
-  # @tag security.
-  - name: Create protected folders
-    file: path={{ item }} owner=www-data group=jenkins state=directory
-    with_items: protected_folders
-
-  # @tag security.
-  - name: Copy .htaccess to the protected folders
-    synchronize: src=files/backup-folder/.htaccess dest={{ item }}/.htaccess
-    with_items: protected_folders
-
-  # @tag security.
-  - name: Generate .htpasswd in protected folders
-    htpasswd: path={{ item }}/.htpasswd name={{ protected_folders_user }} password={{ protected_folders_pass }}
-    with_items: protected_folders
-
-  # @todo should be removed.
-  handlers:
-  - name: Restart apache
-    service: name=apache2 state=restarted
-    tags:
-      - mysql
-      - apache
-      - php-stack
+    - { role: cibox-security }
