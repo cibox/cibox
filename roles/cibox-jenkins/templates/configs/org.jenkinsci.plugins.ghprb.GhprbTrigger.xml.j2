@@ -12,9 +12,9 @@
   <msgSuccess>Test PASSed.</msgSuccess>
   <msgFailure>Test FAILed.</msgFailure>
   <autoCloseFailedPullRequests>false</autoCloseFailedPullRequests>
-  <username></username>
+  <username>{{ github_username }}</username>
   <password>CHANGE_ME</password>
-  <accessToken>CHANGE_ME</accessToken>
+  <accessToken>{{ github_token }}</accessToken>
   <adminlist></adminlist>
   <publishedURL>http://{{ jenkins_server_ip }}:8080/</publishedURL>
   <requestForTestingPhrase>Can one of the admins verify this patch? Use &quot;o+k to test&quot; or &apos;&apos;t+est this please&quot; for manual build execution.</requestForTestingPhrase>
