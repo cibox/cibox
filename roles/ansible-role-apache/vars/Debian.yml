@@ -5,8 +5,8 @@ apache_server_root: /etc/apache2
 apache_conf_path: /etc/apache2
 
 __apache_packages:
-  - apache2
-  #- apache2-mpm-prefork
+  #- apache2
+  - apache2-mpm-prefork
   - apache2-utils
 
 apache_ports_configuration_items:
