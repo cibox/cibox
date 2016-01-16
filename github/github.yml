@@ -76,10 +76,9 @@
     when: with_tests == True
     register: tests
 
-  - name: Add ansible roles to vagrant box
-    synchronize: src=../roles/ dest={{ repo_subfolder }}/provisioning/ansible/roles/ recursive=yes archive=no
+  - name: Add CIBox core and contrib roles to vagrant box
+    shell: cp -R ../core/ ../contrib/ {{ repo_subfolder }}/provisioning/ansible/roles/
     when: with_vm == True
-    register: vmbox
 
   - name: Copying installation scripts - reinstall.sh and playbook reinstall.yml
     synchronize: src=files/drupal{{ drupal_version }}/scripts/ dest={{ repo_subfolder }}/{{ drupal_subfolder }}/ recursive=yes archive=no
@@ -87,6 +86,6 @@
 
   - name: Setting permissions for drupal tree
     file: path={{ repo_subfolder }} state=directory mode=777 recurse=yes
-    when: drupal_dl.changed == True or profile_copy.changed == True or vmbox.changed == True
+    when: drupal_dl.changed == True or profile_copy.changed == True
 
   handlers:
