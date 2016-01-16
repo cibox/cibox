@@ -40,5 +40,4 @@ before_script:
 script:
    - drush --version
    - ls -la
-   - cd d8 
    - sudo ansible-playbook jenkinsbox.yml -i 'localhost,' --connection=local --extra-vars="project_name=travis mysql_root_password="
