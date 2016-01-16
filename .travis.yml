@@ -1,4 +1,5 @@
 language: php
+sudo: true
 
 php:
   - 5.6
@@ -40,4 +41,4 @@ script:
    - drush --version
    - ls -la
    - cd d8 
-   - ansible-playbook jenkinsbox.yml -i 'localhost,' --connection=local --extra-vars="project_name=travis"
+   - sudo ansible-playbook jenkinsbox.yml -i 'localhost,' --connection=local --extra-vars="project_name=travis"
