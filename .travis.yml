@@ -28,7 +28,7 @@ before_script:
    #- sudo drush init
    #- drush init
    - export PATH="$HOME/.composer/vendor/bin:$PATH"
-   - composer global require drush/drush:dev-master
+   - composer global require drush/drush:8.0.2
    - phpenv rehash
    - sudo ln -s /home/travis/.composer/vendor/bin/drush /usr/bin/drush
    - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'create database IF NOT EXISTS af_test;create database IF NOT EXISTS af_test;'; fi"
