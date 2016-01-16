@@ -36,3 +36,4 @@ apache_mods_enabled:
 apache_mods_disabled:
   - authz_default
   - mod_authz_default
+  - authz_default.load
