@@ -31,5 +31,4 @@
     mysql_table_cache: "800"
 
   roles:
-    - { role: ansible-role-mysql }
-    - { role: cibox-mysql-config }
+    - { role: cibox-mysql }
