@@ -1,0 +1,43 @@
+language: php
+
+php:
+  - 5.6
+
+services:
+  - mysql
+
+env:
+  - DB=mysql
+  
+before_install:
+  # Make sure everything's up to date.
+  - sudo apt-get update -qq
+  - travis_retry composer selfupdate
+
+install:
+ # Install Ansible.
+  - sudo pip install ansible==1.9.4
+ 
+ 
+before_script:
+   #- echo "extension=pcntl.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+   #- wget http://files.drush.org/drush.phar
+   #- chmod +x drush.phar
+   #- sudo mv drush.phar /usr/local/bin/drush
+   #- sudo drush init
+   #- drush init
+   - export PATH="$HOME/.composer/vendor/bin:$PATH"
+   - composer global require drush/drush:dev-master
+   - phpenv rehash
+   - sudo ln -s /home/travis/.composer/vendor/bin/drush /usr/bin/drush
+   - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'create database IF NOT EXISTS af_test;create database IF NOT EXISTS af_test;'; fi"
+   # Installing Drupal Console
+   - php -r "readfile('https://drupalconsole.com/installer');" > drupal.phar
+   - sudo mv drupal.phar /usr/local/bin/drupal
+   - sudo chmod +x /usr/local/bin/drupal
+ 
+script:
+   - drush --version
+   - ls -la
+   - cd d8 
+   - ansible-playbook jenkinsbox.yml -i 'localhost,' --connection=local
