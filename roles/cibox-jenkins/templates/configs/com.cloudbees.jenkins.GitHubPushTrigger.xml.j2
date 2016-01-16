@@ -3,9 +3,9 @@
   <manageHook>true</manageHook>
   <credentials>
     <com.cloudbees.jenkins.Credential>
-      <username></username>
+      <username>{{ github_username }}</username>
       <apiUrl>https://api.github.com</apiUrl>
-      <oauthAccessToken>CHANGE_ME</oauthAccessToken>
+      <oauthAccessToken>{{ github_token }}</oauthAccessToken>
     </com.cloudbees.jenkins.Credential>
   </credentials>
 </com.cloudbees.jenkins.GitHubPushTrigger_-DescriptorImpl>
