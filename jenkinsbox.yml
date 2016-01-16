@@ -1,14 +1,11 @@
 ---
-# This playbook should be executed using 
-# ansible-playbook jenkinsbox.yml
-# command
-# Developed for ansible version >= 1.7
-- hosts: CHANGE_ME
+# Do not run this playbook manually! Use 'run.sh'.
+- hosts: all
   gather_facts: yes
   remote_user: root
 
   vars:
-    project_name: CHANGE_ME
+    project_name: '{{ project_name }}'
 
     # Drush for Drupal 7.
     drush_composer_version: 6.*
@@ -45,6 +42,12 @@
     apache_mods_enabled:
       - rewrite.load
       - ssl.load
+
+  pre_tasks:
+    - name: Check if the playbook was executed with the runner
+      fail:
+        msg: "Please, run this playbook with run.sh."
+      when: project_name is not defined
 
   # @todo cleanup old tags.
   roles:
