@@ -49,21 +49,5 @@
         msg: "Please, run this playbook with run.sh."
       when: project_name is not defined
 
-  # @todo cleanup old tags.
   roles:
-    - { role: cibox-env }
-    - { role: cibox-swap, tags: ["cibox-swap"], when: ansible_virtualization_type != "openvz" }
-    - { role: ansible-role-apache }
-    - { role: ansible-role-php, tags: ["php-stack"] }
-    - { role: ansible-composer, tags: ["ansible-composer", "php-stack"] }
-    - { role: cibox-drush, tags: ["php-stack"] }
-    - { role: ansible-php-pear, tags: ["ansible-php-pear", "php-stack"] }
-    - { role: ansible-role-php-xhprof, tags: ["ansible-php-xhprof", "php-stack"] }
-    - { role: ansible-role-mysql, tags: ["mysql", "php-stack", "ansible-role-mysql"] }
-    - { role: cibox-jenkins, tags: ["cibox-jenkins"] }
-    - { role: cibox-jetty-solr, tags: ["cibox-jetty-solr"] }
-    - { role: cibox-sniffers, tags: ["cibox-sniffers", "php-stack"] }
-    - { role: cibox-mysql-config, tags: ["mysql", "php-stack", "cibox-mysql-config"] }
-    - { role: cibox-ssl-config, tags: ["apache", "php-stack", "ssl", "cibox-ssl-config"] }
-    - { role: cibox-behat-selenium2, tags: ["cibox-behat-selenium", "behat-selenium"] }
-    - { role: cibox-security }
+    - { role: '../core/cibox-core-ci-server' }
