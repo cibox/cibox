@@ -1,19 +1,19 @@
-language: php
+#language: php
 sudo: true
 
-php:
-  - 5.6
+#php:
+#  - 5.6
 
-services:
-  - mysql
+#services:
+#  - mysql
 
-env:
-  - DB=mysql
+#env:
+#  - DB=mysql
   
 before_install:
   # Make sure everything's up to date.
   - sudo apt-get update -qq
-  - travis_retry composer selfupdate
+#  - travis_retry composer selfupdate
 
 install:
  # Install Ansible.
@@ -27,17 +27,17 @@ before_script:
    #- sudo mv drush.phar /usr/local/bin/drush
    #- sudo drush init
    #- drush init
-   - export PATH="$HOME/.composer/vendor/bin:$PATH"
-   - composer global require drush/drush:8.0.2
-   - phpenv rehash
-   - sudo ln -s /home/travis/.composer/vendor/bin/drush /usr/bin/drush
-   - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'create database IF NOT EXISTS af_test;create database IF NOT EXISTS af_test;'; fi"
+#   - export PATH="$HOME/.composer/vendor/bin:$PATH"
+#   - composer global require drush/drush:8.0.2
+#   - phpenv rehash
+#   - sudo ln -s /home/travis/.composer/vendor/bin/drush /usr/bin/drush
+#   - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'create database IF NOT EXISTS af_test;create database IF NOT EXISTS af_test;'; fi"
    # Installing Drupal Console
-   - php -r "readfile('https://drupalconsole.com/installer');" > drupal.phar
-   - sudo mv drupal.phar /usr/local/bin/drupal
-   - sudo chmod +x /usr/local/bin/drupal
+#   - php -r "readfile('https://drupalconsole.com/installer');" > drupal.phar
+#   - sudo mv drupal.phar /usr/local/bin/drupal
+#   - sudo chmod +x /usr/local/bin/drupal
  
 script:
-   - drush --version
+#   - drush --version
    - ls -la
    - sudo ansible-playbook jenkinsbox.yml -i 'localhost,' --connection=local --extra-vars="project_name=travis mysql_root_password="
