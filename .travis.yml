@@ -1,5 +1,11 @@
 
-sudo: true
+sudo: required
+
+env:
+  - distribution: ubuntu
+    version: 14.04
+    init: /sbin/init
+    run_opts: ""
 
 before_install:
   # Make sure everything's up to date.
@@ -8,11 +14,9 @@ before_install:
 install:
  # Install Ansible.
   - sudo pip install ansible==1.9.4
- 
- 
+
 before_script:
 
- 
 script:
    - ls -la
    - sudo ansible-playbook jenkinsbox.yml -i 'localhost,' --connection=local --extra-vars="project_name=travis mysql_root_password="
