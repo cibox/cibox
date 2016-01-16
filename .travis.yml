@@ -40,4 +40,4 @@ script:
    - drush --version
    - ls -la
    - cd d8 
-   - ansible-playbook jenkinsbox.yml -i 'localhost,' --connection=local
+   - ansible-playbook jenkinsbox.yml -i 'localhost,' --connection=local --extra-vars="project_name=travis"
