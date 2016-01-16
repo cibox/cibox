@@ -1,0 +1,18 @@
+---
+dependencies:
+  - { role: '../core/cibox-env' }
+  - { role: '../core/cibox-swap' }
+  - { role: '../contrib/ansible-role-apache' }
+  - { role: '../contrib/ansible-role-php' }
+  - { role: '../contrib/ansible-composer' }
+  - { role: '../core/cibox-drush' }
+  - { role: '../contrib/ansible-php-pear' }
+  - { role: '../contrib/ansible-role-php-xhprof' }
+  - { role: '../contrib/ansible-role-mysql' }
+  - { role: '../core/cibox-jenkins' }
+  - { role: '../core/cibox-jetty-solr' }
+  - { role: '../core/cibox-sniffers' }
+  - { role: '../core/cibox-mysql-config' }
+  - { role: '../core/cibox-ssl-config' }
+  - { role: '../core/cibox-behat-selenium2' }
+  - { role: '../core/cibox-security' }
