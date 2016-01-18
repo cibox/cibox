@@ -1,0 +1,17 @@
+
+sudo: required
+dist: trusty
+
+before_install:
+  # Make sure everything's up to date.
+  - sudo apt-get update -qq
+
+install:
+ # Install Ansible.
+  - sudo pip install ansible==1.9.4
+
+before_script:
+
+script:
+   - ls -la
+   - sudo ansible-playbook jenkinsbox.yml -i 'localhost,' --connection=local --extra-vars="project_name=travis mysql_root_password="
