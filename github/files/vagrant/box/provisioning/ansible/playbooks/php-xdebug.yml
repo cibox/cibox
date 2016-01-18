@@ -14,4 +14,4 @@
     php_xdebug_max_nesting_level: 1000
 
   roles:
-    - { role: ansible-role-php-xdebug }
+    - { role: '../core/cibox-php-xdebug' }

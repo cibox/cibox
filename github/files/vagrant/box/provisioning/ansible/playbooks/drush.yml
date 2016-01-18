@@ -6,7 +6,7 @@
   gather_facts: no
 
   roles:
-    - { role: cibox-drush }
+    - { role: '../core/cibox-drush' }
 
   vars:
     # Drush for Drupal 7.

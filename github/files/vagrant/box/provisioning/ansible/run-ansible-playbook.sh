@@ -3,17 +3,17 @@
 export PYTHONUNBUFFERED=1
 
 playbooks=(
-/vagrant/provisioning/ansible/sendmail.yml \
-/vagrant/provisioning/ansible/misc.yml \
-/vagrant/provisioning/ansible/www.yml \
-/vagrant/provisioning/ansible/php.yml \
-/vagrant/provisioning/ansible/php-xdebug.yml \
-/vagrant/provisioning/ansible/mysql.yml \
-/vagrant/provisioning/ansible/memcached.yml \
-/vagrant/provisioning/ansible/composer.yml \
-/vagrant/provisioning/ansible/drush.yml \
-/vagrant/provisioning/ansible/solr.yml \
-/vagrant/provisioning/ansible/sniffers.yml \
+/vagrant/provisioning/ansible/playbooks/sendmail.yml \
+/vagrant/provisioning/ansible/playbooks/misc.yml \
+/vagrant/provisioning/ansible/playbooks/www.yml \
+/vagrant/provisioning/ansible/playbooks/php.yml \
+/vagrant/provisioning/ansible/playbooks/php-xdebug.yml \
+/vagrant/provisioning/ansible/playbooks/mysql.yml \
+/vagrant/provisioning/ansible/playbooks/memcached.yml \
+/vagrant/provisioning/ansible/playbooks/composer.yml \
+/vagrant/provisioning/ansible/playbooks/drush.yml \
+/vagrant/provisioning/ansible/playbooks/solr.yml \
+/vagrant/provisioning/ansible/playbooks/sniffers.yml \
 )
 
 for i in "${playbooks[@]}"

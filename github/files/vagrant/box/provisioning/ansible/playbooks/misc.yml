@@ -6,4 +6,4 @@
   gather_facts: no
 
   roles:
-    - { role: ansible-composer }
+    - { role: '../core/cibox-env' }
