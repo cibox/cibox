@@ -14,4 +14,4 @@ before_script:
 
 script:
    - ls -la
-   - sudo ./run.sh --ip 127.0.0.1
+   - sudo ./run.sh --ip localhost
