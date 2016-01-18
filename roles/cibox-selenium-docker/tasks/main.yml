@@ -1,0 +1,8 @@
+---
+- name: Install docker
+  sudo: yes
+  shell: curl -sSL https://get.docker.com/ | sh
+
+- name: Download selenium image
+  sudo: yes
+  shell: docker run -d -p 4444:4444 selenium/standalone-firefox

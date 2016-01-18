@@ -1,0 +1,1 @@
+CIBOX install selenium as docker image.
