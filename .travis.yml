@@ -14,4 +14,4 @@ before_script:
 
 script:
    - ls -la
-   - sudo ansible-playbook jenkinsbox.yml -i 'localhost,' --connection=local --extra-vars="project_name=travis mysql_root_password="
+   - sudo ansible-playbook services/jenkinsbox.yml -i 'localhost,' --connection=local --extra-vars="project_name=travis mysql_root_password="
