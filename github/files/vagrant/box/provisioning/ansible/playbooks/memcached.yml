@@ -6,4 +6,4 @@
   gather_facts: yes
 
   roles:
-    - { role: '../core/cibox-memcached' }
+    - { role: '../core/facade-memcached' }

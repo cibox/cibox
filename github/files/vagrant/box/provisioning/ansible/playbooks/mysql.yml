@@ -31,4 +31,4 @@
     mysql_table_cache: "800"
 
   roles:
-    - { role: '../core/cibox-mysql' }
+    - { role: '../core/facade-mysql' }

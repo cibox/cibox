@@ -14,4 +14,4 @@
     php_xdebug_max_nesting_level: 1000
 
   roles:
-    - { role: '../core/cibox-php-xdebug' }
+    - { role: '../core/facade-php-xdebug' }

@@ -36,6 +36,6 @@
     php_apc_enable_cli: "0"
 
   roles:
-    - { role: '../core/cibox-php' }
-    - { role: '../core/cibox-php-pear' }
-    - { role: '../core/cibox-php-xhprof' }
+    - { role: '../core/facade-php' }
+    - { role: '../core/facade-php-pear' }
+    - { role: '../core/facade-php-xhprof' }

@@ -52,5 +52,5 @@
 
   roles:
     - { role: '../core/cibox-varnish', when: varnish_enabled }
-    - { role: '../core/cibox-ssl-config' }
-    - { role: '../core/cibox-apache' }
+    - { role: '../core/facade-ssl-config' }
+    - { role: '../core/facade-apache' }
