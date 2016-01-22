@@ -1,0 +1,12 @@
+---
+repo_subfolder: DEMO
+with_vm: True
+with_tests: True
+with_reinstall: True
+
+cmf: drupal
+
+# Drupal settings.
+drupal_subfolder: docroot
+installation_profile_name: pp
+drupal_version: 7

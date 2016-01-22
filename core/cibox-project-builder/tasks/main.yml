@@ -1,0 +1,3 @@
+---
+- include: drupal.yml
+  when: cmf == "drupal"
