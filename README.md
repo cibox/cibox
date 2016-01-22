@@ -1,7 +1,8 @@
 CIBox
 =====
 
-CIBox is a short name for Continuous Integration company operations toolBox
+CIBox is a short name for Continuous Integration company operations toolBox. 
+[![Build Status](https://travis-ci.org/propeoplemd/cibox.svg?branch=master)](https://travis-ci.org/propeoplemd/cibox)
 
 Follow us on [Twitter](https://twitter.com/cibox_tools) and [FaceBook](https://www.facebook.com/CIBox-178038095885249/)
 
