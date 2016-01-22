@@ -38,7 +38,7 @@
   sudo: yes
 
 - name: Install packages
-  shell: apt-get install {{ apt_packages|selectattr('status', 'equalto', true)|map(attribute='name')|join(' ') }}
+  shell: apt-get -y install {{ apt_packages|selectattr('status', 'equalto', true)|map(attribute='name')|join(' ') }}
   sudo: yes
 
 - name: Install Pip
