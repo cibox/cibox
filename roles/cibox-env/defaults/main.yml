@@ -5,6 +5,7 @@ apt_repos:
 
 apt_packages:
   - { name: "imagemagick", status: true }
+  - { name: "libmagickwand-dev", status: true }
   - { name: "libmagickcore-dev", status: true }
   - { name: "libmysqlclient-dev", status: true }
   - { name: "htop", status: true }
