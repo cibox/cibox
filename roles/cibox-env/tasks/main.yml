@@ -38,9 +38,8 @@
   sudo: yes
 
 - name: Install packages
-  action: apt pkg={{ item }} state=latest
+  shell: apt-get install {{ apt_packages|selectattr('status', 'equalto', true)|map(attribute='name')|join(' ') }}
   sudo: yes
-  with_items: apt_packages
 
 - name: Install Pip
   shell: easy_install pip
