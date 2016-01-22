@@ -11,7 +11,7 @@ require 'yaml'
 dir = File.dirname(File.expand_path(__FILE__))
 
 configValues = YAML::load_file("#{dir}/provisioning/config.yaml")
-apacheConfigValues = YAML::load_file("#{dir}/provisioning/ansible/www.yml")
+apacheConfigValues = YAML::load_file("#{dir}/provisioning/ansible/playbooks/www.yml")
 data = configValues['vagrantfile-local']
 
 if !data['vm']['provider']['virtualbox'].empty?

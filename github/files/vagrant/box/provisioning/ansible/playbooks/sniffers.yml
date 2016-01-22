@@ -6,4 +6,4 @@
   gather_facts: no
 
   roles:
-    - { role: cibox-env }
+    - { role: '../core/cibox-sniffers' }

@@ -51,6 +51,6 @@
       ignore_errors: yes
 
   roles:
-    - { role: cibox-varnish, when: varnish_enabled }
-    - { role: cibox-ssl-config }
-    - { role: ansible-role-apache }
+    - { role: '../core/cibox-varnish', when: varnish_enabled }
+    - { role: '../core/facade-ssl-config' }
+    - { role: '../core/facade-apache' }

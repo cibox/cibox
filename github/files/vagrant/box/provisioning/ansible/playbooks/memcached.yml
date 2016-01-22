@@ -6,4 +6,4 @@
   gather_facts: yes
 
   roles:
-    - { role: ansible-role-memcached }
+    - { role: '../core/facade-memcached' }

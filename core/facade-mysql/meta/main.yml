@@ -1,0 +1,4 @@
+---
+# This role is wrapper for 'ansible-role-mysql'.
+dependencies:
+  - { role: '../contrib/ansible-role-mysql' }
