@@ -1,14 +1,44 @@
 ---
 - name: Creating project folder
-  shell: "mkdir {{ repo_subfolder }} || true"
+  file:
+    path: '{{ repo_subfolder }}'
+    state: directory
 
 - name: Creating drupal folder
-  file: path={{ repo_subfolder }}/{{ drupal_subfolder }} state=directory
+  file:
+    path: '{{ repo_subfolder }}/{{ drupal_subfolder }}'
+    state: directory
   register: drupal_stat
 
-- name: Downloading drupal to {{ drupal_subfolder }} subfolder
-  shell: "cd {{ repo_subfolder }} && drush -y --drupal-project-rename={{ drupal_subfolder }} dl drupal-{{ drupal_version }}.x"
-  when: drupal_stat.changed == True
+- name: Download update.xml
+  get_url:
+    url: http://updates.drupal.org/release-history/drupal/{{ drupal_version }}.x
+    dest: /tmp/drupal_update.xml
+
+- name: Extract current release
+  shell: cat /tmp/drupal_update.xml | grep -E '<version>.*</version>' | head -1 | awk -F">" '{print $2}' | awk -F"<" '{print $1}'
+  register: drupal_release
+
+- name: Download Drupal to temporary directory
+  get_url:
+    url: https://ftp.drupal.org/files/projects/drupal-{{ drupal_release.stdout }}.tar.gz
+    dest: /tmp/drupal_latest.tar.gz
+
+- name: Creating temporary directory
+  file:
+    path: /tmp/drupal_latest
+    state: directory
+
+- name: Unarchive the tarball
+  unarchive:
+    copy: no
+    src: /tmp/drupal_latest.tar.gz
+    dest: /tmp/drupal_latest
+
+- name: Copy files to project directory
+  synchronize:
+    src: /tmp/drupal_latest/drupal-{{ drupal_release.stdout }}/
+    dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}'
   register: drupal_dl
 
 - name: Inject pp profile into drupal
