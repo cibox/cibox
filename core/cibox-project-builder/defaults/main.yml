@@ -1,8 +1,9 @@
 ---
-repo_subfolder: DEMO
+repo_subfolder: REPOSITORY
 with_vm: True
 with_tests: True
 with_reinstall: True
+repository_path: ./
 
 cmf: drupal
 
