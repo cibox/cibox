@@ -1,9 +1,3 @@
-> [Wiki](Home) ▸ **About CIBox**
-
-* [Quick Start how-to](https://github.com/propeoplemd/cibox/wiki/QUICKSTART)
-* [Contacts](https://github.com/propeoplemd/cibox/blob/master/CONTACTS.md)
-* [RoadMap for development](https://github.com/propeoplemd/cibox/wiki/RoadMap)
-
 Current state of the project:
 - most of the initial development was done by Andriy Podanenko, Artem Miroshnik, Alexander Schedrov and Yurii Gerasimov.
 

@@ -1,5 +1,3 @@
-> [Wiki](Home) ▸ [[Best Practices]] ▸ **PHP and Drupal**
-
 PHP
 =====
 

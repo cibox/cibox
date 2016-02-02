@@ -1,6 +1,3 @@
-Segmentation fault error
-=====
-
 If during `drush updb` you have "Segmentation fault" error, probably this caused by `node_modules` folder within module/theme or by big file tree.
 
 ![](https://cloud.githubusercontent.com/assets/1316234/8358001/88a4d81e-1b66-11e5-8476-9c8ad068c2ad.png)

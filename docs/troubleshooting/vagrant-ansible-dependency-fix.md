@@ -10,7 +10,7 @@ When Ansible 2 has been released, some of Vagrant machines may have errors. Here
 
     ```bash
     cd provisioning
-    # or
+    or
     cd puphpet
     ```
 

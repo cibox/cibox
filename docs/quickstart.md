@@ -1,5 +1,3 @@
-> [Wiki](Home) ▸ **QUICKSTART**
-
 This document is OUTDATED for current master branch.
 We've decreased time for initial CIBox installation a lot.
 

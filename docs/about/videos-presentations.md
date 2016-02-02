@@ -1,5 +1,3 @@
-> [Wiki](Home) ▸ [[About CIBox]] ▸ **Videos and presentations**
-
 ## Presentations:
 * [Happy Ever Afters With CI Workflow](https://goo.gl/S0k0Xn) September 6, 2015
 * [MoldCamp - multidimentional testing workflow. CIBox](http://www.slideshare.net/podarok/moldcamp-multidimentional-testing-workflow-cibox), May 30, 2015

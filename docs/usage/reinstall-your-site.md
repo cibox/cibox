@@ -1,5 +1,3 @@
-> [Wiki](Home) ▸ [[Usage]] ▸ **How to reinstall your site**
-
 How to reinstall your site
 =====
 

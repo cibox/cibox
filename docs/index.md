@@ -1,4 +1,10 @@
-# Welcome to the CIBox wiki!
+ ██████╗██╗██████╗  ██████╗ ██╗  ██╗
+██╔════╝██║██╔══██╗██╔═══██╗╚██╗██╔╝
+██║     ██║██████╔╝██║   ██║ ╚███╔╝ 
+██║     ██║██╔══██╗██║   ██║ ██╔██╗ 
+╚██████╗██║██████╔╝╚██████╔╝██╔╝ ██╗
+ ╚═════╝╚═╝╚═════╝  ╚═════╝ ╚═╝  ╚═╝
+                                    
 
 CIBox is an open source tool, that allows you to configure CI workflow in few minutes. CIBox created mostly for DevOps and for users who are familiar with technologies.
 

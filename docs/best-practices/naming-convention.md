@@ -1,5 +1,3 @@
-> [Wiki](Home) ▸ [[Best Practices]] ▸ **Naming convention**
-
 Drupal related
 =====
 
