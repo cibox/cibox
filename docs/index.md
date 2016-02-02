@@ -1,5 +1,4 @@
-<p align="center"><img src="images/cibox-logo.png" alt="CIBox Logo" /></p>                                    
-
+<p align="center"><img src="images/cibox-logo.png" alt="CIBox Logo" /></p>
 CIBox is an open source tool, that allows you to configure CI workflow in few minutes. CIBox created mostly for DevOps and for users who are familiar with technologies.
 
 ## Technologies
