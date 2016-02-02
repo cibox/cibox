@@ -1,20 +1,11 @@
-CIBox
-=====
+<p align="center"><img src="docs/images/cibox-logo.png" alt="CIBox Logo" /></p>
+
+[![Build Status](https://travis-ci.org/propeoplemd/cibox.svg?branch=master)](https://travis-ci.org/propeoplemd/cibox)
+[![Documentation Status](https://readthedocs.org/projects/cibox/badge/?version=latest)](http://cibox.readthedocs.org/en/latest/?badge=latest)
 
 CIBox is a short name for Continuous Integration company operations toolBox. 
-[![Build Status](https://travis-ci.org/propeoplemd/cibox.svg?branch=master)](https://travis-ci.org/propeoplemd/cibox)
 
 Follow us on [Twitter](https://twitter.com/cibox_tools) and [FaceBook](https://www.facebook.com/CIBox-178038095885249/)
-
-
-```ascii
-  ██████╗ ██╗     ██████╗   ██████╗  ██╗  ██╗
- ██╔════╝ ██║     ██╔══██╗ ██╔═══██╗ ╚██╗██╔╝
- ██║      ██║     ██████╔╝ ██║   ██║  ╚███╔╝
- ██║      ██║     ██╔══██╗ ██║   ██║  ██╔██╗
- ╚██████╗ ██║     ██████╔╝ ╚██████╔╝ ██╔╝ ██╗
-  ╚═════╝ ╚═╝     ╚═════╝   ╚═════╝  ╚═╝  ╚═╝
-```
 
 CIBox mailing list
 =====
