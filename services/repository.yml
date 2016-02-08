@@ -7,6 +7,7 @@
   vars:
     cmf: drupal
     repo_subfolder: ../FRESH_REPOSITORY
+    drupal_version: 7
 
   roles:
       - { role: '../core/cibox-project-builder' }

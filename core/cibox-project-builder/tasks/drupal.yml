@@ -14,6 +14,7 @@
   get_url:
     url: http://updates.drupal.org/release-history/drupal/{{ drupal_version }}.x
     dest: /tmp/drupal_update.xml
+    force: yes
 
 - name: Extract current release
   shell: cat /tmp/drupal_update.xml | grep -E '<version>.*</version>' | head -1 | awk -F">" '{print $2}' | awk -F"<" '{print $1}'
@@ -23,6 +24,7 @@
   get_url:
     url: https://ftp.drupal.org/files/projects/drupal-{{ drupal_release.stdout }}.tar.gz
     dest: /tmp/drupal_latest.tar.gz
+    force: yes
 
 - name: Creating temporary directory
   file:
@@ -58,24 +60,14 @@
 - name: Create a folder placeholders for sniffers
   shell: "mkdir {{ repo_subfolder }}/{{ drupal_subfolder }}/{{ item }}/"
   ignore_errors: yes
-  with_items:
-    - sites/all/modules/custom
-    - sites/all/modules/contrib
-    - sites/all/themes/custom
-    - sites/all/themes/contrib
-    - sites/all/modules/features
+  with_items: 'drupal_placeholders.drupal{{ drupal_version }}'
 
 - name: Create empty readme files for placeholders
   file:
     path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/{{ item }}/readme.txt'
     state: touch
     force: yes
-  with_items:
-    - sites/all/modules/custom
-    - sites/all/modules/contrib
-    - sites/all/themes/custom
-    - sites/all/themes/contrib
-    - sites/all/modules/features
+  with_items: 'drupal_placeholders.drupal{{ drupal_version }}'
 
 - name: Restrict access to YAML files
   lineinfile:
@@ -120,3 +112,6 @@
 - name: Setting permissions for drupal tree
   file: path={{ repo_subfolder }} state=directory mode=777 recurse=yes
   when: drupal_dl.changed == True or profile_copy.changed == True
+
+# @todo Drupal 8 gitignore.
+# @todo Drupal 8 sites/default/config/staging folder.
