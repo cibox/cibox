@@ -31,8 +31,8 @@ On your host machine you should have the following software:
 
 | Name        | Version |
 | ----------- | ------- |
-| Vagrant     | 1.7+    |
-| Ansible     | 2.0+    |
+| Vagrant     | 1.6+    |
+| Ansible     | 1.7+ (2.x not supported yet)    |
 | VirtualBox  | 4.0+    |
 
 ## CIBox supports
