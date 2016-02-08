@@ -1,0 +1,28 @@
+---
+# This script contains commands to fill out Drupal settings before installation.
+# Executes only for "SQL workflow".
+- name: Getting name for settings (WINDOWS)
+  set_fact: platform_settings_file={{ tmp_folder }}/reinstall_settings.php
+  when: is_windows
+
+- name: Getting name for settings (UNIX)
+  set_fact: platform_settings_file={{ settings_file_path }}
+  when: is_windows == false
+
+- name: Copy settings to tmp folder (WINDOWS)
+  shell: cp {{ settings_file_path }} {{ platform_settings_file }}
+  when: is_windows
+
+- name: Add general post-settings to settings.php
+  lineinfile: dest='{{ platform_settings_file }}' line='{{ item.name }} = \"{{ item.value }}\";'
+  when: item.status == true
+  with_items: global_env.post_settings
+
+- name: Add environment specific post-settings
+  lineinfile: dest='{{ platform_settings_file }}' line='{{ item.name }} = \"{{ item.value }}\";'
+  when: item.status == true
+  with_items: env.post_settings
+
+- name: Copy settings back (WINDOWS)
+  shell: cp {{ platform_settings_file }} {{ settings_file_path }}
+  when: is_windows

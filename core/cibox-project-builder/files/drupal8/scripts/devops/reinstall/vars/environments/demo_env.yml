@@ -1,0 +1,10 @@
+---
+env:
+  pre_settings: []
+  modules: []
+  drush_commands:
+    - { name: 'user-password', status: true, arguments: "{{ drupal_user }} --password={{ drupal_pass }}" }
+    - { name: 'config-set', status: false, arguments: "system.site uuid USER_YOUR_UUID_HERE -y" }
+    - { name: 'search-index', status: false, arguments: "" }
+  post_settings:
+    - { name: '$config_directories["staging"]', status: true, value: 'sites/default/config/staging' }
