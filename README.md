@@ -14,7 +14,7 @@ Follow us on [Twitter](https://twitter.com/cibox_tools) and [FaceBook](https://w
 
 #### Create new Drupal repository
 - `./repository.sh`
-
+- `cd FRESH_REPOSITORY`
 
 ## CIBox mailing list
 
