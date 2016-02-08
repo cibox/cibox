@@ -9,7 +9,7 @@ Follow us on [Twitter](https://twitter.com/cibox_tools) and [FaceBook](https://w
 
 ## Quick Start
 #### Provision new CI server
-- Add your host credentials to the `config.yml` file.
+- Add your host and GitHub credentials to the `config.yml` file.
 - `./provision.sh`
 
 #### Create new Drupal repository
