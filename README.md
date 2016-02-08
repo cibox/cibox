@@ -23,7 +23,7 @@ CIBox is a short name for Continuous Integration company operations toolbox.
 
 ## Documentation [![CIBox documentation reference](https://img.shields.io/badge/CIBox-docs-blue.svg)](http://cibox.readthedocs.org)
 
-Full Drupal VM documentation is available at [http://cibox.readthedocs.org](http://cibox.readthedocs.org)
+Full CIbox documentation is available at [http://cibox.readthedocs.org](http://cibox.readthedocs.org)
 
 ## Dependencies
 
