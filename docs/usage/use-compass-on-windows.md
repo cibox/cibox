@@ -1,0 +1,1 @@
+[Watch video how you can use compass on Windows](https://www.youtube.com/watch?v=dwjFnQfISto)

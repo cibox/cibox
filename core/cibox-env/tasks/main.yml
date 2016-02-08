@@ -49,3 +49,8 @@
   pip: name={{ item }} state=present
   sudo: yes
   with_items: pip_packages
+
+- name: Remove premature repository from php role
+  sudo: yes
+  action: apt_repository repo='ppa:ondrej/php5-5.6' state=absent
+  ignore_errors: yes
