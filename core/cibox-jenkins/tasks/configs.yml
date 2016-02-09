@@ -1,4 +1,28 @@
 ---
+# Trick from http://stackoverflow.com/a/30953269
+- name: Copy groovy script
+  template:
+    src: scripts/encrypt.groovy.j2
+    dest: '{{ jenkins_dest }}/encrypt.groovy'
+    owner: root
+    group: root
+    mode: 0755
+    force: yes
+
+- name: Encrypt GitHub password
+  sudo: yes
+  action: command java -jar {{ jenkins.cli_dest }} -s http://localhost:8080 groovy {{ jenkins_dest }}/encrypt.groovy
+  register: encrypted_pass
+  notify: Restart Jenkins
+
+- name: Set encrypted password
+  set_fact: github_encrypted_password="{{ encrypted_pass.stdout }}"
+
+- name: Remove groovy script
+  file:
+    path: '{{ jenkins_dest }}/encrypt.groovy'
+    state: absent
+
 - name: Create folders for Jenkins jobs
   file:
     path: /var/lib/jenkins/jobs/{{ item.name }}
