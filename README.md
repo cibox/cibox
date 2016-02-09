@@ -1,13 +1,18 @@
 <p align="center"><img src="docs/images/cibox-logo.png" alt="CIBox Logo" /></p>
 
-[![Build Status](https://travis-ci.org/propeoplemd/cibox.svg?branch=master)](https://travis-ci.org/propeoplemd/cibox)
-[![Documentation Status](https://readthedocs.org/projects/cibox/badge/?version=latest)](http://cibox.readthedocs.org/en/latest/?badge=latest)
+Continuous Integration Toolbox [![Release](https://img.shields.io/github/release/propeoplemd/cibox.svg)](https://github.com/propeoplemd/cibox/releases/latest)
+============================
 
-CIBox is a short name for Continuous Integration company operations toolBox. 
+CIBox is a short name for Continuous Integration company operations toolbox. 
 
-Follow us on [Twitter](https://twitter.com/cibox_tools) and [FaceBook](https://www.facebook.com/CIBox-178038095885249/)
+## Main possibilities
 
-## Quick Start
+- Continuous Integration Server that automatically generates builds for every commit in a Pull Request on GitHub (private repositories supported).
+- Configured and optimized Vagrant instance with set of modern tools.
+- Multi CMS/CMF support that allows create project from scratch in seconds.
+- CI platform to run different test suites.
+
+## Quick Start Guide
 #### Provision new CI server
 - Add your host and GitHub credentials to the `config.yml` file.
 - `./provision.sh`
@@ -16,21 +21,32 @@ Follow us on [Twitter](https://twitter.com/cibox_tools) and [FaceBook](https://w
 - `./repository.sh`
 - `cd FRESH_REPOSITORY`
 
-## CIBox mailing list
+## Documentation [![CIBox documentation reference](https://img.shields.io/badge/CIBox-docs-blue.svg)](http://cibox.readthedocs.org)
 
-- To post to this group, send email to ci_box@googlegroups.com
-- To unsubscribe from this group, send email to ci_box+unsubscribe@googlegroups.com
-- Visit and Join this group at https://groups.google.com/d/forum/ci_box
-- For more options, visit https://groups.google.com/d/optout
+Full CIbox documentation is available at [http://cibox.readthedocs.org](http://cibox.readthedocs.org)
 
+## Dependencies
 
-## WIKI
-https://github.com/propeoplemd/cibox/wiki
+On your host machine you should have the following software:
 
-## TIPs:
+| Name        | Version |
+| ----------- | ------- |
+| Vagrant     | 1.6+    |
+| Ansible     | 1.7+ (2.x not supported yet)    |
+| VirtualBox  | 4.0+    |
 
-This repo consists basically from two playbooks
-- CI server installation/provisioning jenkinsbox.yml
-- github.yml repo builder with drupal, vagrant, puppet, drupal pp installation profile, scripts for reinstalling and sniffing with sniffers
+## CIBox supports
 
-You have to use *64bit* Ubuntu 14.04 LTS system for CI server
+CIBox fully supports **Ubuntu 14.04 LTS 64bit** as CI server operation system.
+
+## Contributing to CIBox
+| **Provisioner** | **Repository builder** | **Vagrant** | **Documentation** |
+|------------------|------------------|------------------|------------------|
+| [![Build Status](https://travis-ci.org/propeoplemd/cibox.svg?branch=master)](https://travis-ci.org/propeoplemd/cibox) | ![Build Status](http://128.199.55.125:8080/buildStatus/icon?job=REPOSITORY_BUILDER) | ![Build Status](http://128.199.55.125:8080/buildStatus/icon?job=VAGRANT_BOX) | [![Documentation Status](https://readthedocs.org/projects/cibox/badge/?version=latest)](http://cibox.readthedocs.org/en/latest/?badge=latest) |
+
+Want to hack on CIBox? Awesome! We have [instructions to help you get started contributing code or documentation](http://cibox.readthedocs.org/en/latest/Contributing/).
+
+These instructions are probably not perfect, please let us know if anything feels wrong or incomplete. Better yet, submit a PR and improve them yourself.
+
+## Contacts
+Follow us on [Twitter](https://twitter.com/cibox_tools) and [FaceBook](https://www.facebook.com/CIBox-178038095885249/)
