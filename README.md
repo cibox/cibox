@@ -1,13 +1,13 @@
 <p align="center"><img src="docs/images/cibox-logo.png" alt="CIBox Logo" /></p>
 
-Continious Integration Toolbox [![Release](https://img.shields.io/github/release/propeoplemd/cibox.svg)](https://github.com/propeoplemd/cibox/releases/latest)
+Continuous Integration Toolbox [![Release](https://img.shields.io/github/release/propeoplemd/cibox.svg)](https://github.com/propeoplemd/cibox/releases/latest)
 ============================
 
 CIBox is a short name for Continuous Integration company operations toolbox. 
 
 ## Main possibilities
 
-- Continious Integration Server that automatically generates builds for every commit in a Pull Request on GitHub (private repositories supported).
+- Continuous Integration Server that automatically generates builds for every commit in a Pull Request on GitHub (private repositories supported).
 - Configured and optimized Vagrant instance with set of modern tools.
 - Multi CMS/CMF support that allows create project from scratch in seconds.
 - CI platform to run different test suites.
