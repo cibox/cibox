@@ -1,5 +1,4 @@
 server_ip: 192.168.1.101
-project_name: demo
 github_url: https://github.com/NAME/REPOSITORY
 github_username: BOT_NAME
 github_token: BOT_ACCESS_TOKEN
