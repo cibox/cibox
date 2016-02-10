@@ -9,4 +9,4 @@
     repo_subfolder: ../FRESH_REPOSITORY
 
   roles:
-      - { role: '../core/cibox-project-builder' }
+      - { role: '../core/core-repository' }
