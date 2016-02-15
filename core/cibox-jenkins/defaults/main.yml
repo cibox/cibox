@@ -30,7 +30,8 @@ plugins:
   - 'http://mirrors.jenkins-ci.org/plugins/matrix-project/1.6/matrix-project.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/project-description-setter/1.1/project-description-setter.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/ssh-credentials/1.11/ssh-credentials.hpi'
-  - 'http://mirrors.jenkins-ci.org/plugins/hipchat/0.1.9/hipchat.hpi'
+  # Keeping HipChat support disabled by defaut. Logs should be smaller now.
+  # - 'http://mirrors.jenkins-ci.org/plugins/hipchat/0.1.9/hipchat.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/scm-api/0.2/scm-api.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/scripttrigger/0.31/scripttrigger.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/parameterized-trigger/2.28/parameterized-trigger.hpi'
