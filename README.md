@@ -21,9 +21,9 @@ CIBox is a short name for Continuous Integration company operations toolbox.
 - `./repository.sh`
 - `cd FRESH_REPOSITORY`
 
-## Documentation [![CIBox documentation reference](https://img.shields.io/badge/CIBox-docs-blue.svg)](http://cibox.readthedocs.org)
+## Documentation [![CIBox documentation reference](https://img.shields.io/badge/CIBox-docs-blue.svg)](http://docs.cibox.tools)
 
-Full CIbox documentation is available at [http://cibox.readthedocs.org](http://cibox.readthedocs.org)
+Full CIbox documentation is available at [http://docs.cibox.tools](http://docs.cibox.tools)
 
 ## Dependencies
 

@@ -1,6 +1,5 @@
 ---
 placeholder: 'placeholder'
-project_name: 'cibox'
 jenkins_admin_email: 'noreply@cibox.tools'
 # Jenkins server IP. Should be overridden outside of role.
 # "gather_facts" option should be enabled.
