@@ -20,7 +20,7 @@
 - name: Place PHP CLI configuration file in place.
   template:
     src: cli-php.ini.j2
-    dest: "{{ php_conf_path }}/cli/php.ini"
+    dest: "{{ __php_cli_conf_path }}/php.ini"
     owner: root
     group: root
     mode: 0644
