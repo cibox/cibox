@@ -1,6 +1,3 @@
-This document is OUTDATED for current master branch.
-We've decreased time for initial CIBox installation a lot.
-
 Welcome to CIBox development workflow
 
 Here you can see a quick how-to start current development workflow from scratch to first build for Pull Request.
