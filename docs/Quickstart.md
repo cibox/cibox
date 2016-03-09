@@ -1,25 +1,22 @@
-This document is OUTDATED for current master branch.
-We've decreased time for initial CIBox installation a lot.
-
 Welcome to CIBox development workflow
 
 Here you can see a quick how-to start current development workflow from scratch to first build for Pull Request.
 
-#### Jenkins provisioning
-* Clone repository to your local desktop. ```git clone https://github.com/propeoplemd/cibox.git```
-* Create your own Ubuntu 14.04 powered virtual machine, vps or dedicated server and get its IP address. We recommend [DigitalOcean VPS hosting](http://bit.ly/cibox-digitalocean), because we are using its droplets for spinning up CI instanses for ~2 years.
-* Go into cloned ```cibox``` subfolder and add IP address of created machine to ```hosts``` file within a folder. It is simple ini file and there are examples of some testing hosts. Use unique name for your machine's ```IP```.
-* Open ```jenkinsbox.yml``` with your favorite editor and replace ```CHANGE_ME``` placeholders (your host name from hosts file and project name without special characters and whitespaces).
-* Run ```ansible-playbook jenkinsbox.yml``` from console of your desktop machine and wait untill all the software installed onto remote host. If there are errors during install or install been stalled for more than 5 minutes, try to stop ```CTRL-C``` and rerun the command untill it's done.
-* After successful run of ```jenkinsbox.yml``` playbook you should login into ```http://IP:8080``` Jenkins console with root credentials of your remote machine.
-
 #### Prepare GitHub project
-* Open ```github``` subfolder inside ```cibox``` folder and run ```ansible-playbook github.yml``` there. You'll get ```DEMO``` subfolder where all the files prepared for your future project.
-* Create new Git repository inside ```DEMO``` project and push it to your remote repository on GitHub.
+* Clone repository to your local desktop. ```git clone https://github.com/propeoplemd/cibox.git```
+* Open ```cibox``` subfolder and run ```sh ./repository.sh``` there. You'll get ```FRESH_REPOSITORY``` subfolder where all the files prepared for your future project.
+* Create new Git repository inside ```FRESH_REPOSITORY``` project and push it to your remote repository on GitHub.
+* Create dedicated user at GitHub for not conflicting with your own personal account. The user's credentials would be used as bot for posting comments from Jenkins to GitHub.
+
+#### Jenkins provisioning
+* Create your own Ubuntu 14.04 powered virtual machine, vps or dedicated server and get its IP address. We recommend [DigitalOcean VPS hosting](http://bit.ly/cibox-digitalocean), because we are using its droplets for spinning up CI instanses for ~2 years without any issues.
+* Go into cloned ```cibox``` subfolder and prefill IP address and previously created github bot repo's credentials of created machine to ```config.yml``` file within a folder. It is simple yml file.
+* Run ```sh ./provision``` from console of your desktop machine and wait untill all the software installed onto remote host. If there are errors during install or install been stalled for more than 10 minutes, try to stop ```CTRL-C``` and rerun the command untill it's done.
+* After successful run of ```sh ./provision``` script you should login into ```http://IP:8080``` Jenkins console.
 
 #### How to work with project files?
 
-* Run `vagrant up` withing the `DEMO` directory and you'll get ready to use virtual machine.
+* Run `vagrant up` withing the `FRESH_REPOSITORY` directory and you'll get ready to use virtual machine.
 
 #### Configure connection from Jenkins to GitHub
 * Open Jenkins system settings ```http://IP:8080/configure```, then open ```Configure System``` item and add your own github bot user credentials and access token.
