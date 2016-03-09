@@ -11,6 +11,12 @@ Here you can see a quick how-to start current development workflow from scratch 
 #### Jenkins provisioning
 * Create your own Ubuntu 14.04 powered virtual machine, vps or dedicated server and get its IP address. We recommend [DigitalOcean VPS hosting](http://bit.ly/cibox-digitalocean), because we are using its droplets for spinning up CI instanses for ~2 years without any issues.
 * Go into cloned ```cibox``` subfolder and prefill IP address and previously created github bot repo's credentials of created machine to ```config.yml``` file within a folder. It is simple yml file.
+```yml
+github_url: https://github.com/NAME/REPOSITORY
+github_username: BOT_NAME
+github_token: BOT_ACCESS_TOKEN
+github_password: BOT_PASSWORD
+```
 * Run ```sh ./provision``` from console of your desktop machine and wait untill all the software installed onto remote host. If there are errors during install or install been stalled for more than 10 minutes, try to stop ```CTRL-C``` and rerun the command untill it's done.
 * After successful run of ```sh ./provision``` script you should login into ```http://IP:8080``` Jenkins console.
 
