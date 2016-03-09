@@ -17,6 +17,16 @@
   notify: restart webserver
   when: php_use_managed_ini
 
+- name: Place PHP CLI configuration file in place.
+  template:
+    src: cli-php.ini.j2
+    dest: "{{ __php_cli_conf_path }}/php.ini"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart webserver
+  when: php_use_managed_ini
+
 - name: Place APC configuration file in place.
   template:
     src: apc.ini.j2

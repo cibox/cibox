@@ -1,0 +1,9 @@
+site_name: CIBox Documentation
+
+repo_url: https://github.com/propeoplemd/cibox
+site_description: 'CIBox - Continuous Integration company operations toolbox.'
+theme: readthedocs
+
+markdown_extensions:
+  - toc:
+      permalink: True

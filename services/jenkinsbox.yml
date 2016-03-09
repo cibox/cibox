@@ -5,8 +5,6 @@
   remote_user: root
 
   vars:
-    project_name: '{{ project_name }}'
-
     # Drush for Drupal 7.
     drush_composer_version: 6.*
     # Drush for Drupal 8.
@@ -46,8 +44,8 @@
   pre_tasks:
     - name: Check if the playbook was executed with the runner
       fail:
-        msg: "Please, run this playbook with run.sh."
-      when: project_name is not defined
+        msg: "Please, run this playbook with provision.sh."
+      when: server_ip is not defined
 
   roles:
     - { role: '../core/core-jenkinsbox' }

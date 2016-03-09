@@ -1,6 +1,5 @@
 ---
 placeholder: 'placeholder'
-project_name: 'cibox'
 jenkins_admin_email: 'noreply@cibox.tools'
 # Jenkins server IP. Should be overridden outside of role.
 # "gather_facts" option should be enabled.
@@ -10,6 +9,7 @@ jenkins_server_ip: "{{ ansible_default_ipv4.address }}"
 github_url: https://github.com/NAME/REPOSITORY
 github_username: BOT_NAME
 github_token: BOT_ACCESS_TOKEN
+github_password: BOT_PASSWORD
 
 # We are using unix pam autentification module for jenkins.
 plugins:
@@ -29,7 +29,8 @@ plugins:
   - 'http://mirrors.jenkins-ci.org/plugins/matrix-project/1.6/matrix-project.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/project-description-setter/1.1/project-description-setter.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/ssh-credentials/1.11/ssh-credentials.hpi'
-  - 'http://mirrors.jenkins-ci.org/plugins/hipchat/0.1.9/hipchat.hpi'
+  # Keeping HipChat support disabled by defaut. Logs should be smaller now.
+  # - 'http://mirrors.jenkins-ci.org/plugins/hipchat/0.1.9/hipchat.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/scm-api/0.2/scm-api.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/scripttrigger/0.31/scripttrigger.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/parameterized-trigger/2.28/parameterized-trigger.hpi'
@@ -43,7 +44,7 @@ jenkins_jobs:
   - { name: 'BACKUP_PROD_DB', template: 'backup_prod_db.xml.j2', status: true }
   - { name: 'DEMO', template: 'demo.xml.j2', status: true }
   - { name: 'DISK_USAGE_TRIGGER', template: 'disk_usage_trigger.xml.j2', status: true }
-  - { name: '{{ project_name }}_PR_BUILDER', template: 'pr_builder.xml.j2', status: true }
+  - { name: 'PR_BUILDER', template: 'pr_builder.xml.j2', status: true }
   - { name: 'SERVER_CLEANER', template: 'server_cleaner.xml.j2', status: true }
 
 jenkins_users:

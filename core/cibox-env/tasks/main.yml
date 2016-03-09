@@ -36,6 +36,7 @@
 - name: Update apt
   apt: update_cache=yes
   sudo: yes
+  ignore_errors: yes
 
 - name: Install packages
   shell: apt-get -y install {{ apt_packages|selectattr('status', 'equalto', true)|map(attribute='name')|join(' ') }}
