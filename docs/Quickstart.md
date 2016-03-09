@@ -24,15 +24,6 @@ github_password: BOT_PASSWORD
 
 * Run `vagrant up` withing the `FRESH_REPOSITORY` directory and you'll get ready to use virtual machine.
 
-#### Configure connection type from Jenkins to GitHub (optional)
-
-##### https://
-If you use `https://` and `HTTP` authentication (e.g. `https://github.com/propeoplemd/cibox.git`) in GitHub repository URL, will be enough settings from previous steps.
-##### git://
-If you use `git://` and `SSH` authentication (e.g. `git@github.com:propeoplemd/cibox.git`) in GitHub repository URL, you have to do one additional step.
-* login to your Jenkins host machine via console under ```jenkins``` user credentials and create ssh key
-```ssh-keygen -t rsa -b 4096 -C "your_email@example.com"```. You should upload that key to github bot account for adding ability to access github repo from Jenkins server. You should [test connection](https://help.github.com/articles/generating-ssh-keys/#step-5-test-the-connection) and add github to known hosts before starting to use CI Box by this step.
-
 #### Create first PR on GitHub
 * Create New Pull request for your project repo and wait ~5 minutes. You should get changed status and build comment afterwards.
 * For debugging Jenkins problems use ```http://IP:8080/log/all``` UI or ```/var/log/jenkins/jenkins.log``` on your Jenkins server. Also take a look at [Known Issues wiki page](https://github.com/propeoplemd/cibox/wiki/Known-Issues) for a possible issues.
