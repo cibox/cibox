@@ -19,20 +19,6 @@ Here you can see a quick how-to start current development workflow from scratch 
 * Run `vagrant up` withing the `FRESH_REPOSITORY` directory and you'll get ready to use virtual machine.
 
 #### Configure connection from Jenkins to GitHub
-* Open Jenkins system settings ```http://IP:8080/configure```, then open ```Configure System``` item and add your own github bot user credentials and access token.
-![API 1](https://cloud.githubusercontent.com/assets/1316234/9269670/853e58fa-4274-11e5-898f-9abf45290f02.png)
-
----
-
-![API 2](https://cloud.githubusercontent.com/assets/1316234/9269692/a3ae754a-4274-11e5-8d48-ae5798d6c854.png)
-
----
-
-![BOT 1](https://cloud.githubusercontent.com/assets/1316234/9269705/c4c11bd4-4274-11e5-8e4e-b220d058b925.png)
-* Open Jenkins users credentials ```http://IP:8080/credential-store/domain/_/``` and change prefilled empty user with your bot's credentials.
-* ```DEMO``` and ```*PR_BUILDER``` jobs should have appropriate urls to github repository of your project. Please replace urls with CHANGE_ME placeholders to right ones. Also change user to your bot user within ```*PR_BUILDER``` settings
-
-![BOT 2](https://cloud.githubusercontent.com/assets/1316234/9269989/c8a446fc-4276-11e5-9ab0-9175cbb339d6.png)
 
 ##### https://
 If you use `https://` and `HTTP` authentication (e.g. `https://github.com/propeoplemd/cibox.git`) in GitHub repository URL, will be enough settings from previous steps.
