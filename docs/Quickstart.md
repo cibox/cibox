@@ -6,7 +6,7 @@ Here you can see a quick how-to start current development workflow from scratch 
 * Clone repository to your local desktop. ```git clone https://github.com/propeoplemd/cibox.git```
 * Open ```cibox``` subfolder and run ```sh ./repository.sh``` there. You'll get ```FRESH_REPOSITORY``` subfolder where all the files prepared for your future project.
 * Create new Git repository inside ```FRESH_REPOSITORY``` project and push it to your remote repository on GitHub.
-* Create dedicated user at GitHub for not conflicting with your own personal account. The user's credentials would be used as bot for posting comments from Jenkins to GitHub.
+* Create dedicated user at GitHub for not conflicting with your own personal account. The user's credentials [hot to get a tocken](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) would be used as bot for posting comments from Jenkins to GitHub. This user should have access to a project repo.
 
 #### Jenkins provisioning
 * Create your own Ubuntu 14.04 powered virtual machine, vps or dedicated server and get its IP address. We recommend [DigitalOcean VPS hosting](http://bit.ly/cibox-digitalocean), because we are using its droplets for spinning up CI instanses for ~2 years without any issues.
@@ -18,7 +18,7 @@ Here you can see a quick how-to start current development workflow from scratch 
 
 * Run `vagrant up` withing the `FRESH_REPOSITORY` directory and you'll get ready to use virtual machine.
 
-#### Configure connection from Jenkins to GitHub
+#### Configure connection type from Jenkins to GitHub (optional)
 
 ##### https://
 If you use `https://` and `HTTP` authentication (e.g. `https://github.com/propeoplemd/cibox.git`) in GitHub repository URL, will be enough settings from previous steps.
