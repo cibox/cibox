@@ -19,7 +19,7 @@ echo "Installing pip via easy_install."
 wget https://raw.githubusercontent.com/ActiveState/ez_setup/v0.9/ez_setup.py
 python ez_setup.py && rm -f ez_setup.py
 easy_install pip
-# Make sure setuptools are installed crrectly.
+# Make sure setuptools are installed correctly.
 pip install setuptools --no-use-wheel --upgrade
 
 echo "Installing required python modules."
