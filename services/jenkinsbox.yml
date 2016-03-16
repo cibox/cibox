@@ -17,6 +17,7 @@
     # PHP configs.
     php_apc_enabled_in_ini: true
 
+    cibox_php_pcntl: no
     # Apache config.
     cibox_ssl_folder: /etc/apache/ssl
     apache_create_vhosts: true
