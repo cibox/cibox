@@ -1,0 +1,9 @@
+---
+# This script contains commands to manage "Profile workflow" and install site from scratch by using installation profile.
+- name: Remove settings.php
+  file: name={{ settings_file_path }} state=absent
+  sudo: yes
+
+- name: Installing drupal
+  sudo: yes
+  shell: "{{ php_env_vars }} drush -y si {{ installation_profile_name }} --db-url=mysql://{{ mysql_user }}:{{ mysql_pass }}@{{ mysql_host }}:/{{ mysql_db }} --account-name={{ drupal_user }} --account-pass={{ drupal_pass }} --uri={{ site_url }}"

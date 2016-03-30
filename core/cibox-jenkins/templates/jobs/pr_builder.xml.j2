@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+    <actions/>
+    <description>This job will scan new PR in GitHub repo and executes CI stuff.</description>
+    <keepDependencies>false</keepDependencies>
+    <properties>
+        <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.9.1">
+            <projectUrl>{{ github_url }}</projectUrl>
+        </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    </properties>
+    <scm class="hudson.plugins.git.GitSCM" plugin="git@2.2.5">
+        <configVersion>2</configVersion>
+        <userRemoteConfigs>
+            <hudson.plugins.git.UserRemoteConfig>
+                <name>origin</name>
+                <refspec>+refs/pull/*:refs/remotes/origin/pr/*</refspec>
+                <url>{{ github_url }}.git</url>
+                <credentialsId>c55a496e-7717-4f51-88d5-1a50b478ba55</credentialsId>
+            </hudson.plugins.git.UserRemoteConfig>
+        </userRemoteConfigs>
+        <branches>
+            <hudson.plugins.git.BranchSpec>
+                <name>${sha1}</name>
+            </hudson.plugins.git.BranchSpec>
+        </branches>
+        <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+        <submoduleCfg class="list"/>
+    <extensions>
+      <hudson.plugins.git.extensions.impl.CleanBeforeCheckout/>
+      <hudson.plugins.git.extensions.impl.CloneOption>
+        <shallow>true</shallow>
+        <reference></reference>
+        <timeout>5</timeout>
+      </hudson.plugins.git.extensions.impl.CloneOption>
+      <hudson.plugins.git.extensions.impl.SubmoduleOption>
+        <disableSubmodules>false</disableSubmodules>
+        <recursiveSubmodules>true</recursiveSubmodules>
+        <trackingSubmodules>false</trackingSubmodules>
+        <timeout>5</timeout>
+      </hudson.plugins.git.extensions.impl.SubmoduleOption>
+      <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+        <relativeTargetDir>new_pull_request</relativeTargetDir>
+      </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
+    </extensions>
+    </scm>
+    <canRoam>true</canRoam>
+    <disabled>false</disabled>
+    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+    <triggers>
+        <org.jenkinsci.plugins.ghprb.GhprbTrigger plugin="ghprb@1.15-0">
+            <spec>H/3 * * * *</spec>
+            <adminlist></adminlist>
+            <allowMembersOfWhitelistedOrgsAsAdmin>true</allowMembersOfWhitelistedOrgsAsAdmin>
+            <orgslist>propeoplemd</orgslist>
+            <cron>H/3 * * * *</cron>
+            <triggerPhrase></triggerPhrase>
+            <onlyTriggerPhrase>false</onlyTriggerPhrase>
+            <useGitHubHooks>false</useGitHubHooks>
+            <permitAll>false</permitAll>
+            <commentFilePath>${WORKSPACE}/commentinfo.md</commentFilePath>
+            <whitelist></whitelist>
+            <autoCloseFailedPullRequests>false</autoCloseFailedPullRequests>
+            <whiteListTargetBranches>
+                <org.jenkinsci.plugins.ghprb.GhprbBranch>
+                    <branch></branch>
+                </org.jenkinsci.plugins.ghprb.GhprbBranch>
+            </whiteListTargetBranches>
+            <project>SRS_PR_BUILDER</project>
+        </org.jenkinsci.plugins.ghprb.GhprbTrigger>
+    </triggers>
+    <concurrentBuild>false</concurrentBuild>
+    <builders>
+        <hudson.tasks.Shell>
+            <command>
+export PYTHONUNBUFFERED=1
+echo "===============" > ${WORKSPACE}/commentinfo.md
+cd new_pull_request
+sudo rsync -avz docroot/ /var/www/build${BUILD_NUMBER}
+cd /var/www/build${BUILD_NUMBER}
+sudo chown -R www-data:jenkins *
+ansible-playbook reinstall.yml -i 'localhost,' --connection=local --extra-vars "php_env_vars='APP_ENV=dev' mysql_user=root mysql_pass=root mysql_db=drupal${BUILD_NUMBER} drupal_folder=/var/www/build${BUILD_NUMBER} site_url=http://{{ jenkins_server_ip }}/build${BUILD_NUMBER} pp_environment='default'"
+ansible-playbook sniffers.yml -i 'localhost,' --connection=local --extra-vars "workspace_root=${WORKSPACE} webroot=http://{{ jenkins_server_ip }}/build${BUILD_NUMBER}"
+ansible-playbook tests.yml -i 'localhost,' --connection=local --extra-vars "workspace_root=${WORKSPACE} behat_base_url=http://{{ jenkins_server_ip }}/build${BUILD_NUMBER} update_dependencies='yes' resources_path=${WORKSPACE}/new_pull_request//tests/behat/resources
+behat_drupal_root=/var/www/build${BUILD_NUMBER}
+behat_root=${WORKSPACE}/new_pull_request/tests/behat"
+sudo chown -R www-data:jenkins ../build${BUILD_NUMBER}
+            </command>
+        </hudson.tasks.Shell>
+    </builders>
+  <publishers>
+    <jenkins.plugins.hipchat.HipChatNotifier plugin="hipchat@0.1.9">
+      <token>CHANGE_ME</token>
+      <room>CHANGE_ME</room>
+      <startNotification>true</startNotification>
+      <notifySuccess>true</notifySuccess>
+      <notifyAborted>true</notifyAborted>
+      <notifyNotBuilt>false</notifyNotBuilt>
+      <notifyUnstable>false</notifyUnstable>
+      <notifyFailure>true</notifyFailure>
+      <notifyBackToNormal>true</notifyBackToNormal>
+            <startJobMessage>&gt;&gt;&gt; &lt;strong&gt;$ghprbPullTitle&lt;/strong&gt; &lt;br /&gt; $JOB_NAME #$BUILD_NUMBER $STATUS ($CHANGES_OR_CAUSE) &lt;br /&gt; Started by $ghprbTriggerAuthor ($ghprbActualCommitAuthorEmail) &lt;br /&gt;&lt;a href=&quot;$URL/console&quot;&gt;Open Builder console within Jenkins&lt;/a&gt;&lt;br /&gt;&lt;a href=&quot;CHANGE_ME_TO_PROJECT_HTTPS_URL/pull/$ghprbPullId&quot;&gt;Open PR at Github&lt;/a&gt; &lt;br /&gt;</startJobMessage>
+            <completeJobMessage>&gt;&gt;&gt; &lt;strong&gt;$ghprbPullTitle&lt;/strong&gt; &lt;br /&gt; $JOB_NAME #$BUILD_NUMBER $STATUS after $DURATION &lt;br /&gt; by $ghprbTriggerAuthor ($ghprbActualCommitAuthorEmail) &lt;br /&gt;&lt;a href=&quot;$URL/console&quot;&gt;Open Builder console within Jenkins&lt;/a&gt;&lt;br /&gt;&lt;a href=&quot;CHANGE_ME_TO_PROJECT_HTTPS_URL/pull/$ghprbPullId&quot;&gt;Open PR at Github&lt;/a&gt;</completeJobMessage>
+    </jenkins.plugins.hipchat.HipChatNotifier>
+  </publishers>
+    <buildWrappers>
+        <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.0">
+            <colorMapName>xterm</colorMapName>
+        </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+    </buildWrappers>
+</project>

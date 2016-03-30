@@ -1,0 +1,4 @@
+---
+# This role is wrapper for 'ansible-role-apache'.
+dependencies:
+  - { role: '../contrib/ansible-role-apache' }

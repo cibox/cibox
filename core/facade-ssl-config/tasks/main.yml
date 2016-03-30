@@ -1,0 +1,9 @@
+---
+
+  - name: Assures {{ cibox_ssl_folder }} dir exists
+    sudo: yes
+    file: path={{ cibox_ssl_folder }} state=directory
+
+  - name: Create self-signed SSL cert
+    sudo: yes
+    command: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "/C=US" -keyout {{ cibox_ssl_folder }}/apache.key -out {{ cibox_ssl_folder }}/apache.crt

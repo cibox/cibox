@@ -1,0 +1,22 @@
+---
+- include: composer_install.yml
+  when: drush_install_mode != 'none'
+
+- name: Create global Drush configuration folder
+  file: path=/etc/drush/ state=directory
+  tags: [drush]
+
+- name: Create global Drush configuration (drushrc) file
+  template: src=drushrc.j2 dest=/etc/drush/drushrc.php validate='php -l %s' mode=0644
+  tags: [drush]
+
+- name: Configure Drush BASH completion
+  file: src={{drush_complete_sh}} path={{drush_bash_completion_d}}/drush state=link force=yes
+  when: drush_complete_sh is defined
+
+- name: Drush version
+  shell: drush --version
+  register: installed_drush_version
+
+- name: Display drush version
+  debug: msg={{ installed_drush_version.stdout_lines }}

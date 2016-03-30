@@ -1,0 +1,28 @@
+---
+- name: "Install Drush with global Composer"
+  shell: "{{drush_composer_bin}} global require drush/drush:{{drush_composer_version}} --no-interaction --no-ansi"
+  sudo_user: "{{ drush_composer_user }}"
+
+- name: Make drush src available globally
+  shell: "rsync -avz --delete /root/.composer/vendor/drush/drush/ /usr/local/src/drush"
+  sudo: yes
+
+- name: Adding global link to drush binary
+  file: src=/usr/local/src/drush/drush dest=/usr/local/bin/drush state=link mode=755
+  sudo: yes
+
+- name: Fix permissions for library folder.
+  file: path=/usr/local/src/drush/lib state=directory mode=0777
+  sudo: yes
+
+- name: Update all composer dependencies
+  sudo: yes
+  command: "{{drush_composer_bin}} update"
+  args:
+    chdir: /usr/local/src/drush
+
+- name: "Get global Composer user home directory path."
+  shell: cat /etc/passwd | grep -Ew {{ drush_composer_user }} | cut -d":" -f6
+  register: drush_composer_user_home
+- set_fact:
+    drush_complete_sh: "{{ drush_composer_user_home.stdout }}/.composer/vendor/bin/drush.complete.sh"

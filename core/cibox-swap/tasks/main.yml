@@ -1,0 +1,29 @@
+---
+  - name: Check if swap already enabled.
+    sudo: yes
+    file: path=/swapfile1 state=touch
+    register: is_swapfile
+
+  - name: Create swapfile if not present
+    sudo: yes
+    shell: 'dd if=/dev/zero of=/swapfile1 bs={{ swap_size }} count={{ swap_blocks }}'
+    when: is_swapfile.changed == true and is_swapfile.size == 0
+
+  - name: Make swapfile as swap
+    sudo: yes
+    ignore_errors: yes
+    shell: 'mkswap /swapfile1'
+
+  - name: Check if swap enabled as swapon
+    sudo: yes
+    shell: 'swapon -s'
+    register: swapon
+
+  - name: Enable swap
+    sudo: yes
+    shell: 'swapon /swapfile1'
+    when: swapon.stdout.find('swapfile1') == -1
+
+  - name: Add swap to fstab
+    sudo: yes
+    mount: name=swap src=/swapfile1 fstype=swap opts=default state=present

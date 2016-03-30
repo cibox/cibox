@@ -1,0 +1,75 @@
+---
+# This script contains commands to manage "SQL workflow":
+# - Downloading database from remote host or use local dump
+# - Importing to database
+# - Running registry rebuild (when modules have been moved to new directory)
+# - Running database updates
+- name: Droping drupal database
+  mysql_db: name={{ mysql_db }} state=absent login_user={{ mysql_user }} login_password={{ mysql_pass }} login_host={{ mysql_host }}
+  when: pp_environment == "demo" or pp_environment == "default"
+
+- name: Creating drupal database
+  mysql_db: name={{ mysql_db }} state=present login_user={{ mysql_user }} login_password={{ mysql_pass }} login_host={{ mysql_host }}
+
+# Vagrant build.
+- name: Downloading latest backup to local environment
+  get_url: url={{ source_database }} dest={{ backup_folder }}/latest_remote.sql.gz force=yes
+  when: pp_environment == "default" and ((ansible_env.USER is not defined or ansible_env.USER != "{{ ci_server_username }}") and (ansible_env.SUDO_USER is not defined or ansible_env.SUDO_USER != "{{ ci_server_username }}"))
+
+- name: Removing possible abandoned dump
+  shell: rm -rf {{ backup_folder }}/latest_remote.sql
+  sudo: yes
+  when: pp_environment == "default" and ((ansible_env.USER is not defined or ansible_env.USER != "{{ ci_server_username }}") and (ansible_env.SUDO_USER is not defined or ansible_env.SUDO_USER != "{{ ci_server_username }}"))
+
+- name: Importing from remote backup
+  sudo: yes
+  mysql_db: name={{ mysql_db }} state=import target={{ backup_folder }}/latest_remote.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }} login_host={{ mysql_host }}
+  when: pp_environment == "default" and ((ansible_env.USER is not defined or ansible_env.USER != "{{ ci_server_username }}") and (ansible_env.SUDO_USER is not defined or ansible_env.SUDO_USER != "{{ ci_server_username }}"))
+
+# CI server build.
+- name: Copy latest backup to build folder
+  sudo: yes
+  copy: src={{ backup_folder }}/{{ source_backup_name }} dest=./latest.sql.gz force=yes mode=0644
+  when: (pp_environment == "default" or pp_environment == "demo") and ((ansible_env.USER is defined and ansible_env.USER == "{{ ci_server_username }}") or (ansible_env.SUDO_USER is defined and ansible_env.SUDO_USER == "{{ ci_server_username }}"))
+
+- name: Importing from local backup
+  sudo: yes
+  mysql_db: name={{ mysql_db }} state=import target=./latest.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }} login_host={{ mysql_host }}
+  when: (pp_environment == "default" or pp_environment == "demo") and ((ansible_env.USER is defined and ansible_env.USER == "{{ ci_server_username }}") or (ansible_env.SUDO_USER is defined and ansible_env.SUDO_USER == "{{ ci_server_username }}"))
+
+- name: Remove local backup from build folder
+  sudo: yes
+  file: name=./latest.sql.gz state=absent
+  when: pp_environment == "default" or pp_environment == "demo"
+
+# Run registry rebuild.
+- name: Check if registry_rebuild is installed
+  shell: "{{ php_env_vars }} drush | grep -c registry_rebuild"
+  args:
+    chdir: ~/
+  register: registry_rebuild_installed
+  ignore_errors: true
+
+- name: Downloading registry_rebuild
+  sudo: yes
+  shell: "{{ php_env_vars }} drush -y dl registry_rebuild"
+  args:
+    chdir: ~/
+  when: rebuild_registry and registry_rebuild_installed.stdout == "0"
+
+- name: Clear drush cache
+  sudo: yes
+  shell: "{{ php_env_vars }} drush cc drush"
+  args:
+    chdir: ~/
+  when: rebuild_registry and registry_rebuild_installed.stdout == "0"
+
+- name: Rebuilding drupal registry
+  sudo: yes
+  shell: "{{ php_env_vars }} drush -y rr -l {{ site_url }} || true"
+  when: rebuild_registry
+
+# Update database.
+- name: Updating database
+  sudo: yes
+  shell: "{{ php_env_vars }} drush -dvy updb -l {{ site_url }}"

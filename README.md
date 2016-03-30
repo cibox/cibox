@@ -1,101 +1,52 @@
-CIBox (Continuous Integration Box)
-=====
+<p align="center"><img src="docs/images/cibox-logo.png" alt="CIBox Logo" /></p>
 
-CIBox mailing list
-=====
+Continuous Integration Toolbox [![Release](https://img.shields.io/github/release/propeoplemd/cibox.svg)](https://github.com/propeoplemd/cibox/releases/latest)
+============================
 
-- To post to this group, send email to ci_box@googlegroups.com
-- To unsubscribe from this group, send email to ci_box+unsubscribe@googlegroups.com
-- Visit and Join this group at https://groups.google.com/d/forum/ci_box
-- For more options, visit https://groups.google.com/d/optout
+CIBox is a short name for Continuous Integration company operations toolbox. 
 
-Quick Start
-=====
-https://github.com/propeoplemd/cibox/wiki/QUICKSTART
+## Main possibilities
 
-WIKI
-=====
-https://github.com/propeoplemd/cibox/wiki
+- Continuous Integration Server that automatically generates builds for every commit in a Pull Request on GitHub (private repositories supported).
+- Configured and optimized Vagrant instance with set of modern tools.
+- Multi CMS/CMF support that allows create project from scratch in seconds.
+- CI platform to run different test suites.
 
-TIP:
-=====
+## Quick Start Guide
+#### Provision new CI server
+- Add your host and GitHub credentials to the `config.yml` file.
+- `./provision.sh`
 
-Don't forget to setup all http://ci_hostname:8080/configure settings with CHANGE_ME... placeholders to be able meet project requirements.
-Also you should change all CHANGE_ME placeholders for DEMO and PR builders jobs as well.
+#### Create new Drupal repository
+- `./repository.sh`
+- `cd FRESH_REPOSITORY`
 
-This repo consists basically from two playbooks
-- CI server installation/provisioning jenkinsbox.yml
-- github.yml repo builder with drupal, vagrant, puppet, drupal pp installation profile, scripts for reinstalling and sniffing with sniffers
+## Documentation [![CIBox documentation reference](https://img.shields.io/badge/CIBox-docs-blue.svg)](http://docs.cibox.tools)
 
-You have to use *64bit* Ubuntu 12.04 LTS or 14.04 LTS systems for CI server
+Full CIbox documentation is available at [http://docs.cibox.tools](http://docs.cibox.tools)
 
-Common and base apps and packages
-=====
-cibox-misc role contains all basic packages required for cibox and vagrant installation.
+## Dependencies
 
-Possible variations
-=====
+On your host machine you should have the following software:
 
-Currently jenkinsbox.yml playbook powered with tags, so you can run only part of it.
+| Name        | Version |
+| ----------- | ------- |
+| Vagrant     | 1.6+    |
+| Ansible     | 1.7+ (2.x not supported yet)    |
+| VirtualBox  | 4.0+    |
 
-Install SOLR only
-=====
+## CIBox supports
 
-```sh
-ansible-playbook jenkinsbox.yml --tags "ansible-jetty-solr"
-```
+CIBox fully supports **Ubuntu 14.04 LTS 64bit** as CI server operation system.
 
-Install php stack.
-=====
+## Contributing to CIBox
+| **Provisioner** | **Repository builder** | **Vagrant** | **Documentation** |
+|------------------|------------------|------------------|------------------|
+| [![Build Status](https://travis-ci.org/propeoplemd/cibox.svg?branch=master)](https://travis-ci.org/propeoplemd/cibox) | ![Build Status](http://128.199.55.125:8080/buildStatus/icon?job=REPOSITORY_BUILDER) | ![Build Status](http://128.199.55.125:8080/buildStatus/icon?job=VAGRANT_BOX) | [![Documentation Status](https://readthedocs.org/projects/cibox/badge/?version=latest)](http://cibox.readthedocs.org/en/latest/?badge=latest) |
 
-```sh
-ansible-playbook jenkinsbox.yml --tags "php-stack"
-```
+Want to hack on CIBox? Awesome! We have [instructions to help you get started contributing code or documentation](http://cibox.readthedocs.org/en/latest/Contributing/).
 
-Other tags self-explained
-=====
+These instructions are probably not perfect, please let us know if anything feels wrong or incomplete. Better yet, submit a PR and improve them yourself.
 
-run them as
-```sh
-ansible-playbook jenkinsbox.yml --tags "TAGNAME"
-```
-
-- ansible-jenkins
-- ansible-composer
-- ansible-php-pear
-- ansible-php-xhprof
-- ansible-sniffers
-- apache
-- mysql
-- cibox-mysql-config
-- cibox-swap
-- cibox-ssl-config
-
-
-OpenVZ support
-=====
-
-If your system build on OpenVZ stack and swap is disabled you may bypass
-it with using fakeswap.sh file within files/fakeswap directory
-
-for use this script run on remote system console
-```sh
-chmod a+x fakeswap.sh
-```
-and
-```sh
-sh ./fakeswap.sh 4086
-```
-for adding 4086MB swap size
-
-
-Roles not used by default
-=====
-
-Within a roles/ subfolder there are roles, been imported from some projects but
-not used by default
-
-- cibox-phpdaemon: - role from HP project for installing phpdaemon
-- ansible-role-php-pecl: - role, originally developed by geerlingguy but without
- dependency from his php playbook. Can be used for installing pecl packages.
-
+## Contacts
+Follow us on [Twitter](https://twitter.com/cibox_tools) and [FaceBook](https://www.facebook.com/CIBox-178038095885249/)

@@ -1,0 +1,25 @@
+---
+# Commands to prepare environment.
+- name: Set writable cache dir
+  sudo: yes
+  file: path={{ cache_folder }} mode=777 state=directory recurse=yes
+
+- name: Set writable tmp dir
+  sudo: yes
+  file: dest={{ tmp_folder }} mode=777 state=directory recurse=yes
+
+- name: Set writable backup dir
+  sudo: yes
+  file: dest={{ backup_folder }} mode=777 state=directory recurse=yes
+
+- name: Set writable default dir
+  sudo: yes
+  file: dest=sites/default mode=777 state=directory recurse=yes
+
+- name: Set writable files dir
+  sudo: yes
+  file: dest=sites/default/files mode=777 state=directory recurse=yes
+
+- name: Set writable private dir
+  sudo: yes
+  file: dest=sites/default/files/private mode=777 state=directory recurse=yes
