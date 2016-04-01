@@ -1,0 +1,59 @@
+---
+- name: Create directory for PHP sources
+  file:
+    path: /tmp/phpsource
+    state: directory
+  register: php_sources
+
+- name: Get PHP sources
+  shell: "apt-get source php5"
+  args:
+    # Disable warning about usage of "apt" module due to it unable load sources.
+    warn: no
+    chdir: "{{ php_sources.path }}"
+    removes: "{{ php_sources.path }}"
+
+- name: Register path to PCNTL extension sources
+  # Folder contains archives and only one subfolder, the name of which always differ (depending on PHP version).
+  shell: "echo $(ls -d */)ext/pcntl"
+  args:
+    chdir: "{{ php_sources.path }}"
+  register: php_pcntl
+
+- name: Register path to pcntl.so
+  set_fact:
+    php_pcntl_so_path: "{{ php_sources.path }}/{{ php_pcntl.stdout }}/modules/pcntl.so"
+
+- name: Check that pcntl.so compiled and exists
+  stat:
+    path: "{{ php_pcntl_so_path }}"
+  register: php_pcntl_so
+
+- name: Compile PCNTL extension
+  shell: "phpize && ./configure && make"
+  args:
+    chdir: "{{ php_sources.path }}/{{ php_pcntl.stdout }}"
+  when: "{{ not php_pcntl_so.stat.exists }}"
+
+- name: Register path to directory with PHP extensions
+  shell: "php -i | awk -F '=>' '/^extension_dir/ {print $2}'"
+  register: php_extension_dir
+
+- name: Copy compiled PCNTL extension to PHP extensions directory
+  # Strange, but "copy" module tells that source file does not exists.
+  shell: "cp {{ php_pcntl_so_path }} {{ php_extension_dir.stdout }}"
+#  copy:
+#    src: "{{ php_pcntl_so_path }}"
+#    dest: "{{ php_extension_dir.stdout }}"
+
+- name: Allow to use PCNTL extension as Apache module
+  lineinfile:
+    dest: "/etc/php5/apache2/conf.d/pcntl.ini"
+    line: "extension=pcntl.so"
+    state: present
+    create: yes
+
+- name: Restart Apache
+  service:
+    name: apache2
+    state: restarted

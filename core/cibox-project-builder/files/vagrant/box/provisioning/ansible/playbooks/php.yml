@@ -34,8 +34,10 @@
     php_apc_shm_size: "96M"
     php_apc_stat: "1"
     php_apc_enable_cli: "0"
+    cibox_php_pcntl: no
 
   roles:
     - { role: '../core/facade-php' }
     - { role: '../core/facade-php-pear' }
     - { role: '../core/facade-php-xhprof' }
+    - { role: '../core/cibox-php-pcntl' }
