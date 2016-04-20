@@ -63,7 +63,7 @@
   shell: "{{ php_env_vars }} drush -y rr -l {{ site_url }} || true"
   when: rebuild_registry
 
-# Update database.
+# Update database. See https://www.youtube.com/watch?v=vFsgNjhGr4Y how-to update configs with http://dgo.to/confi
 - name: Updating database
   sudo: yes
   shell: "{{ php_env_vars }} drush -dvy updb -l {{ site_url }}"
