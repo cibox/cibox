@@ -51,6 +51,13 @@
 
 - name: Create folder for Drupal 8 configs
   file:
+    recurse: yes
+    path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/sites/default/config/staging'
+    state: directory
+  when: drupal_version == 8
+
+- name: Add htaccess for Drupal 8 in configs
+  file:
     path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/sites/default/config/staging/.htaccess'
     state: touch
   when: drupal_version == 8
