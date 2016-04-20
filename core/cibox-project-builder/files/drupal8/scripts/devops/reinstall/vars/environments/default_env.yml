@@ -6,7 +6,8 @@ env:
   drush_commands:
     - { name: 'user-password', status: true, arguments: "{{ drupal_user }} --password={{ drupal_pass }}" }
     - { name: 'config-set', status: false, arguments: "system.site uuid USER_YOUR_UUID_HERE -y" }
-    - { name: 'config-import', status: false, arguments: "staging -y --partial" }
+    # Plese do not use drush for importing configs. See https://www.youtube.com/watch?v=vFsgNjhGr4Y for how to use http://dgo.to/confi
+    - { name: 'config-import', status: false, arguments: "staging -y" }
     - { name: 'cr', status: true, arguments: "" }
     - { name: 'search-index', status: false, arguments: "" }
   post_settings:
