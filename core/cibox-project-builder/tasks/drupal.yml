@@ -43,6 +43,18 @@
     dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}'
   register: drupal_dl
 
+- name: Copy gitignore for Drupal 8
+  synchronize:
+    src: '{{ repo_subfolder }}/{{ drupal_subfolder }}/example.gitignore'
+    dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/.gitignore'
+  when: drupal_version == 8
+
+- name: Create folder for Drupal 8 configs
+  file:
+    path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/sites/default/config/staging/.htaccess'
+    state: touch
+  when: drupal_version == 8
+
 - name: Inject pp profile into drupal
   file:
     path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/profiles/{{ installation_profile_name }}'
@@ -58,7 +70,9 @@
   register: profile_copy
 
 - name: Create a folder placeholders for sniffers
-  shell: "mkdir {{ repo_subfolder }}/{{ drupal_subfolder }}/{{ item }}/"
+  file:
+    path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/{{ item }}'
+    state: directory
   ignore_errors: yes
   with_items: 'drupal_placeholders.drupal{{ drupal_version }}'
 
@@ -112,6 +126,3 @@
 - name: Setting permissions for drupal tree
   file: path={{ repo_subfolder }} state=directory mode=777 recurse=yes
   when: drupal_dl.changed == True or profile_copy.changed == True
-
-# @todo Drupal 8 gitignore.
-# @todo Drupal 8 sites/default/config/staging folder.
