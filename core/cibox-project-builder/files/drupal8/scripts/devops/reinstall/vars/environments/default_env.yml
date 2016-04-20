@@ -2,7 +2,7 @@
 env:
   pre_settings: []
   modules:
-    - { name: 'devel config_inspector config_devel', status: true }
+    - { name: 'devel config_inspector config_devel', status: false }
   drush_commands:
     - { name: 'user-password', status: true, arguments: "{{ drupal_user }} --password={{ drupal_pass }}" }
     - { name: 'config-set', status: false, arguments: "system.site uuid USER_YOUR_UUID_HERE -y" }
