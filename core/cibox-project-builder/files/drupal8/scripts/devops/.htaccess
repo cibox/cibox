@@ -1,0 +1,5 @@
+# Restrict access to YAML files.
+<Files ~ "\.yml$">
+  Order Allow,Deny
+  Deny from All
+</Files>

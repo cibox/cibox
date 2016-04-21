@@ -1,0 +1,46 @@
+---
+# This playbook should be executed using reinstall.sh script
+# Developed for ansible version >= 1.7
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  vars_files:
+    - devops/reinstall/vars/global_settings.yml
+    - devops/reinstall/vars/environments/global_env.yml
+
+  tasks:
+  - name: Include specific variables per environment
+    include_vars: "devops/reinstall/vars/environments/{{ pp_environment }}_env.yml"
+    tags: [ 'settings', 'pre-settings', 'post-settings', 'modules-enable', 'drush-commands' ]
+
+  - include: devops/reinstall/database_backup.yml
+    when: make_backup
+    tags: [ 'database-backup' ]
+
+  - include: devops/reinstall/prepare_environment.yml
+    tags: [ 'prepare-environment' ]
+
+  - include: devops/reinstall/pre_settings.yml
+    when: workflow_type == "sql"
+    tags: [ 'settings', 'pre-settings', 'sql-workflow' ]
+
+  - include: devops/reinstall/sql_workflow.yml
+    when: workflow_type == "sql"
+    tags: [ 'sql-workflow' ]
+
+  - include: devops/reinstall/profile_workflow.yml
+    when: workflow_type == "profile"
+    tags: [ 'profile-workflow' ]
+
+  - include: devops/reinstall/prepare_environment.yml
+    tags: [ 'prepare-environment' ]
+
+  - include: devops/reinstall/post_settings.yml
+    tags: [ 'settings', 'post-settings' ]
+
+  - include: devops/reinstall/modules_enable.yml
+    tags: [ 'modules-enable' ]
+
+  - include: devops/reinstall/drush_commands.yml
+    tags: [ 'drush-commands' ]

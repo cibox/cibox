@@ -1,0 +1,40 @@
+---
+drupal_user: admin
+drupal_pass: propeople
+installation_profile_name: pp
+mysql_user: root
+mysql_pass: root
+mysql_db: drupal
+mysql_host: 127.0.0.1
+cache_folder: /var/www/cache
+backup_folder: /var/www/backup
+tmp_folder: /tmp
+php_env_vars: 'APP_ENV=dev' # APP_ENV=dev - this varible will be set at PR_BUILDER from CI shell executor.
+site_url: 'http://drupal.192.168.56.132.xip.io' # No trailing slash!
+# Site url to download assets via stage_file_proxy.
+origin_site_url: 'http://192.168.56.132.xip.io/'
+# This variable will be used for variable_get('environment'). Can be overridden by CI server.
+# development = 'default', demo = 'demo', staging = 'staging', production = 'production'.
+pp_environment: 'default'
+# This variable allows select type of installation. Can be overridden by CI server.
+# From installation profile = 'profile', from sql dump = 'sql'.
+workflow_type: 'profile'
+is_windows: false
+ci_server_username: 'jenkins'
+# This variable allows make backup from CI environment before processing.
+# true, false.
+make_backup: false
+rebuild_registry: false
+# Local environment that will be used from backup.
+local_backup_environment: 'staging'
+# htpasswd protection for securing backups.
+backup_user: propeople
+backup_pass: givemebackup
+# Source backup database that will be downloaded to build site.
+# In many cases this is production dump.
+source_backup_name: latest_prod.sql.gz
+# URL to the source database. Can be overridden by CI server.
+source_database: http://{{ backup_user }}:{{ backup_pass }}@192.168.56.132/backup/{{ source_backup_name }}
+# Path where settings.php should be placed.
+settings_file_path: sites/default/settings.php
+settings_default_file_path: sites/default/default.settings.php
