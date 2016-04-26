@@ -1,6 +1,15 @@
 **Actual for CIBox <= 1.0.4**
 
-When Ansible 2 has been released, some of Vagrant machines may have errors. Here's list of commands how you can fix it:
+When Ansible 2 has been released, some of Vagrant machines may have errors. 
+
+```
+==> default:   vars:
+==> default:     php_packages:
+==> default:     ^ here
+==> default: Failed installing /vagrant/puphpet/ansible/php.yml
+```
+
+Here's list of commands how you can fix it:
 
 1. Find Vagrant folder in your project. It may have following names:
   - `puphpet` (for old boxes)
