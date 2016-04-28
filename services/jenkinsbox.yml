@@ -5,10 +5,7 @@
   remote_user: root
 
   vars:
-    # Drush for Drupal 7.
-    drush_composer_version: 6.*
-    # Drush for Drupal 8.
-    # drush_composer_version: 8.*
+    drush_composer_version: 8.*
 
     drushrc:
       drush_usage_log: 1
