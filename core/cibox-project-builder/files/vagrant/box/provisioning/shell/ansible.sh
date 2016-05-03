@@ -22,6 +22,7 @@ sudo pip install --upgrade pip
 sudo pip install --upgrade virtualenv 
 sudo pip install --upgrade pip
 sudo pip install --upgrade cffi 
+sudo pip install --upgrade cryptography
 # Make sure setuptools are installed correctly.
 pip install setuptools --no-use-wheel --upgrade
 
