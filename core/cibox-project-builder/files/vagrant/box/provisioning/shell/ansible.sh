@@ -17,9 +17,11 @@ echo 'Installing ansible'
 
 echo "Installing pip via easy_install."
 sudo apt-get -y --force-yes install python-pip python-dev build-essential
+sudo apt-get install libffi-dev
 sudo pip install --upgrade pip 
 sudo pip install --upgrade virtualenv 
 sudo pip install --upgrade pip
+sudo pip install --upgrade cffi 
 # Make sure setuptools are installed correctly.
 pip install setuptools --no-use-wheel --upgrade
 
