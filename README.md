@@ -49,4 +49,4 @@ Want to hack on CIBox? Awesome! We have [instructions to help you get started co
 These instructions are probably not perfect, please let us know if anything feels wrong or incomplete. Better yet, submit a PR and improve them yourself.
 
 ## Contacts
-Follow us on [Twitter](https://twitter.com/cibox_tools) and [FaceBook](https://www.facebook.com/CIBox-178038095885249/)
+Follow us on [Twitter](https://twitter.com/cibox_tools) and [FaceBook](https://www.facebook.com/CIBox.tools)
