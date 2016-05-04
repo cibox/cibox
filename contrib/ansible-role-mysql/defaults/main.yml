@@ -5,6 +5,9 @@ mysql_root_password: root
 
 mysql_enabled_on_startup: yes
 
+# update my.cnf. each time role is run? yes | no
+overwrite_global_mycnf: yes
+
 # Pass in a comma-separated list of repos to use (e.g. "remi,epel"). Used only
 # for RedHat systems (and derivatives).
 mysql_enablerepo: ""
@@ -20,6 +23,11 @@ mysql_enablerepo: ""
 mysql_port: "3306"
 mysql_bind_address: '0.0.0.0'
 mysql_datadir: /var/lib/mysql
+
+# Slow query log settings.
+mysql_slow_query_log_enabled: no
+mysql_slow_query_log_file: /var/log/mysql-slow.log
+mysql_slow_query_time: 2
 
 # Memory settings (default values optimized ~512MB RAM).
 mysql_key_buffer_size: "256M"
@@ -53,8 +61,9 @@ mysql_innodb_lock_wait_timeout: 50
 mysql_mysqldump_max_allowed_packet: "64M"
 
 # Logging settings.
-mysql_log_error: /var/log/mysqld.log
-mysql_syslog_tag: mysqld
+mysql_log: ""
+mysql_log_error: /var/log/mysql.err
+mysql_syslog_tag: mysql
 
 # Databases.
 mysql_databases: []
