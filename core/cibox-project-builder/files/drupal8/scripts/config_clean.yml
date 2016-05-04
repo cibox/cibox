@@ -1,0 +1,45 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars_files:
+    - devops/reinstall/vars/global_settings.yml
+    - devops/reinstall/vars/environments/global_env.yml
+  vars:
+    profile: pp
+    staging: sites/default/config/staging
+    exclude:
+    # We should manually take care about core.extension.yml. It shouldn't contain
+    # config_devel, devel, stage_file_proxy
+      # Core modules configuration files:
+      - { name: 'stage_file_proxy.settings.yml', status: true }
+      - { name: 'system.menu.devel.yml', status: true }
+      - { name: 'devel.settings.yml', status: true }
+      - { name: 'config_devel.settings.yml', status: true }
+
+  tasks:
+    - name: Export config
+      shell: drush config-export staging -y --skip-modules=devel,config_devel,stage_file_proxy
+
+    - name: Remove excluded config files
+      file:
+        path: '{{ staging }}/{{ item.name }}'
+        state: absent
+      with_items: exclude
+      when: true == {{ item.status }}
+
+    - name: Copy config to profile
+      when: workflow_type == 'profile'
+      synchronize:
+        src: '{{ staging }}/'
+        dest: profiles/{{ profile }}/config/install
+        delete: yes
+        rsync_opts:
+          - '--exclude=.htaccess'
+
+    - name: Clean staging directory
+      when: workflow_type == 'profile'
+      shell: 'rm *.yml'
+      args:
+        chdir: '{{ staging }}'

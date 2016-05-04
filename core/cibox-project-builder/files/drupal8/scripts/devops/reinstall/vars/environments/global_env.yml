@@ -1,0 +1,7 @@
+---
+global_env:
+  pre_settings: []
+  modules: []
+  drush_commands: []
+  post_settings:
+    - { name: '$settings["pp_environment"]', status: true, value: "{{ pp_environment }}" }
