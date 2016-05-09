@@ -7,3 +7,4 @@
 
   roles:
     - { role: '../core/cibox-sniffers' }
+    - { role: '../core/cibox-behat-selenium2' }
