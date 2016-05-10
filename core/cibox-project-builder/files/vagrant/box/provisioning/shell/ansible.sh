@@ -18,7 +18,7 @@ echo 'Finished installing base packages for ansible'
 echo 'Installing ansible'
 
 echo "Installing pip via easy_install."
-sudo apt-get -y --force-yes install python-pip python-dev build-essential libffi-dev libssl-dev
+sudo apt-get -y --force-yes install unzip python-pip python-dev build-essential libffi-dev libssl-dev
 
 sudo pip install --upgrade pip 
 sudo pip install --upgrade virtualenv 
