@@ -13,6 +13,7 @@
   action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=installed update-cache=yes"
   with_items: behat_selenium2_dependencies
   tags: behat-selenium
+  ignore_errors: yes
 
 - include: chrome.yml
 
