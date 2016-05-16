@@ -26,7 +26,11 @@
     when: update_dependencies == 'yes'
 
   - name: Create dynamic behat.yml
-    template: src={{ behat_root }}/behat.yml.j2 dest={{ behat_root }}/behat.yml
+    template: src={{ behat_root }}/behat.yml.j2 dest=/tmp/behat.yml
+    
+  - name: Move behat.yml
+    sudo: yes
+    shell: mv /tmp/behat.yml {{ behat_root }}/behat.yml
 
   - name: Ensure that xvfb run
     service: name=xvfb state=started
