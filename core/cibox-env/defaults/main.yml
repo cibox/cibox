@@ -17,9 +17,10 @@ apt_packages:
   - { name: "python-software-properties", status: true }
   - { name: "python-dev", status: true }
   - { name: "python-setuptools", status: true }
-  - { name: "python", status: true }
+  - { name: "python 2.7.9", status: true }
   - { name: "python-simplejson", status: true }
   - { name: "python-passlib", status: true }
+  - { name: "python-pip", status: true }
   - { name: "software-properties-common", status: true }
   - { name: "rsync", status: true }
   - { name: "libssl-dev", status: true }
@@ -36,3 +37,6 @@ pip_packages:
   - markupsafe
   - MySQL-python
   - ansible==1.9.4
+  - virtualenv
+  - cffi
+  - cryptography
