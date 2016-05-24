@@ -1,18 +1,15 @@
 default:
   formatters:
+    pretty: true
     html:
       output_path: {{ behat_drupal_root }}/build_reports
   suites:
     default:
       contexts:
         - FeatureContext: ~
-        - Behat\Drupal\Propeople\PropeopleContext: ~
-        - Behat\Drupal\Propeople\Email\EmailContext:
-  #            mail_account_strings: _mail_account_strings
-  #        - Behat\Drupal\Propeople\Redirect\RedirectContext: ~
-  #            wait_for_redirect: 30
         - Drupal\DrupalExtension\Context\MinkContext: ~
         - Drupal\DrupalExtension\Context\DrupalContext: ~
+        - Drupal\DrupalExtension\Context\MarkupContext: ~
         - Drupal\DrupalExtension\Context\MessageContext: ~
   extensions:
     emuse\BehatHTMLFormatter\BehatHTMLFormatterExtension:
