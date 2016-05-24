@@ -9,7 +9,7 @@
 
 - name: Untar Xdebug.
   command: >
-    tar -C {{ workspace }} -xvzf {{ workspace }}/{{ php_xdebug_version }}.tgz
+    tar -C {{ workspace }} -xvzf {{ workspace }}/{{ php_xdebug_version }}.tar.gz
     creates={{ workspace }}/xdebug-{{ php_xdebug_version }}/README
 
 - name: Build Xdebug.
