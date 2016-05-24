@@ -32,11 +32,11 @@
     sudo: yes
     shell: mv /tmp/behat.yml {{ behat_root }}/behat.yml
 
-  - name: Ensure that xvfb run
+  - name: Ensure that xvfb is run
     service: name=xvfb state=started
     when: run_javascript_tests == 'yes'
 
-  - name: Export display and enable chrome
+  - name: Export display and enable Chrome
     shell: firefox & # Add exclusion for firefox
     environment:
       DISPLAY: ':99'
@@ -56,7 +56,7 @@
       DISPLAY: ':99'
     when: run_javascript_tests == 'yes' and browser == 'firefox'
 
-  - name: Wait until selenium start
+  - name: Wait until Selenium starts
     wait_for: port=4444 delay=10 host=127.0.0.1
     when: run_javascript_tests == 'yes'
 
@@ -71,13 +71,13 @@
     shell: 'echo "Behat tests: standard file {{ behat_base_url }}/{{ build_reports_dir }}/report.html" >> {{ workspace_root }}/{{ artifacts_file }} && cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }}'
     when: run_javascript_tests == 'yes'
 
-  - name: Run headlses Behat tests
+  - name: Run headless Behat tests
     ignore_errors: yes
     shell: 'echo "Behat tests: standard file {{ behat_base_url }}/{{ build_reports_dir }}/report.html" >> {{ workspace_root }}/{{ artifacts_file }} && cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }} --tags "~@javascript"'
     when: run_javascript_tests == 'no'
 
   post_tasks:
-  - name: Kill selenium process
+  - name: Kill the Selenium process
     sudo: yes
     shell: kill `ps wuax | grep 'java -jar {{ selenium_jar_path }}' | grep -v grep | awk '{print $2}'`
     when: run_javascript_tests == 'yes'
