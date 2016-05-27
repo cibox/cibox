@@ -24,7 +24,9 @@ sudo pip install --upgrade pip
 sudo pip install --upgrade virtualenv
 sudo pip install --upgrade cffi 
 sudo pip install --upgrade cryptography
+sudo pip install --upgrade ndg-httpsclient
 sudo pip install --upgrade pypi
+
 # Make sure setuptools are installed correctly.
 pip install setuptools --no-use-wheel --upgrade
 

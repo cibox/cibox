@@ -35,6 +35,7 @@ apt_packages:
   - { name: "phantomjs", status: true}
 
 pip_packages:
+  - ndg-httpsclient
   - setuptools
   - paramiko
   - pyyaml
