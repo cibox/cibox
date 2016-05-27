@@ -30,6 +30,7 @@ apt_packages:
   - { name: "git", status: true }
 
 pip_packages:
+  - ndg-httpsclient
   - setuptools
   - paramiko
   - pyyaml
