@@ -36,7 +36,7 @@ plugins:
   - 'http://mirrors.jenkins-ci.org/plugins/parameterized-trigger/2.28/parameterized-trigger.hpi'
 
 # TODO add automatic pkg downloader for latest LTS http://pkg.jenkins-ci.org/debian-stable/
-jenkins_pkg_version: 'http://pkg.jenkins-ci.org/debian-stable/binary/jenkins_1.651.2_all.deb'
+jenkins_pkg_version: 'http://mirrors.jenkins-ci.org/debian-stable/jenkins_1.651.2_all.deb'
 
 # Delay before jenkins up and running. Sometimes it is not enouph.
 startup_delay_s: 40
