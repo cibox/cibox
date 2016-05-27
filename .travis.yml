@@ -14,4 +14,4 @@ before_script:
 
 script:
    - ls -la
-   - sudo ansible-playbook services/jenkinsbox.yml -i 'localhost,' --connection=local --extra-vars="server_ip=127.0.0.1 mysql_root_password="
+   - sudo ansible-playbook -vvvv services/jenkinsbox.yml -i 'localhost,' --connection=local --extra-vars="server_ip=127.0.0.1 mysql_root_password="
