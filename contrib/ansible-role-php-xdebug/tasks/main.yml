@@ -6,7 +6,7 @@
   get_url:
     url: "https://github.com/xdebug/xdebug/archive/{{ php_xdebug_version }}.tar.gz"
     dest: "{{ workspace }}"
-    timeout: 1000
+    timeout: 10000
 
   sudo: yes
 
