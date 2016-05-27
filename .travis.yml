@@ -8,7 +8,7 @@ before_install:
 
 install:
  # Install Ansible.
-  - sudo pip install ansible==1.9.4
+  - sudo pip install ansible==2.1.0
 
 before_script:
 
