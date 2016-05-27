@@ -1,5 +1,5 @@
 ---
-workspace: ~/
+workspace: /tmp
 
 php_xdebug_version: 2.2.5
 
