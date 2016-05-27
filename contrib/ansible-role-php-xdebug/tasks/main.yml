@@ -6,6 +6,7 @@
   get_url:
     url: "https://github.com/xdebug/xdebug/archive/{{ php_xdebug_version }}.tar.gz"
     dest: "{{ workspace }}"
+  sudo: yes
 
 - name: Untar Xdebug.
   command: >
