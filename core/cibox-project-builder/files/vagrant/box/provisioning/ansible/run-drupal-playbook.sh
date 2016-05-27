@@ -2,6 +2,8 @@
 
 export PYTHONUNBUFFERED=1
 
+sudo service mysql start || true
+
 playbooks=(
 /var/www/docroot/reinstall.yml \
 /var/www/docroot/devops.yml \
