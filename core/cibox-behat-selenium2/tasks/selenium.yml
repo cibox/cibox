@@ -11,7 +11,7 @@
   tags: behat-selenium
 
 - name: Download GoogleChrome driver
-  get_url: url=http://selenium-release.storage.googleapis.com/2.45/selenium-server-standalone-2.45.0.jar dest=/root/selenium.jar
+  get_url: url=http://selenium-release.storage.googleapis.com/2.45/selenium-server-standalone-2.45.0.jar dest=/root/selenium.jar timeout=1000
   when: selenium_server.stat.exists == false
   tags: behat-selenium
 
