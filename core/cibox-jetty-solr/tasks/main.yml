@@ -22,7 +22,7 @@
   register: solr_tar
 
 - name: Download Solr with Jetty
-  get_url: dest=/opt url=http://archive.apache.org/dist/lucene/solr/{{ jetty_solr_version }}/solr-{{ jetty_solr_version }}.tgz
+  get_url: dest=/opt url=http://archive.apache.org/dist/lucene/solr/{{ jetty_solr_version }}/solr-{{ jetty_solr_version }}.tgz timeout=1000
   when: solr_tar.stat.exists == false
 
 - name: Unarchive downloaded Solr
@@ -54,7 +54,7 @@
   file: path=/opt/solr group=solr owner=solr recurse=yes
 
 - name: Get init.d script for jetty
-  get_url: dest=/etc/init.d/jetty url=https://gist.githubusercontent.com/peterc/404672/raw/77591f254b055a0fc6165df808ded10e1bb02565/jetty
+  get_url: dest=/etc/init.d/jetty url=https://gist.githubusercontent.com/peterc/404672/raw/77591f254b055a0fc6165df808ded10e1bb02565/jetty timeout=1000
 
 - name: Make jetty script executable
   file: path=/etc/init.d/jetty state=file mode=0755
