@@ -4,7 +4,7 @@
 
 - name: Download Xdebug.
   get_url:
-    url: url: "http://xdebug.org/files/xdebug-{{ php_xdebug_version }}.tgz"
+    url: "http://xdebug.org/files/xdebug-{{ php_xdebug_version }}.tgz"
     dest: "{{ workspace }}"
     timeout: 10000
   sudo: yes
