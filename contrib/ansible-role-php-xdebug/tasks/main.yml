@@ -4,12 +4,14 @@
 
 - name: Download Xdebug.
   get_url:
-    url: "https://github.com/xdebug/xdebug/archive/{{ php_xdebug_version }}.tar.gz"
+    url: "http://xdebug.org/files/xdebug-{{ php_xdebug_version }}.tgz"
     dest: "{{ workspace }}"
+    timeout: 10000
+  sudo: yes
 
 - name: Untar Xdebug.
   command: >
-    tar -C {{ workspace }} -xvzf {{ workspace }}/xdebug-{{ php_xdebug_version }}.tar.gz
+    tar -C {{ workspace }} -xvzf {{ workspace }}/xdebug-{{ php_xdebug_version }}.tgz
     creates={{ workspace }}/xdebug-{{ php_xdebug_version }}/README
 
 - name: Build Xdebug.

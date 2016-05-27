@@ -13,7 +13,7 @@
 
 # Vagrant build.
 - name: Downloading latest backup to local environment
-  get_url: url={{ source_database }} dest={{ backup_folder }}/latest_remote.sql.gz force=yes
+  get_url: url={{ source_database }} dest={{ backup_folder }}/latest_remote.sql.gz force=yes timeout=1000
   when: pp_environment == "default" and ((ansible_env.USER is not defined or ansible_env.USER != "{{ ci_server_username }}") and (ansible_env.SUDO_USER is not defined or ansible_env.SUDO_USER != "{{ ci_server_username }}"))
 
 - name: Removing possible abandoned dump
