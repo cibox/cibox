@@ -4,11 +4,11 @@
   sudo_user: "{{ drush_composer_user }}"
 
 - name: "Check instalation path"
-  shell: "ls -la /root/.composer/vendor/drush"
+  shell: "ls -la ~/.composer/vendor/drush"
   sudo: yes
-  
+
 - name: Make drush src available globally
-  shell: "rsync -avz --delete /root/.composer/vendor/drush/drush/ /usr/local/src/drush"
+  shell: "rsync -avz --delete ~/.composer/vendor/drush/drush/ /usr/local/src/drush"
   sudo: yes
 
 - name: Adding global link to drush binary
