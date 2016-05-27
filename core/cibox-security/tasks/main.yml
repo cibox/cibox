@@ -15,15 +15,15 @@
 
 - name: Create protected folders
   file: path={{ item }} owner=www-data group=jenkins state=directory
-  with_items: protected_folders
+  with_items: "{{ protected_folders }}"
 
 - name: Copy .htaccess to the protected folders
   template:
       src: ".htaccess.j2"
       dest: "{{ item }}/.htaccess"
       force: yes
-  with_items: protected_folders
+  with_items: "{{ protected_folders }}"
 
 - name: Generate .htpasswd in protected folders
   htpasswd: path={{ item }}/.htpasswd name={{ protected_folders_user }} password={{ protected_folders_pass }}
-  with_items: protected_folders
+  with_items: "{{ protected_folders }}"

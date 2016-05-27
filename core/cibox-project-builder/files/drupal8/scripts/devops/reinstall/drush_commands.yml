@@ -3,15 +3,15 @@
 - name: Run general drush commands
   shell: "{{ php_env_vars }} drush -y {{ item.name }} {{ item.arguments }}"
   when: item.status == true
-  with_items: global_env.drush_commands
+  with_items: "{{ global_env.drush_commands }}"
 
 - name: Run environment specific drush commands
   shell: "{{ php_env_vars }} drush -y {{ item.name }} {{ item.arguments }}"
   ignore_errors: true
   register: echo
   when: item.status == true
-  with_items: env.drush_commands
+  with_items: "{{ env.drush_commands }}"
 
 - name: Debug
   debug: var=item.stdout
-  with_items: echo.results
+  with_items: "{{ echo.results }}"

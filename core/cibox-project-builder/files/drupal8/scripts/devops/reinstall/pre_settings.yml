@@ -42,12 +42,12 @@
 - name: Add general pre-settings to settings.php
   lineinfile: dest='{{ platform_settings_file }}' line='{{ item.name }} = \"{{ item.value }}\";'
   when: item.status == true
-  with_items: global_env.pre_settings
+  with_items: "{{ global_env.pre_settings }}"
 
 - name: Add environment specific pre-settings
   lineinfile: dest='{{ platform_settings_file }}' line='{{ item.name }} = \"{{ item.value }}\";'
   when: item.status == true
-  with_items: env.pre_settings
+  with_items: "{{ env.pre_settings }}"
 
 - name: Copy settings back (WINDOWS)
   shell: cp {{ platform_settings_file }} {{ settings_file_path }}
