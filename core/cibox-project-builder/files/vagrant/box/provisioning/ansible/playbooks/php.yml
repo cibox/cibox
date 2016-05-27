@@ -22,7 +22,7 @@
     php_use_managed_ini: true
     php_display_errors: On
     php_error_reporting: '-1'
-    php_session.save_path: /var/lib/php/session
+    php_session_save_path: /var/lib/php/session
     php_max_execution_time: '300'
     php_memory_limit: 1024M
     php_post_max_size: 64M
