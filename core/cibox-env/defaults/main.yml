@@ -40,3 +40,4 @@ pip_packages:
   - virtualenv
   - cffi
   - cryptography
+  - connection
