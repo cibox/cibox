@@ -21,10 +21,10 @@ echo "Installing pip via easy_install."
 sudo apt-get -y --force-yes install unzip python-pip python-dev build-essential libffi-dev libssl-dev
 
 sudo pip install --upgrade pip 
-sudo pip install --upgrade virtualenv 
-sudo pip install --upgrade pip
+sudo pip install --upgrade virtualenv
 sudo pip install --upgrade cffi 
 sudo pip install --upgrade cryptography
+sudo pip install --upgrade pypi
 # Make sure setuptools are installed correctly.
 pip install setuptools --no-use-wheel --upgrade
 
