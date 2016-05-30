@@ -11,7 +11,7 @@
 
 - name: Encrypt GitHub password
   sudo: yes
-  action: command java -jar {{ jenkins.cli_dest }} -s http://localhost:8080 groovy {{ jenkins_dest }}/encrypt.groovy
+  action: command java -Djenkins.install.runSetupWizard=false -jar {{ jenkins.cli_dest }} -s http://localhost:8080 groovy {{ jenkins_dest }}/encrypt.groovy
   register: encrypted_pass
   notify: Restart Jenkins
 
