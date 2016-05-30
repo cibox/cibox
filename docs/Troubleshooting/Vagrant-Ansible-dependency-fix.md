@@ -26,7 +26,7 @@ Here's list of commands how you can fix it:
 3. Download patch with fix.
 
     ```bash
-    wget https://github.com/propeoplemd/cibox/commit/7b57e39d8bf7786f1bdf078220612fe18375d508.patch
+    wget https://github.com/cibox/cibox/commit/7b57e39d8bf7786f1bdf078220612fe18375d508.patch
     ```
 
 4. Apply patch 
