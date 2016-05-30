@@ -5,7 +5,7 @@ Thanks for checking out CIBox!
 If you have a feature request, but not familiar with CIBox internals - create your Pull Request against ```next_major``` branch.
 This branch is used for incorporating the ideas been tested by CIBox core team for inclusion into stable release.
 
-If you've found a bug - search through [GitHub issues](https://github.com/cibox/cibox/issues) or [troubleshooting section in CIBox documentation](http://docs.cibox.tools).
+If you've found a bug - search through [GitHub issues](https://github.com/cibox/cibox/issues) or [Troubleshooting section in CIBox documentation](http://docs.cibox.tools).
 for Known Issues. If you issue is unique - please, [create new issue](https://github.com/cibox/cibox/issues/new). This step gets core team into the process and should help you with fixing an issue shortly.
 
 Contributing to CIBox

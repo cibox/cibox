@@ -3,7 +3,7 @@ Welcome to CIBox development workflow
 Here you can see a quick how-to start current development workflow from scratch to first build for Pull Request.
 
 #### Prepare GitHub project
-* Clone repository to your local desktop. ```git clone https://github.com/propeoplemd/cibox.git```
+* Clone repository to your local desktop. ```git clone https://github.com/cibox/cibox.git```
 * Open ```cibox``` subfolder and run ```sh ./repository.sh``` there. You'll get ```FRESH_REPOSITORY``` subfolder where all the files prepared for your future project.
 * Create new Git repository inside ```FRESH_REPOSITORY``` project and push it to your remote repository on GitHub.
 * Create dedicated user at GitHub for not conflicting with your own personal account. The user's credentials ( [how to get a token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) ) would be used as bot for posting comments from Jenkins to GitHub. This user should have access to a project repo.
@@ -26,7 +26,7 @@ github_password: BOT_PASSWORD
 
 #### Create first PR on GitHub
 * Create New Pull request for your project repo and wait ~5 minutes. You should get changed status and build comment afterwards.
-* For debugging Jenkins problems use ```http://IP:8080/log/all``` UI or ```/var/log/jenkins/jenkins.log``` on your Jenkins server. Also take a look at [Known Issues wiki page](https://github.com/propeoplemd/cibox/wiki/Known-Issues) for a possible issues.
+* For debugging Jenkins problems use ```http://IP:8080/log/all``` UI or ```/var/log/jenkins/jenkins.log``` on your Jenkins server. Also take a look at [Troubleshooting section in CIBox documentation](http://docs.cibox.tools) for a possible issues.
 
 ##### Securing CI
 For adding more security to spinned up CI server you need to close Jenkins port (8080 by default) via adding nginx/apache htpasswd protection or adding VPN connection only to the server.
