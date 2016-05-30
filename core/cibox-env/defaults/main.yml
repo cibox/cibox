@@ -30,13 +30,14 @@ apt_packages:
   - { name: "git", status: true }
 
 pip_packages:
+  - ndg-httpsclient
   - setuptools
   - paramiko
   - pyyaml
   - jinja2
   - markupsafe
   - MySQL-python
-  - ansible==1.9.4
+  - ansible==2.1.0
   - virtualenv
   - cffi
   - cryptography

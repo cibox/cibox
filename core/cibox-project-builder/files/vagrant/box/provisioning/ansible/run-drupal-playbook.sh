@@ -1,6 +1,9 @@
 #!/bin/bash
 
 export PYTHONUNBUFFERED=1
+cd /var/www/docroot 
+
+sudo service mysql start || true
 
 playbooks=(
 /var/www/docroot/reinstall.yml \
