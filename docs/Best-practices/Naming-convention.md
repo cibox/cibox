@@ -1,4 +1,4 @@
-Drupal related
+Drupal 7 related
 =====
 
 All the modules and themes live in following directories:
