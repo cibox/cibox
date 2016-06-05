@@ -9,7 +9,8 @@ Here you can see a quick how-to start current development workflow from scratch 
 * Create dedicated user at GitHub for not conflicting with your own personal account. The user's credentials ( [how to get a token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) ) would be used as bot for posting comments from Jenkins to GitHub. This user should have access to a project repo.
 
 #### Jenkins provisioning
-* Create your own Ubuntu 14.04 powered virtual machine, vps or dedicated server and get its IP address. We recommend [DigitalOcean VPS hosting](http://bit.ly/cibox-digitalocean), because we are using its droplets for spinning up CI instances for ~2 years without any issues.
+* Install ansible 1.9.x at your local desctop.
+* Create your own Ubuntu 14.04 powered virtual machine, vps or dedicated server and get its IP address. We recommend [DigitalOcean VPS hosting](http://bit.ly/cibox-digitalocean), because we are using its droplets for spinning up CI instances for ~2 years without any issues. Allow [root access](http://askubuntu.com/questions/469143/how-to-enable-ssh-root-access-on-ubuntu-14-04) [without password](http://www.thegeekstuff.com/2008/11/3-steps-to-perform-ssh-login-without-password-using-ssh-keygen-ssh-copy-id/_) to this virtual machine.
 * Go into cloned ```cibox``` subfolder and prefill IP address and previously created github bot repo's credentials of created machine to ```config.yml``` file within a folder. It is simple yml file.
 ```yml
 github_url: https://github.com/NAME/REPOSITORY
