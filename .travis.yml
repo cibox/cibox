@@ -1,6 +1,6 @@
 
 sudo: required
-dist: trusty
+dist: xenial
 
 before_install:
   # Make sure everything's up to date.
