@@ -1,6 +1,6 @@
 site_name: CIBox Documentation
 
-repo_url: https://github.com/propeoplemd/cibox
+repo_url: https://github.com/cibox/cibox
 site_description: 'CIBox - Continuous Integration company operations toolbox.'
 theme: readthedocs
 
