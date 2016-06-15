@@ -1,5 +1,3 @@
-## Secure Jenkins
-
 By default jenkins is accessible on port 8080 with credentials of your linux user (set up password if you log in to server with ssh only).
 
 Good practice is to make jenkins accessible only via basic authentication. You can do that using either nginx or apache as reverse proxy. 
