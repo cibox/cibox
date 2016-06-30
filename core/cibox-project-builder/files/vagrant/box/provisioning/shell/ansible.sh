@@ -2,8 +2,10 @@
 
 echo 'Installing base packages for ansible'
 export "DEBIAN_FRONTEND=noninteractive"
-# ansible needs python.
-apt-get -y --force-yes install python python-dev python-simplejson sudo curl make rsync git libmysqlclient-dev apparmor-utils >/dev/null
+# ansible needs python version 2.7.9 to avoid SNIMissingWarning.
+# see http://urllib3.readthedocs.io/en/latest/security.html#snimissingwarning
+apt-get -y --force-yes install python 2.7.9
+apt-get -y --force-yes install python-dev python-simplejson sudo curl make rsync git libmysqlclient-dev apparmor-utils >/dev/null
 
 # because basic ubuntu is too stripped down we need to add logging.
 apt-get --reinstall install -y --force-yes bsdutils >/dev/null
@@ -16,7 +18,7 @@ echo 'Finished installing base packages for ansible'
 echo 'Installing ansible'
 
 echo "Installing pip via easy_install."
-sudo apt-get -y --force-yes install python-pip python-dev build-essential libffi-dev libssl-dev
+sudo apt-get -y --force-yes install unzip python-pip python-dev build-essential libffi-dev libssl-dev
 
 sudo pip install --upgrade pip 
 sudo pip install --upgrade virtualenv 

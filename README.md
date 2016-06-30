@@ -1,6 +1,6 @@
 <p align="center"><img src="docs/images/cibox-logo.png" alt="CIBox Logo" /></p>
 
-Continuous Integration Toolbox [![Release](https://img.shields.io/github/release/propeoplemd/cibox.svg)](https://github.com/propeoplemd/cibox/releases/latest)
+Continuous Integration Toolbox [![Release](https://img.shields.io/github/release/cibox/cibox.svg)](https://github.com/cibox/cibox/releases/latest)
 ============================
 
 CIBox is a short name for Continuous Integration company operations toolbox. 
@@ -42,7 +42,7 @@ CIBox fully supports **Ubuntu 14.04 LTS 64bit** as CI server operation system.
 ## Contributing to CIBox
 | **Provisioner** | **Repository builder** | **Vagrant** | **Documentation** |
 |------------------|------------------|------------------|------------------|
-| [![Build Status](https://travis-ci.org/propeoplemd/cibox.svg?branch=master)](https://travis-ci.org/propeoplemd/cibox) | ![Build Status](http://128.199.55.125:8080/buildStatus/icon?job=REPOSITORY_BUILDER) | ![Build Status](http://128.199.55.125:8080/buildStatus/icon?job=VAGRANT_BOX) | [![Documentation Status](https://readthedocs.org/projects/cibox/badge/?version=latest)](http://cibox.readthedocs.org/en/latest/?badge=latest) |
+| [![Build Status](https://travis-ci.org/cibox/cibox.svg?branch=master)](https://travis-ci.org/cibox/cibox) | ![Build Status](http://128.199.55.125:8080/buildStatus/icon?job=REPOSITORY_BUILDER) | ![Build Status](http://128.199.55.125:8080/buildStatus/icon?job=VAGRANT_BOX) | [![Documentation Status](https://readthedocs.org/projects/cibox/badge/?version=latest)](http://cibox.readthedocs.org/en/latest/?badge=latest) |
 
 Want to hack on CIBox? Awesome! We have [instructions to help you get started contributing code or documentation](http://cibox.readthedocs.org/en/latest/Contributing/).
 

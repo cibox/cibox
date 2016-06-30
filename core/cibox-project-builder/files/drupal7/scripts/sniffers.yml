@@ -11,6 +11,8 @@
     artifacts_file: commentinfo.md
     webroot: http://localhost
     installation_profile_name: pp
+    docroot: docroot/
+    sniff_diffs: false
     installation_profile_path: "profiles/{{ installation_profile_name }}"
     scan_security: true
     phpcs_extensions: php,inc,install,module
@@ -186,6 +188,48 @@
     - name: PHP CodeSniffer run
       shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} {{ installation_profile_path }} {{ custom_themes_path }} --report-file={{ build_reports_dir }}/{{ item.name }}sniff.txt --ignore={{ phpcs_modules_ignore | join(",") }} || true'
       with_items: phpcs_standards
+
+    - name: Get latest develop
+      shell: "git fetch origin {{ target_branch }}"
+      args:
+        chdir: "{{ pr_workspace }}"
+      when: (source_hash is defined) and sniff_diffs
+
+    - name: Get branching point hash
+      shell: "diff -u1 <(git rev-list --first-parent {{ source_hash }}) <(git rev-list --first-parent origin/{{ target_branch }}) | sed -ne 's/^ //p'"
+      args:
+        executable: /bin/bash
+        chdir: "{{ pr_workspace }}"
+      register: branching_hash
+      when: (source_hash is defined) and sniff_diffs
+
+    - name: Get branching point hash stdout
+      set_fact: branching_hash_stdout={{ branching_hash.stdout }}
+      when: (source_hash is defined) and sniff_diffs
+
+    - name: Populate list of changed files for sniffers
+      shell: "git diff --name-only --diff-filter=ACMRTUXB {{ branching_hash_stdout }} {{ source_hash }} | sed -e 's@{{ docroot }}@@g' | grep -E '({{ features_path }}|{{ custom_modules_path }}|{{ custom_themes_path }})' | tr '\n' ' '"
+      args:
+        executable: /bin/bash
+        chdir: "{{ pr_workspace }}"
+      register: changed_files
+      when: (branching_hash_stdout is defined) and sniff_diffs
+
+    - name: Populate list of changed files for sniffers stdout
+      set_fact: changed_files_stdout={{ changed_files.stdout }}
+      when: (branching_hash_stdout is defined) and sniff_diffs
+
+    - name: PHP CodeSniffer for changed files run
+      shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_features_extensions }} -n {{ changed_files_stdout }} --report-file={{ build_reports_dir }}/ChangedFiles{{ item.name }}sniff.txt --ignore={{ phpcs_features_ignore | join(",") }} || true'
+      with_items: phpcs_standards
+      when: (changed_files_stdout is defined) and sniff_diffs
+
+    - name: PHP CodeSniffer for changed files reports build
+      ignore_errors: yes
+      shell: 'if grep "FOUND" {{ build_reports_dir }}/ChangedFiles{{ item.name }}sniff.txt; then echo "<strong>`grep -o "\<\| ERROR \|\>" {{ build_reports_dir }}/ChangedFiles{{ item.name }}sniff.txt | wc -l`</strong> errors for CodeSniffer in Changed Files: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/ChangedFiles{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
+      with_items: phpcs_standards
+      when: changed_files_stdout is defined
+      when: (changed_files is defined) and sniff_diffs
 
     - name: PHP CodeSniffer reports build
       ignore_errors: yes

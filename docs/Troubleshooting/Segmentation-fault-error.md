@@ -21,5 +21,6 @@ index d3ac87e..d209e0a 100755
 ```
 
 Related issues:
-- https://www.drupal.org/node/2329453#comment-9360519
-- https://github.com/drush-ops/drush/pull/1347
+
+* [https://www.drupal.org/node/2329453#comment-9360519](https://www.drupal.org/node/2329453#comment-9360519)
+* [https://github.com/drush-ops/drush/pull/1347](https://www.drupal.org/node/2329453#comment-9360519)
