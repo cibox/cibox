@@ -50,3 +50,7 @@ jenkins_jobs:
 
 jenkins_users:
   - { name: 'root', template: 'root.xml.j2', status: true }
+
+# Jenkins theme config.
+jenkins_theme_css: https://cibox.github.io/cibox-jenkins-theme/cibox-theme.css
+jenkins_theme_js: https://cibox.github.io/cibox-jenkins-theme/cibox-theme.js
