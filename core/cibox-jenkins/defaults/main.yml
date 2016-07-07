@@ -34,6 +34,7 @@ plugins:
   - 'http://mirrors.jenkins-ci.org/plugins/scm-api/0.2/scm-api.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/scripttrigger/0.31/scripttrigger.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/parameterized-trigger/2.28/parameterized-trigger.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/simple-theme-plugin/0.3/simple-theme-plugin.hpi'
 
 jenkins_pkg_version: 'http://pkg.jenkins-ci.org/debian/binary/jenkins_1.624_all.deb'
 
