@@ -1,0 +1,101 @@
+---
+# This playbook should be executed using ansible-playbook command
+# Developed for ansible version >= 1.7
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    # this variable will be overridden from jenkins.
+    workspace_root: .
+    artifacts_file: commentinfo.md
+    webroot: http://localhost
+    installation_profile_name: pp
+    docroot: docroot/
+    sniff_diffs: false
+    installation_profile_path: "profiles/{{ installation_profile_name }}"
+    scan_security: true
+    phpcbf_extensions: php,inc,install,module
+    phpcbf_features_extensions: module
+    custom_modules_path: sites/all/modules/custom/
+    custom_themes_path: sites/all/themes/custom
+    features_path: sites/all/modules/features
+    phpcbf_modules_ignore:
+      - sites/all/themes/custom/nonstandard
+      - sites/all/modules/custom/wysiwyg_image_caption/contrib
+    phpcbf_features_ignore:
+      - sites/all/features/nonstandard
+    phpcbf_features_ignore_path: sites/all/features,*.pages_default.inc,*.panelizer.inc,*.features.menu_custom.inc,*.features.webform.inc,*.features.filter.inc,*.strongarm.inc,*.fpp_content_declarations.inc,*.panels_default.inc
+    composer_dir: /usr/share/composer
+    phpcbf_bin: /usr/bin/phpcbf
+    autofix_reports_dir: autofix_reports
+
+    composer_global_require:
+      - { package: 'drupal/coder', version: ':dev-8.x-2.x' }
+      - { package: 'squizlabs/php_codesniffer', version: '=dev-master' }
+
+    phpcbf_standards:
+      - { path: 'vendor/drupal/coder/coder_sniffer/Drupal', name: 'Drupal' } #/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal Drupal
+
+    sniffers_update: true
+
+  roles:
+    - { role: devops/roles/cibox-security-testing, when: scan_security == true }
+
+  pre_tasks:
+    - name: Was composer downloaded
+      sudo: yes
+      stat: path={{ composer_dir }}
+      register: is_composer_dir
+      when: sniffers_update == true
+
+    - name: prepare directory for global composer libs
+      sudo: yes
+      file: path={{ composer_dir }} state=directory
+      when: sniffers_update == true and is_composer_dir.stat.exists == false
+      tags:
+        - sniffers
+
+    - name: Cleanup composer packages
+      sudo: yes
+      shell: "cd {{ composer_dir }} && composer remove {{ item.package }}"
+      with_items: composer_global_require
+      when: sniffers_update == true
+      tags:
+        - sniffers
+        - composer
+        - git
+
+    - name: Install composer global requires
+      sudo: yes
+      shell: "cd {{ composer_dir }} && composer require --prefer-dist {{ item.package }}{{ item.version }}"
+      with_items: composer_global_require
+      when: sniffers_update == true
+      tags:
+        - sniffers
+        - composer
+        - git
+
+    - name: Install php codesniffer standards
+      sudo: yes
+      file: src={{ composer_dir }}/{{ item.path }} dest={{ composer_dir }}/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/{{ item.name }} state=link
+      with_items: phpcbf_standards
+      when: sniffers_update == true
+      tags:
+        - sniffers
+        - git
+
+    - name: Fix permissions for composer libs
+      sudo: yes
+      file: path={{ composer_dir }} state=directory mode=655 recurse=yes
+      when: sniffers_update == true
+
+    - name: Create symlink to phpcbf binary
+      sudo: yes
+      file: src={{ composer_dir }}/vendor/bin/phpcbf dest={{ phpcbf_bin }} state=link mode=655 force=yes
+      when: sniffers_update == true
+
+  tasks:
+    - name: PHP CodeSniffer codestyle autofix run
+      shell: '{{ phpcbf_bin }} --standard={{ item.name }} --extensions={{ phpcbf_extensions }} -n {{ custom_modules_path }} {{ installation_profile_path }} {{ custom_themes_path }} --ignore={{ phpcbf_modules_ignore | join(",") }} || true'
+      with_items: phpcbf_standards
