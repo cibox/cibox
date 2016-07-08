@@ -33,16 +33,6 @@
   tags:
     - sniffers
 
-- name: Cleanup composer packages
-  sudo: yes
-  shell: "cd {{ composer_dir }} && composer remove {{ item.package }}"
-  with_items: composer_global_require
-  when: is_composer_dir.stat.exists == false
-  tags:
-    - sniffers
-    - composer
-    - git
-
 - name: Install composer global requires
   sudo: yes
   shell: "cd {{ composer_dir }} && composer require --prefer-dist {{ item.package }}{{ item.version }}"
