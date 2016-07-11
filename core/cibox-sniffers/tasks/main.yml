@@ -35,7 +35,7 @@
 
 - name: Install composer global requires
   sudo: yes
-  shell: "cd {{ composer_dir }} && composer require {{ item }}"
+  shell: "cd {{ composer_dir }} && composer require --prefer-dist {{ item.package }}{{ item.version }}"
   with_items: composer_global_require
   when: is_composer_dir.stat.exists == false
   tags:
