@@ -1,0 +1,13 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  tasks:
+  - name: Clean database
+    shell: 'mysql -uroot -proot -e "show databases;" -s | egrep "^drupal" | xargs -I "@@" mysql -uroot -proot -e "DROP DATABASE @@"'
+    sudo: yes
+
+  - name: Remove builds
+    shell: 'rm -rf /var/www/build*'
+    sudo: yes
