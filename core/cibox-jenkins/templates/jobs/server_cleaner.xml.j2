@@ -51,11 +51,26 @@
   </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
-    <hudson.tasks.Shell>
-      <command>export PYTHONUNBUFFERED=1
-ansible-playbook sourcecode/cibox/jobs/server_cleaner.yml -i &apos;localhost,&apos; --connection=local
-</command>
-    </hudson.tasks.Shell>
+    <org.jenkinsci.plugins.ansible.AnsiblePlaybookBuilder plugin="ansible@0.5">
+      <playbook>${WORKSPACE}/sourcecode/cibox/jobs/server_cleaner.yml</playbook>
+      <inventory class="org.jenkinsci.plugins.ansible.InventoryContent">
+        <content></content>
+        <dynamic>false</dynamic>
+      </inventory>
+      <limit></limit>
+      <tags></tags>
+      <skippedTags></skippedTags>
+      <startAtTask></startAtTask>
+      <credentialsId></credentialsId>
+      <sudo>false</sudo>
+      <sudoUser></sudoUser>
+      <forks>5</forks>
+      <unbufferedOutput>true</unbufferedOutput>
+      <colorizedOutput>false</colorizedOutput>
+      <hostKeyChecking>false</hostKeyChecking>
+      <additionalParameters> -i &apos;localhost,&apos; --connection=local</additionalParameters>
+      <copyCredentialsInWorkspace>false</copyCredentialsInWorkspace>
+    </org.jenkinsci.plugins.ansible.AnsiblePlaybookBuilder>
   </builders>
   <publishers/>
   <buildWrappers/>
