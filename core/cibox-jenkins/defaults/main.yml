@@ -36,6 +36,7 @@ plugins:
   - 'http://mirrors.jenkins-ci.org/plugins/parameterized-trigger/2.28/parameterized-trigger.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/simple-theme-plugin/0.3/simple-theme-plugin.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/ansible/0.5/ansible.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/jobConfigHistory/2.14/jobConfigHistory.hpi'
 
 jenkins_pkg_version: 'http://pkg.jenkins-ci.org/debian/binary/jenkins_1.624_all.deb'
 
