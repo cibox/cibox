@@ -1,12 +1,25 @@
 ---
+- name: download composer
+  get_url:
+    url: https://getcomposer.org/installer
+    dest: /tmp/installer
+  tags: composer
+
 - name: install composer
-  shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin creates=/usr/local/bin/composer
+  shell: cat /tmp/installer | php -- --install-dir=/usr/local/bin
+  args:
+    creates: /usr/local/bin/composer
   tags: composer
 
 - name: rename composer.phar to composer
-  shell: mv /usr/local/bin/composer.phar /usr/local/bin/composer creates=/usr/local/bin/composer
+  shell: mv /usr/local/bin/composer.phar /usr/local/bin/composer
+  args:
+    creates: /usr/local/bin/composer
   tags: composer
 
 - name: make composer executable
-  file: path=/usr/local/bin/composer state=touch mode=0755
+  file: 
+    path: /usr/local/bin/composer
+    mode: a+x
+    state: file
   tags: composer
