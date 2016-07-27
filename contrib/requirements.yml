@@ -1,0 +1,9 @@
+---
+# In order to install/update contrib module, run followign command from root of project:
+#        ansible-galaxy install -n -f -r contrib/requirements.yml
+#
+# Contrib requirements list.
+#
+- src: https://github.com/angstwad/docker.ubuntu
+  version: v1.1.8
+  path: contrib

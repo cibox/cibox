@@ -14,6 +14,7 @@ playbooks=(
 /vagrant/provisioning/ansible/playbooks/drush.yml \
 /vagrant/provisioning/ansible/playbooks/solr.yml \
 /vagrant/provisioning/ansible/playbooks/sniffers.yml \
+/vagrant/provisioning/ansible/playbooks/docker.yml \
 )
 
 for i in "${playbooks[@]}"
