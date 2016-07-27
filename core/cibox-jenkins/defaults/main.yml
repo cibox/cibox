@@ -37,6 +37,7 @@ plugins:
   - 'http://mirrors.jenkins-ci.org/plugins/simple-theme-plugin/0.3/simple-theme-plugin.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/ansible/0.5/ansible.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/jobConfigHistory/2.14/jobConfigHistory.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/slack/1.8/slack.hpi'
 
 jenkins_pkg_version: 'http://pkg.jenkins-ci.org/debian/binary/jenkins_1.624_all.deb'
 
@@ -49,6 +50,7 @@ jenkins_jobs:
   - { name: 'DISK_USAGE_TRIGGER', template: 'disk_usage_trigger.xml.j2', status: true }
   - { name: 'PR_BUILDER', template: 'pr_builder.xml.j2', status: true }
   - { name: 'SERVER_CLEANER', template: 'server_cleaner.xml.j2', status: true }
+  - { name: 'SERVER_SECURITY_UPD', template: 'server_security.xml.j2', status: true }
 
 jenkins_users:
   - { name: 'root', template: 'root.xml.j2', status: true }

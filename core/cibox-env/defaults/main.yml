@@ -28,6 +28,7 @@ apt_packages:
   - { name: "rng-tools", status: true }
   - { name: "cgroup-bin", status: true }
   - { name: "git", status: true }
+  - { name: "unattended-upgrades", status: true}
 
 pip_packages:
   - setuptools
