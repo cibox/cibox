@@ -1,0 +1,7 @@
+---
+# List of users to be added to 'docker' system group,
+# SECURITY WARNING: 
+# Be aware that granted users can easily get full root access on the docker host system!
+docker_group_members:
+- vagrant
+- jenkins
