@@ -3,7 +3,6 @@
 * [Happy Ever Afters With CI Workflow](https://goo.gl/S0k0Xn) September 6, 2015
 * [MoldCamp - multidimentional testing workflow. CIBox](http://www.slideshare.net/podarok/moldcamp-multidimentional-testing-workflow-cibox), May 30, 2015
 * [CIbox - OpenSource solution for making your #devops better](http://www.slideshare.net/podarok/cibox-opensource-solutio)
-* [DrupalCon Los Angeles - Continuous Integration Toolbox](http://www.slideshare.net/podarok/drupalcon-los-angeles-continuous-integration-toolbox)
 * [Drupal Continuous Integration Workflow](http://www.slideshare.net/podarok/drupal-continuous-integration-workflow)
 * [Start using vagrant now!](http://www.slideshare.net/podarok/start-using-vagrant-now)
 * [Live deployment, CI, Drupal](http://www.slideshare.net/podarok/live-deployment-ci-drupal)
@@ -18,4 +17,6 @@
 * [How to setup cibox and github repo](https://www.youtube.com/watch?v=EJZcqTcycf0), **outdated**
 
 ## DrupalCon sessions:
+* [CIBox - full stack open source Continuous Integration flow for Drupal/Symfony teams](http://www.slideshare.net/podarok/cibox-full-stack-open-source-continuous-integration-flow-for-drupalsymfony-teams)
 * [Multidimensional testing workflow before merge to master](https://events.drupal.org/losangeles2015/sessions/multidimensional-testing-workflow-merge-master)
+
