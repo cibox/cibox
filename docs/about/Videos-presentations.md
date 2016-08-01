@@ -7,6 +7,10 @@
 * [Start using vagrant now!](http://www.slideshare.net/podarok/start-using-vagrant-now)
 * [Live deployment, CI, Drupal](http://www.slideshare.net/podarok/live-deployment-ci-drupal)
 
+## DrupalCon sessions:
+* [CIBox - full stack open source Continuous Integration flow for Drupal/Symfony teams](http://www.slideshare.net/podarok/cibox-full-stack-open-source-continuous-integration-flow-for-drupalsymfony-teams)
+* [Multidimensional testing workflow before merge to master](https://events.drupal.org/losangeles2015/sessions/multidimensional-testing-workflow-merge-master)
+
 ## Videos:
 * [DrupalCon Barcelona 2015: CIBox - full stack open source Continuous Integration flow](https://www.youtube.com/watch?v=4-Ol8kN_A0M)
 * [DrupalCamp Kyiv 2015: Workshop. How to start using Continuous Integration Box](https://www.youtube.com/watch?t=303&v=HgVZm0cxC0I)
@@ -15,8 +19,4 @@
 
 ## Screencasts:
 * [How to setup cibox and github repo](https://www.youtube.com/watch?v=EJZcqTcycf0), **outdated**
-
-## DrupalCon sessions:
-* [CIBox - full stack open source Continuous Integration flow for Drupal/Symfony teams](http://www.slideshare.net/podarok/cibox-full-stack-open-source-continuous-integration-flow-for-drupalsymfony-teams)
-* [Multidimensional testing workflow before merge to master](https://events.drupal.org/losangeles2015/sessions/multidimensional-testing-workflow-merge-master)
 
