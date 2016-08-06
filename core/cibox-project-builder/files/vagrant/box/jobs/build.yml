@@ -1,0 +1,22 @@
+---
+# @TODO: In this file we should run reinstall role.
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  vars:
+    workspace: ./
+    build_number: 1
+    server_docroot_folder: /var/www
+    project_docroot_folder: docroot
+    php_env_vars: 'APP_ENV=dev'
+    mysql_user: 'root'
+    mysql_password: 'root'
+    mysql_db: drupal{{ build_number }}
+    drupal_folder: "{{ server_docroot_folder }}/build{{ build_number }}"
+    site_url: "http://10.0.2.15/build{{ build_number }}"
+    pp_environment: 'default'
+
+  post_tasks:
+    - name: Folder permissions
+      shell: "sudo chown -R www-data:jenkins {{ server_docroot_folder }}/build{{ build_number }}"
