@@ -39,7 +39,7 @@
         <timeout>5</timeout>
       </hudson.plugins.git.extensions.impl.SubmoduleOption>
       <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
-        <relativeTargetDir>sourcecode</relativeTargetDir>
+        <relativeTargetDir>{{ jenkins_sourcode_folder }}</relativeTargetDir>
       </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
     </extensions>
   </scm>
@@ -49,11 +49,11 @@
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
     <org.jenkinsci.plugins.ghprb.GhprbTrigger plugin="ghprb@1.15-0">
-      <spec>* * * * *</spec>
+      <spec>H/3 * * * *</spec>
       <adminlist></adminlist>
       <allowMembersOfWhitelistedOrgsAsAdmin>true</allowMembersOfWhitelistedOrgsAsAdmin>
       <orgslist>propeoplemd</orgslist>
-      <cron>* * * * *</cron>
+      <cron>H/3 * * * *</cron>
       <triggerPhrase></triggerPhrase>
       <onlyTriggerPhrase>false</onlyTriggerPhrase>
       <useGitHubHooks>false</useGitHubHooks>
@@ -72,7 +72,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <org.jenkinsci.plugins.ansible.AnsiblePlaybookBuilder plugin="ansible@0.5">
-      <playbook>${WORKSPACE}/sourcecode/cibox/jobs/deploy_code.yml</playbook>
+      <playbook>${WORKSPACE}/{{ jenkins_sourcode_folder }}/cibox/jobs/deploy_code.yml</playbook>
       <inventory class="org.jenkinsci.plugins.ansible.InventoryContent">
         <content></content>
         <dynamic>false</dynamic>
@@ -114,7 +114,7 @@
       </extraVars>
     </org.jenkinsci.plugins.ansible.AnsiblePlaybookBuilder>
     <org.jenkinsci.plugins.ansible.AnsiblePlaybookBuilder plugin="ansible@0.5">
-      <playbook>${WORKSPACE}/sourcecode/cibox/jobs/build.yml</playbook>
+      <playbook>${WORKSPACE}/{{ jenkins_sourcode_folder }}/cibox/jobs/build.yml</playbook>
       <inventory class="org.jenkinsci.plugins.ansible.InventoryContent">
         <content></content>
         <dynamic>false</dynamic>
@@ -284,7 +284,7 @@
         </org.jenkinsci.plugins.ansible.ExtraVar>
         <org.jenkinsci.plugins.ansible.ExtraVar>
           <key>resources_path</key>
-          <value>${WORKSPACE}/sourcecode/tests/behat/resources</value>
+          <value>${WORKSPACE}/{{ jenkins_sourcode_folder }}/tests/behat/resources</value>
           <hidden>false</hidden>
         </org.jenkinsci.plugins.ansible.ExtraVar>
         <org.jenkinsci.plugins.ansible.ExtraVar>
@@ -294,7 +294,7 @@
         </org.jenkinsci.plugins.ansible.ExtraVar>
         <org.jenkinsci.plugins.ansible.ExtraVar>
           <key>behat_root</key>
-          <value>${WORKSPACE}/sourcecode/tests/behat</value>
+          <value>${WORKSPACE}/{{ jenkins_sourcode_folder }}/tests/behat</value>
           <hidden>false</hidden>
         </org.jenkinsci.plugins.ansible.ExtraVar>
       </extraVars>

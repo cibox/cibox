@@ -36,7 +36,7 @@
         <timeout>5</timeout>
       </hudson.plugins.git.extensions.impl.SubmoduleOption>
       <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
-        <relativeTargetDir>sourcecode</relativeTargetDir>
+        <relativeTargetDir>{{ jenkins_sourcode_folder }}</relativeTargetDir>
       </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
     </extensions>
   </scm>
@@ -52,7 +52,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <org.jenkinsci.plugins.ansible.AnsiblePlaybookBuilder plugin="ansible@0.5">
-      <playbook>${WORKSPACE}/sourcecode/cibox/jobs/server_cleaner.yml</playbook>
+      <playbook>${WORKSPACE}/{{ jenkins_sourcode_folder }}/cibox/jobs/server_cleaner.yml</playbook>
       <inventory class="org.jenkinsci.plugins.ansible.InventoryContent">
         <content></content>
         <dynamic>false</dynamic>
