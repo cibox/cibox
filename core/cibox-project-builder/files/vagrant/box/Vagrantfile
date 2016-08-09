@@ -101,4 +101,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.insert_key = "false"
   config.ssh.forward_agent = true
 
+  # Do not update additions.
+  config.vbguest.auto_update = false
+
 end
