@@ -3,7 +3,7 @@
   shell: 'echo "===============" > {{ workspace }}/commentinfo.md'
 
 - name: Sync files into docroot
-  shell: "rsync -avz {{ source }}/ {{ destination }}"
+  shell: "mv {{ source }}/ {{ destination }}"
 
 - name: Folder permissions
   shell: "sudo chown -R www-data:jenkins {{ destination }}"
