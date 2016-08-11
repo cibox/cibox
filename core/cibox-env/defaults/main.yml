@@ -2,6 +2,7 @@
 
 apt_repos:
   - ppa:ansible/ansible
+  - ppa:duggan/jo
 
 apt_packages:
   - { name: "imagemagick", status: true }
@@ -29,6 +30,8 @@ apt_packages:
   - { name: "cgroup-bin", status: true }
   - { name: "git", status: true }
   - { name: "unattended-upgrades", status: true}
+  # See https://github.com/jpmens/jo/blob/master/jo.md
+  - { name: "jo", status: true}
 
 pip_packages:
   - setuptools
