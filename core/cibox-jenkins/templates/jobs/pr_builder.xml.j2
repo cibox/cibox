@@ -76,7 +76,7 @@
 export PYTHONUNBUFFERED=1
 echo "===============" > ${WORKSPACE}/commentinfo.md
 cd new_pull_request
-sudo rsync -avz docroot/ /var/www/build${BUILD_NUMBER}
+sudo mv docroot /var/www/build${BUILD_NUMBER}
 cd /var/www/build${BUILD_NUMBER}
 sudo chown -R www-data:jenkins *
 ansible-playbook reinstall.yml -i 'localhost,' --connection=local --extra-vars "php_env_vars='APP_ENV=dev' mysql_user=root mysql_pass=root mysql_db=drupal${BUILD_NUMBER} drupal_folder=/var/www/build${BUILD_NUMBER} site_url=http://{{ jenkins_server_ip }}/build${BUILD_NUMBER} pp_environment='default'"
