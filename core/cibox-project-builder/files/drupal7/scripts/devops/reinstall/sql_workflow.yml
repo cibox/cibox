@@ -52,7 +52,7 @@
 
 - name: Downloading registry_rebuild
   sudo: yes
-  shell: "{{ php_env_vars }} drush -y dl registry_rebuild"
+  shell: "{{ php_env_vars }} drush -y dl registry_rebuild-7.x"
   args:
     chdir: ~/
   when: rebuild_registry and registry_rebuild_installed.stdout == "0"
