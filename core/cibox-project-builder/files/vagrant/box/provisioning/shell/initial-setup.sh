@@ -2,6 +2,13 @@
 
 VAGRANT_CORE_FOLDER=$(echo "$1")
 export "DEBIAN_FRONTEND=noninteractive"
+# Making a world a bit more perfect in order to continue provision due to possible locks...
+sudo killall apt-get
+sudo killall dpkg
+sudo dpkg --configure -a
+
+# CIBox ad.
+cat "${VAGRANT_CORE_FOLDER}/shell/self-promotion.txt"
 
 OS=$(/bin/bash "${VAGRANT_CORE_FOLDER}/shell/os-detect.sh" ID)
 CODENAME=$(/bin/bash "${VAGRANT_CORE_FOLDER}/shell/os-detect.sh" CODENAME)
@@ -11,7 +18,6 @@ if [[ ! -d /.puphpet-stuff ]]; then
 
     echo "${VAGRANT_CORE_FOLDER}" > "/.puphpet-stuff/vagrant-core-folder.txt"
 
-    cat "${VAGRANT_CORE_FOLDER}/shell/self-promotion.txt"
     echo "Created directory /.puphpet-stuff"
 fi
 
