@@ -1,7 +1,7 @@
 ---
 vagrantfile-local:
     vm:
-        box: 'Ubuntu 14.04. CIBox VM provisioned.'
+        box: 'Ubuntu_14_04__CIBox_VM_provisioned'
         box_url: 'http://cici.ffwua.com/ubuntu14.04provisionedCIBox.box'
         hostname: null
         network:
@@ -22,7 +22,7 @@ vagrantfile-local:
                 setextradata:
                     VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root: 1
             lxc:
-                box: 'Ubuntu 14.04. CIBox VM provisioned. LXC version.'
+                box: 'Ubuntu_14_04__CIBox_VM_provisioned_LXC_version'
                 box_url: 'http://cici.ffwua.com/ubuntu14.04provisionedCIBox.lxc.box'
         synced_folder:
             - id: drupal
