@@ -15,6 +15,12 @@ Drupal Vagrant Dev box for CIbox support
 vagrant up && vagrant ssh
 ```
 
+If you need to rerun provisioning
+
+```sh
+FORCE_PROVISION=yes vagrant up && vagrant ssh
+```
+
 **Drupal reinstallation from scratch**
 
 Unix users
@@ -35,7 +41,7 @@ http://drupal.192.168.56.132.xip.io/
 If ```xip.io``` not working - create row with
 
 ```hosts
-192.168.56.112 drupal.192.168.56.132.xip.io
+192.168.56.132 drupal.192.168.56.132.xip.io
 ```
 
 in ```/etc/hosts``` or just use another ServerName in apache.yml
@@ -67,7 +73,7 @@ Tools
 Adminer for mysql administration (credentials drupal:drupal and root:root)
 
 ```
-http://192.168.56.112.xip.io/adminer.php
+http://192.168.56.132.xip.io/adminer.php
 ```
 
 ##PHP Profiler XHProf

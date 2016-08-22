@@ -2,6 +2,8 @@
 
 export PYTHONUNBUFFERED=1
 
+# Commented playbook stay here just in case you'll need it for updating an image or
+# specific software settings.
 playbooks=(
 /vagrant/provisioning/ansible/playbooks/sendmail.yml \
 /vagrant/provisioning/ansible/playbooks/misc.yml \
@@ -20,7 +22,7 @@ playbooks=(
 for i in "${playbooks[@]}"
 do
    echo "Install "${i}
-   ansible-playbook -i 'localhost,' ${i} --connection=local
+   ansible-playbook -vvvv -i 'localhost,' ${i} --connection=local
    if [ "$?" == "0" ]; then
     echo "Finished installing "${i}
    else
