@@ -1,4 +1,4 @@
-Drupal Vagrant Dev box for CIbox support
+Drupal Vagrant Dev box for CIBox support
 ======
 
 #Installation
@@ -90,7 +90,7 @@ After `vset devel_xhprof_enabled` it could return an error about "Class 'XHProfR
 Linux Containers
 =====
 
-When your system enpowered with linux containers(lxc), you can speedup a lot of things by
+When your system empowered with linux containers(lxc), you can speedup a lot of things by
 using them and getting rid of virtualization.
 For approaching lxc, please install vagrant plugin
 
