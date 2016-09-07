@@ -2,6 +2,7 @@ Configure GitHub hooks
 =====
 
 GitHub hooks is a great thing that can accelerate your process. When GitHub hooks are enabled, your builds will be triggered right after PR is created or comment `retest this please` was added in PR.
+The only thing, you need to remember, that when github hooks are configured but stopped working - you'll get stalled CI.
 
 ### 1. Add GitHub bot as admin to repository
 
