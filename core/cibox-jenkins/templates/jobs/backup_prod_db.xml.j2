@@ -44,6 +44,7 @@ scp root@CHANGE_TO_PROD_SERVER_I:/var/www/backup/proddump.sql.gz /var/www/backup
     </builders>
     <publishers/>
     <buildWrappers>
+        <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.4"/>
         <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.1">
             <colorMapName>xterm</colorMapName>
         </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
