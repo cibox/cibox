@@ -47,3 +47,8 @@
     state: absent
   notify: restart apache
   when: apache_remove_default_vhost
+
+- name: Adjust permissions for /var/www dir.
+  file:
+    path: /var/www
+    mode: "o+rwx"
