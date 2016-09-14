@@ -1,5 +1,7 @@
 ---
 global_env:
+  # Protecting against HTTP HOST Header attacks (https://www.drupal.org/node/1992030).
+  trusted_host_patterns: []
   pre_settings: []
   modules: []
   drush_commands: []
