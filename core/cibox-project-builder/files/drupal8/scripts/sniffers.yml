@@ -65,12 +65,12 @@
       - nodejs
 
     jshint_folders:
-      - { name: 'modules', path: 'modules/custom' }
-      - { name: 'themes', path: 'themes/custom' }
-      - { name: 'profile', path: "{{ installation_profile_path }}" }
+      - { name: 'modules', path: 'modules/custom', exclude: [] }
+      - { name: 'themes', path: 'themes/custom', exclude: ['bower'] }
+      - { name: 'profile', path: "{{ installation_profile_path }}", exclude: [] }
 
     scsslint_folders:
-      - { name: 'themes', path: 'themes/custom' }
+      - { name: 'themes', path: 'themes/custom', exclude: ['bower'] }
 
     sniffers_update: true
 
@@ -215,7 +215,7 @@
       with_items: phpcs_standards
 
     - name: JSHint run
-      shell: 'find {{ item.path }} ! -path "*mute*" -type f \( -iname "*.js" ! -iname "*min.js" \) -print0 | sudo xargs -0 jshint > {{ build_reports_dir }}/{{ item.name }}jshint.txt || true'
+      shell: 'find {{ item.path }} {{ "! -type d \( -path " + (item.exclude | join(" -path ")) + " \)" if item.exclude else "" }} -type f \( -iname "*.js" ! -iname "*min.js" \) -print0 | sudo xargs -0 jshint > {{ build_reports_dir }}/{{ item.name }}jshint.txt || true'
       with_items: jshint_folders
 
     - name: JSHint build reports
@@ -224,7 +224,7 @@
       with_items: jshint_folders
 
     - name: SCSS lint run
-      shell: 'find {{ item.path }} -name "*.scss" -print0 | xargs -0 -r scss-lint > {{ build_reports_dir }}/scsslint{{ item.name }}.txt || true'
+      shell: 'find {{ item.path }} {{ "! -type d \( -path " + (item.exclude | join(" -path ")) + " \)" if item.exclude else "" }} -iname "*.scss" -print0 | xargs -0 -r scss-lint > {{ build_reports_dir }}/scsslint{{ item.name }}.txt || true'
       with_items: scsslint_folders
 
     - name: SCSS lint build reports
