@@ -35,7 +35,6 @@
 
     git_repos:
       - { branch: 'master', repo: 'http://git.drupal.org/sandbox/coltrane/1921926.git', name: 'DrupalSecure' } # git clone --branch master http://git.drupal.org/sandbox/coltrane/1921926.git DrupalSecure
-      - { branch: '8.x-1.x', repo: 'https://github.com/klausi/drupalpractice.git', name: 'DrupalPractice' } #git clone --branch 8.x-1.x https://github.com/klausi/drupalpractice.git DrupalPractice
       - { branch: 'master', repo: 'https://github.com/podarok/phpcs-security-audit.git', name: 'Security' } #git clone --branch master https://github.com/podarok/phpcs-security-audit.git Security
       - { branch: 'master', repo: 'https://github.com/podarok/Symfony2-coding-standard.git', name: 'Symfony2' }
 
@@ -43,7 +42,6 @@
       - { path: 'vendor/drupal/coder/coder_sniffer/Drupal', name: 'Drupal' } #/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal Drupal
       - { path: 'vendor/podarok/DrupalSecure/DrupalSecure', name: 'DrupalSecure' } #/root/.composer/vendor/podarok/DrupalSecure DrupalSecure
       - { path: 'vendor/podarok/Security/Security', name: 'Security' } #/root/.composer/vendor/podarok/Security Security
-      - { path: 'vendor/podarok/DrupalPractice/DrupalPractice', name: 'DrupalPractice' } #/root/.composer/vendor/podarok/DrupalPractice DrupalPractice
 
     npm_packages:
       - jshint
