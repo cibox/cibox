@@ -18,7 +18,7 @@ vagrant up && vagrant ssh
 If you need to rerun provisioning
 
 ```sh
-FORCE_PROVISION=yes vagrant up && vagrant ssh
+vagrant provision
 ```
 
 **Drupal reinstallation from scratch**
