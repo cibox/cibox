@@ -81,7 +81,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # Do a provision only if it manually requested ("vagrant provision" executed).
-  if "provision" == ARGV[0]
+  # https://github.com/mitchellh/vagrant/issues/7043#issuecomment-197935659
+  if ARGV.include?("provision") || ARGV.include?("--provision")
     config.vm.provision "shell" do |s|
       s.path = "provisioning/shell/initial-setup.sh"
       s.args = "/vagrant/provisioning"
