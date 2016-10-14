@@ -1,5 +1,6 @@
 ---
 env:
+  trusted_host_patterns: []
   pre_settings:
     - { name: '$config_directories["staging"]', status: false, value: 'sites/default/config/staging' }
     - { name: '$settings["install_profile"]', status: true, value: "{{ installation_profile_name }}" }

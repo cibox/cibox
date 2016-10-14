@@ -32,7 +32,6 @@
       - drupal/coder:dev-8.x-2.x
     git_repos:
       - { branch: 'master', repo: 'http://git.drupal.org/sandbox/coltrane/1921926.git', name: 'DrupalSecure' } # git clone --branch master http://git.drupal.org/sandbox/coltrane/1921926.git DrupalSecure
-      - { branch: '8.x-1.x', repo: 'https://github.com/klausi/drupalpractice.git', name: 'DrupalPractice' } #git clone --branch 8.x-1.x https://github.com/klausi/drupalpractice.git DrupalPractice
       - { branch: 'master', repo: 'https://github.com/podarok/phpcs-security-audit.git', name: 'Security' } #git clone --branch master https://github.com/podarok/phpcs-security-audit.git Security
       - { branch: 'master', repo: 'https://github.com/podarok/Symfony2-coding-standard.git', name: 'Symfony2' }
 
@@ -40,7 +39,6 @@
       - { path: 'vendor/drupal/coder/coder_sniffer/Drupal', name: 'Drupal' } #/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal Drupal
       - { path: 'vendor/podarok/DrupalSecure/DrupalSecure', name: 'DrupalSecure' } #/root/.composer/vendor/podarok/DrupalSecure DrupalSecure
       - { path: 'vendor/podarok/Security/Security', name: 'Security' } #/root/.composer/vendor/podarok/Security Security
-      - { path: 'vendor/podarok/DrupalPractice/DrupalPractice', name: 'DrupalPractice' } #/root/.composer/vendor/podarok/DrupalPractice DrupalPractice
 
     npm_packages:
       - jshint
@@ -65,12 +63,12 @@
       - nodejs
 
     jshint_folders:
-      - { name: 'modules', path: 'modules/custom' }
-      - { name: 'themes', path: 'themes/custom' }
-      - { name: 'profile', path: "{{ installation_profile_path }}" }
+      - { name: 'modules', path: 'modules/custom', exclude: [] }
+      - { name: 'themes', path: 'themes/custom', exclude: ['bower'] }
+      - { name: 'profile', path: "{{ installation_profile_path }}", exclude: [] }
 
     scsslint_folders:
-      - { name: 'themes', path: 'themes/custom' }
+      - { name: 'themes', path: 'themes/custom', exclude: ['bower'] }
 
     sniffers_update: true
 
@@ -215,7 +213,7 @@
       with_items: phpcs_standards
 
     - name: JSHint run
-      shell: 'find {{ item.path }} ! -path "*mute*" -type f \( -iname "*.js" ! -iname "*min.js" \) -print0 | sudo xargs -0 jshint > {{ build_reports_dir }}/{{ item.name }}jshint.txt || true'
+      shell: 'find {{ item.path }} {{ "! -type d \( -path " + (item.exclude | join(" -path ")) + " \)" if item.exclude else "" }} -type f \( -iname "*.js" ! -iname "*min.js" \) -print0 | sudo xargs -0 jshint > {{ build_reports_dir }}/{{ item.name }}jshint.txt || true'
       with_items: jshint_folders
 
     - name: JSHint build reports
@@ -224,7 +222,7 @@
       with_items: jshint_folders
 
     - name: SCSS lint run
-      shell: 'find {{ item.path }} -name "*.scss" -print0 | xargs -0 -r scss-lint > {{ build_reports_dir }}/scsslint{{ item.name }}.txt || true'
+      shell: 'find {{ item.path }} {{ "! -type d \( -path " + (item.exclude | join(" -path ")) + " \)" if item.exclude else "" }} -iname "*.scss" -print0 | xargs -0 -r scss-lint > {{ build_reports_dir }}/scsslint{{ item.name }}.txt || true'
       with_items: scsslint_folders
 
     - name: SCSS lint build reports
