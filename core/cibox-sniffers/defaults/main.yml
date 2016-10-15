@@ -1,5 +1,4 @@
 ---
-
 composer_dir: /usr/share/composer
 phpcs_bin: /usr/bin/phpcs
 
