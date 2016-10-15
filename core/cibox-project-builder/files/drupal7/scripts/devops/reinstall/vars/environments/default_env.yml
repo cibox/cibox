@@ -10,7 +10,7 @@ env:
   drush_commands:
     # Update admin username and password.
     - { name: 'sqlq', status: true, arguments: "\"UPDATE users SET name='{{ drupal_user }}' WHERE uid=1\"" }
-    - { name: 'user-password', status: true, arguments: "{{ drupal_user }} --password={{ drupal_pass }}" }
+    - { name: 'upwd', status: true, arguments: "{{ drupal_user }} --password={{ drupal_pass }}" }
   post_settings:
     - { name: '$conf["error_level"]', status: true, value: '2' }
     - { name: '$conf["cache"]', status: true, value: '0' }
