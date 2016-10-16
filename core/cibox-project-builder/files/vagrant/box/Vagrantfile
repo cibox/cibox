@@ -2,33 +2,17 @@
 # vi: set ft=ruby :
 VAGRANTFILE_API_VERSION = "2"
 
-# Use rbconfig to determine if we're on a windows host or not.
-require 'rbconfig'
-is_windows = (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
-
-require 'yaml'
+require "yaml"
 
 dir = File.dirname(File.expand_path(__FILE__))
-
 configValues = YAML::load_file("#{dir}/provisioning/config.yaml")
 apacheConfigValues = YAML::load_file("#{dir}/provisioning/ansible/playbooks/www.yml")
-data = configValues['vagrantfile-local']
-
-if !data['vm']['provider']['virtualbox'].empty?
-  ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
-end
-if !ENV['VAGRANT_CI'].nil?
-  ENV['VAGRANT_DEFAULT_PROVIDER'] = 'lxc'
-end
+data = configValues["vagrantfile-local"]
+provider = (ARGV.include?("--provider=lxc") || !data["vm"]["provider"].key?("virtualbox")) ? "lxc" : "virtualbox"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "#{data['vm']['box']}"
-  config.vm.box_url = "#{data['vm']['box_url']}"
-
-  if !ENV['VAGRANT_CI'].nil?
-    config.vm.box = "#{data['vm']['provider']['lxc']['box']}"
-    config.vm.box_url = "#{data['vm']['provider']['lxc']['box_url']}"
-  end
+  config.vm.box = "#{data['vm']['provider'][provider]['box']}"
+  config.vm.box_url = "#{data['vm']['provider'][provider]['box_url']}"
 
   if data['vm']['hostname'].to_s != ''
     config.vm.hostname = "#{data['vm']['hostname']}"
@@ -83,15 +67,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Do a provision only if it manually requested ("vagrant provision" executed).
   # https://github.com/mitchellh/vagrant/issues/7043#issuecomment-197935659
   if ARGV.include?("provision") || ARGV.include?("--provision")
-    config.vm.provision "shell" do |s|
-      s.path = "provisioning/shell/initial-setup.sh"
-      s.args = "/vagrant/provisioning"
-    end
+    config.vm.provision :shell,
+      :path => "provisioning/shell/initial-setup.sh",
+      :args => "/vagrant/provisioning"
 
     # Install ansible inside the box.
-    config.vm.provision :shell, :path => "provisioning/shell/ansible.sh"
+    config.vm.provision :shell,
+      :path => "provisioning/shell/ansible.sh"
     # Install ansible playbooks inside the box.
-    config.vm.provision :shell, :path => "provisioning/ansible/run-ansible-playbook.sh"
+    config.vm.provision :shell,
+      :path => "provisioning/ansible/run-ansible-playbook.sh"
   end
 
   # Install drupal within vm for testing.
@@ -104,5 +89,4 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.shell = "sh"
   config.ssh.insert_key = "false"
   config.ssh.forward_agent = true
-
 end
