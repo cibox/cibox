@@ -18,7 +18,7 @@ vagrant up && vagrant ssh
 If you need to rerun provisioning
 
 ```sh
-FORCE_PROVISION=yes vagrant up && vagrant ssh
+vagrant provision
 ```
 
 **Drupal reinstallation from scratch**
@@ -100,9 +100,9 @@ apt-get install redir lxc cgroup-bin
 ```
 also you may need to apply this patch https://github.com/fgrehm/vagrant-lxc/pull/354
 
-When your system is enpowered by apparmor, you should enable nfs mounts for your host
+When your system is empowered by apparmor, you should enable nfs mounts for your host
 machine
-Do that by editing ```/etc/apparmor.d/lxc/lxc-default``` file with one line
+Do that by editing `/etc/apparmor.d/lxc/lxc-default` file with one line
 
 ```ruby
 profile lxc-container-default flags=(attach_disconnected,mediate_deleted) {
@@ -110,24 +110,17 @@ profile lxc-container-default flags=(attach_disconnected,mediate_deleted) {
     mount options=(rw, bind, ro),
   ...
 ```
+
 and reload apparmor service
 ```sh
 sudo /etc/init.d/apparmor reload
 ```
 
-
 and run the box by command
 
 ```sh
-VAGRANT_CI=yes vagrant up
+vagrant up --provider=lxc
 ```
-
-Do use 
-```
-VAGRANT_CI=yes
-```
-environment variable, if you got issues with all vagrant commands.
-
 
 Windows Containers
 =====
