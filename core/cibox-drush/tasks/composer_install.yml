@@ -3,8 +3,12 @@
   shell: "{{drush_composer_bin}} global require drush/drush:{{drush_composer_version}} --no-interaction --no-ansi"
   sudo_user: "{{ drush_composer_user }}"
 
+- name: "Get global Composer install path."
+  shell: "composer config -g home"
+  register: drush_composer_global_home
+
 - name: Make drush src available globally
-  shell: "rsync -avz --delete /root/.composer/vendor/drush/drush/ /usr/local/src/drush"
+  shell: "rsync -avz --delete {{drush_composer_global_home}}/vendor/drush/drush/ /usr/local/src/drush"
   sudo: yes
 
 - name: Adding global link to drush binary
