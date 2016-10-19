@@ -4,7 +4,7 @@
 For Ubuntu 16.04 please install ansible by commands
 
 ```sh
-sudo apt-get install pythin-pip
+sudo apt-get install python-pip
 sudo pip install ansible==1.9.4
 ```
 
