@@ -1,0 +1,19 @@
+---
+dependencies:
+  - { role: '../core/cibox-env' }
+  - { role: '../core/cibox-swap' }
+  - { role: '../core/facade-apache' }
+  - { role: '../core/facade-php' }
+  - { role: '../core/facade-composer' }
+  - { role: '../core/cibox-drush' }
+  - { role: '../core/facade-php-pear' }
+  - { role: '../core/facade-php-xhprof' }
+  - { role: '../core/cibox-php-pcntl' }
+  - { role: '../core/facade-mysql' }
+  - { role: '../core/cibox-jenkins' }
+  - { role: '../core/cibox-jetty-solr' }
+  - { role: '../core/cibox-sniffers' }
+  - { role: '../core/facade-ssl-config' }
+  - { role: '../core/cibox-behat-selenium2' }
+  - { role: '../core/cibox-security' }
+  - { role: '../core/facade-docker' }

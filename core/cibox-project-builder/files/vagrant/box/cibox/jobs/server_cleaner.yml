@@ -1,0 +1,48 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  vars:
+    tmp_folder: /tmp
+    remove_patterns:
+      - '*.pdf'
+      - '*.jpg'
+      - '*.mp4'
+      - '*.avi'
+      - '*.png'
+      - '*.csv'
+      - '*.mov'
+      - '*.doc'
+      - '*.dotx'
+      - '*.docx'
+      - '*.xlsx'
+      - '*.xls'
+      - '*.swf'
+      - '*.wmv'
+      - 'file*'
+      - '*.gif'
+      - '*.mp3'
+    mysql_user: root
+    mysql_pass: root
+    database_pattern: "^drupal"
+
+  # TODO: convert tasks to Ansible format.
+  tasks:
+  - name: Clean database
+    shell: 'mysql -u{{ mysql_user }} -p{{ mysql_pass }} -e "show databases;" -s | egrep "{{ database_pattern }}" | xargs -I "@@" mysql -u{{ mysql_user }} -p{{ mysql_pass }} -e "DROP DATABASE @@"'
+    sudo: yes
+
+  - name: Remove builds
+    shell: 'rm -rf /var/www/build*'
+    sudo: yes
+
+  - name: Remove files from temporary folder
+    shell: "find {{ tmp_folder }} -maxdepth 1 -name '{{ item }}' -delete"
+    with_items: remove_patterns
+
+  - name: Remove configs from temporary folder
+    shell: "rm -rf {{ tmp_folder }}/confi*"
+
+  - name: Remove Jenkins logs
+    shell: "rm -rf /var/log/jenkins/*"

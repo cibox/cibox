@@ -1,0 +1,46 @@
+---
+
+apt_repos:
+  - ppa:ansible/ansible
+  - ppa:duggan/jo
+
+apt_packages:
+  - { name: "imagemagick", status: true }
+  - { name: "libmagickwand-dev", status: true }
+  - { name: "libmagickcore-dev", status: true }
+  - { name: "libmysqlclient-dev", status: true }
+  - { name: "htop", status: true }
+  - { name: "vim", status: true }
+  - { name: "time", status: true }
+  - { name: "tree", status: true }
+  - { name: "make", status: true }
+  - { name: "apparmor-utils", status: true }
+  - { name: "python-software-properties", status: true }
+  - { name: "python-dev", status: true }
+  - { name: "python-setuptools", status: true }
+  - { name: "python 2.7.9", status: true }
+  - { name: "python-simplejson", status: true }
+  - { name: "python-passlib", status: true }
+  - { name: "python-pip", status: true }
+  - { name: "software-properties-common", status: true }
+  - { name: "rsync", status: true }
+  - { name: "libssl-dev", status: true }
+  - { name: "zlib1g-dev", status: true }
+  - { name: "rng-tools", status: true }
+  - { name: "cgroup-bin", status: true }
+  - { name: "git", status: true }
+  - { name: "unattended-upgrades", status: true}
+  # See https://github.com/jpmens/jo/blob/master/jo.md
+  - { name: "jo", status: true}
+
+pip_packages:
+  - setuptools
+  - paramiko
+  - pyyaml
+  - jinja2
+  - markupsafe
+  - MySQL-python
+  - ansible==1.9.4
+  - virtualenv
+  - cffi
+  - cryptography

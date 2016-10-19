@@ -1,0 +1,43 @@
+---
+# This playbook installs php
+
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: yes
+  sudo: yes
+
+  vars:
+    php_packages:
+      - php5-cli
+      - php5-curl
+      - php5-gd
+      - php5-intl
+      - php5-mcrypt
+      - php5-memcache
+      - php5-imagick
+      - php5-mysql
+      - php-apc
+      - libapache2-mod-php5
+      - php5-dev
+    php_use_managed_ini: true
+    php_display_errors: On
+    php_error_reporting: '-1'
+    php_session.save_path: /var/lib/php/session
+    php_max_execution_time: '300'
+    php_memory_limit: 1024M
+    php_post_max_size: 64M
+    php_upload_max_filesize: 64M
+
+    php_enable_apc: true
+    php_apc_enabled_in_ini: true
+    php_apc_cache_by_default: "1"
+    php_apc_shm_size: "96M"
+    php_apc_stat: "1"
+    php_apc_enable_cli: "0"
+    cibox_php_pcntl: no
+
+  roles:
+    - { role: '../core/facade-php' }
+    - { role: '../core/facade-php-pear' }
+    - { role: '../core/facade-php-xhprof' }
+    - { role: '../core/cibox-php-pcntl' }

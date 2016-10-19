@@ -1,0 +1,7 @@
+---
+# This script contains commands to enable modules that are specified in configuration.
+- name: Enable general modules
+  shell: "{{ php_env_vars }} drush -y en {{ global_env.modules|selectattr('status', 'equalto', true)|map(attribute='name')|join(' ') }}"
+
+- name: Enable environment specific modules
+  shell: "{{ php_env_vars }} drush -y en {{ env.modules|selectattr('status', 'equalto', true)|map(attribute='name')|join(' ') }}"

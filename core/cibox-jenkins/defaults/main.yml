@@ -1,0 +1,62 @@
+---
+placeholder: 'placeholder'
+jenkins_admin_email: 'noreply@cibox.tools'
+# Jenkins server IP. Should be overridden outside of role.
+# "gather_facts" option should be enabled.
+jenkins_server_ip: "{{ ansible_default_ipv4.address }}"
+
+# GitHub configurations.
+github_url: https://github.com/NAME/REPOSITORY
+github_username: BOT_NAME
+github_token: BOT_ACCESS_TOKEN
+github_password: BOT_PASSWORD
+
+# We are using unix pam autentification module for jenkins.
+plugins:
+  - 'http://mirrors.jenkins-ci.org/plugins/ansicolor/0.4.1/ansicolor.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/token-macro/1.10/token-macro.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/ssh-agent/1.3/ssh-agent.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/plain-credentials/1.1/plain-credentials.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/credentials/1.22/credentials.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/git-client/1.18.0/git-client.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/git/2.4.0/git.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/github-api/1.69/github-api.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/github/1.12.1/github.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/ghprb/1.15-0/ghprb.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/htmlpublisher/1.5/htmlpublisher.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/jquery/1.11.2-0/jquery.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/matrix-auth/1.2/matrix-auth.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/matrix-project/1.6/matrix-project.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/project-description-setter/1.1/project-description-setter.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/ssh-credentials/1.11/ssh-credentials.hpi'
+  # Keeping HipChat support disabled by defaut. Logs should be smaller now.
+  # - 'http://mirrors.jenkins-ci.org/plugins/hipchat/0.1.9/hipchat.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/scm-api/0.2/scm-api.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/scripttrigger/0.31/scripttrigger.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/parameterized-trigger/2.28/parameterized-trigger.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/simple-theme-plugin/0.3/simple-theme-plugin.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/ansible/0.5/ansible.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/jobConfigHistory/2.14/jobConfigHistory.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/slack/1.8/slack.hpi'
+  - 'http://mirrors.jenkins-ci.org/plugins/timestamper/1.8.5/timestamper.hpi'
+
+jenkins_pkg_version: 'http://pkg.jenkins-ci.org/debian/binary/jenkins_1.624_all.deb'
+
+# Delay before jenkins up and running. Sometimes it is not enouph.
+startup_delay_s: 40
+
+jenkins_jobs:
+  - { name: 'BACKUP_PROD_DB', template: 'backup_prod_db.xml.j2', status: true }
+  - { name: 'DEMO', template: 'demo.xml.j2', status: true }
+  - { name: 'DISK_USAGE_TRIGGER', template: 'disk_usage_trigger.xml.j2', status: true }
+  - { name: 'PR_BUILDER', template: 'pr_builder.xml.j2', status: true }
+  - { name: 'SERVER_CLEANER', template: 'server_cleaner.xml.j2', status: true }
+  - { name: 'SERVER_SECURITY_UPD', template: 'server_security.xml.j2', status: true }
+
+jenkins_users:
+  - { name: 'root', template: 'root.xml.j2', status: true }
+
+# Jenkins theme config.
+jenkins_theme_css: https://cibox.github.io/cibox-jenkins-theme/cibox-theme.css
+jenkins_theme_js: https://cibox.github.io/cibox-jenkins-theme/cibox-theme.js
+jenkins_sourcode_folder: sourcecode

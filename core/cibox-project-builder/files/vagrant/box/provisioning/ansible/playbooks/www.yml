@@ -1,0 +1,56 @@
+---
+# This playbook installs apache
+
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: yes
+  sudo: yes
+
+  vars:
+    # Varnish configuration.
+    varnish_enabled: false
+    # Use this secret in your client(Drupal Varnish module) in order to connect to Varnish.
+    varnish_secret: "14bac2e6-1e34-4770-8078-974373b76c90"
+
+    # SSL configuration.
+    cibox_ssl_folder: /etc/apache/ssl
+    cibox_server_ip: 192.168.56.132
+
+    # Apache configuration.
+    apache_create_vhosts: true
+    apache_vhosts_filename: "vhosts.conf"
+    apache_remove_default_vhost: true
+    apache_vhosts:
+      - {
+        servername: "{{ cibox_server_ip }}.xip.io",
+        documentroot: "/var/www"
+      }
+      - {
+        servername: "drupal.{{ cibox_server_ip }}.xip.io",
+        documentroot: "/var/www/docroot"
+      }
+    apache_vhosts_ssl:
+      - {
+        servername: "drupal.{{ cibox_server_ip }}.xip.io",
+        documentroot: "/var/www/docroot",
+        certificate_file: "{{ cibox_ssl_folder }}/apache.crt",
+        certificate_key_file: "{{ cibox_ssl_folder }}/apache.key",
+      }
+    apache_mods_enabled:
+      - rewrite.load
+      - ssl.load
+
+  # Disable services to avoid conflicts in port usage.
+  pre_tasks:
+    - name: Make sure Varnish is disabled
+      service: name=varnish state=stopped
+      ignore_errors: yes
+
+    - name: Make sure Apache2 is disabled
+      service: name=apache2 state=stopped
+      ignore_errors: yes
+
+  roles:
+    - { role: '../core/cibox-varnish', when: varnish_enabled }
+    - { role: '../core/facade-ssl-config' }
+    - { role: '../core/facade-apache' }

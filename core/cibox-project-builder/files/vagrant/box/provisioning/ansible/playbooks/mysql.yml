@@ -1,0 +1,34 @@
+---
+# This playbook installs mysql
+
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: yes
+  sudo: yes
+
+  vars:
+    mysql_packages:
+      - mysql-server
+      - mysql-client
+    mysql_root_password: root
+    mysql_enabled_on_startup: yes
+
+    mysql_databases:
+      - name: drupal
+    mysql_users:
+      - name: drupal
+        host: "localhost"
+        password: drupal
+        priv: "drupal.*:ALL"
+
+    mysql_innodb_file_per_table: "1"
+    mysql_tmp_table_size: "160M"
+    mysql_max_heap_table_size: "160M"
+    mysql_character-set-server: "utf8"
+    mysql_collation-server: "utf8_unicode_ci"
+    mysql_innodb_flush_log_at_trx_commit: "0" # or 2
+    mysql_query_cache_size: "16M"
+    mysql_table_cache: "800"
+
+  roles:
+    - { role: '../core/facade-mysql' }

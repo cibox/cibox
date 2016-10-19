@@ -1,0 +1,6 @@
+---
+
+- name: Adjust permissions for /var/www dir.
+  file:
+    path: /var/www
+    mode: "o+rwx"

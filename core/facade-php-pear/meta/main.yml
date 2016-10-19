@@ -1,0 +1,4 @@
+---
+# This role is wrapper for 'ansible-php-pear'.
+dependencies:
+  - { role: '../contrib/ansible-php-pear' }

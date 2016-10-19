@@ -1,0 +1,9 @@
+---
+# @TODO: In this file we should run reinstall role.
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  post_tasks:
+    - name: Folder permissions
+      shell: "sudo chown -R www-data:jenkins {{ server_docroot_folder }}/build{{ build_number }}"

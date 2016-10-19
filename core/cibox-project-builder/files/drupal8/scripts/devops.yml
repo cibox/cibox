@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    scan_security: false
+
+  roles:
+    - { role: devops/roles/cibox-security-testing, when: scan_security == true }

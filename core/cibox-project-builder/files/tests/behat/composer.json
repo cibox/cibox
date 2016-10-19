@@ -1,0 +1,11 @@
+{
+  "require": {
+    "drupal/tqextension": "1.*",
+    "emuse/behat-html-formatter": "0.*",
+    "drupal/drupal-extension": "~3.0",
+    "drupal/drupal-driver": "~1.0"
+  },
+  "config": {
+    "bin-dir": "bin"
+  }
+}

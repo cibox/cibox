@@ -1,0 +1,16 @@
+---
+# This playbook installs drush
+
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: no
+
+  roles:
+    - { role: '../core/cibox-drush' }
+
+  vars:
+    drush_composer_version: 8.*
+    drushrc:
+      drush_usage_log: 1
+      drush_usage_send: 1
+      php-notices: warning

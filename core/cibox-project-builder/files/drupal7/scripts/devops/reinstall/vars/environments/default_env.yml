@@ -1,0 +1,20 @@
+---
+env:
+  pre_settings: []
+  modules:
+    - { name: 'dblog', status: true }
+    - { name: 'stage_file_proxy', status: false }
+    - { name: 'devel', status: true }
+    - { name: 'views_ui', status: false }
+    - { name: 'diff', status: false }
+  drush_commands:
+    # Update admin username and password.
+    - { name: 'sqlq', status: true, arguments: "\"UPDATE users SET name='{{ drupal_user }}' WHERE uid=1\"" }
+    - { name: 'user-password', status: true, arguments: "{{ drupal_user }} --password={{ drupal_pass }}" }
+  post_settings:
+    - { name: '$conf["error_level"]', status: true, value: '2' }
+    - { name: '$conf["cache"]', status: true, value: '0' }
+    - { name: '$conf["block_cache"]', status: true, value: '0' }
+    - { name: '$conf["preprocess_css"]', status: true, value: '0' }
+    - { name: '$conf["preprocess_js"]', status: true, value: '0' }
+    - { name: '$conf["stage_file_proxy_origin"]', status: false, value: "{{ origin_site_url }}" }

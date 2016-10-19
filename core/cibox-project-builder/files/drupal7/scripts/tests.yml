@@ -1,0 +1,83 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    workspace_root: .
+    artifacts_file: commentinfo.md
+    build_reports_dir: build_reports
+    behat_base_url: http://drupal.192.168.56.132.xip.io # WITHOUT TRAILING SLASH
+    behat_drupal_root: /var/www/docroot
+    resources_path: /var/www/tests/behat/resources
+    behat_root: '../tests/behat'
+    config_file: behat.yml
+    features_dir: features
+    browser: 'chrome'
+    selenium_url: 127.0.0.1:4444/wd/hub
+    run_javascript_tests: 'no'
+    update_dependencies: 'yes'
+    selenium_jar_path: /var/lib/selenium/selenium.jar
+    chrome_driver_path: /var/lib/chrome-driver/chromedriver
+
+  tasks:
+  - name: Install behat dependencies from composer.json
+    shell: "cd {{ behat_root }} && composer up"
+    when: update_dependencies == 'yes'
+
+  - name: Create dynamic behat.yml
+    template: src={{ behat_root }}/behat.yml.j2 dest=/tmp/behat.yml
+    
+  - name: Move behat.yml
+    sudo: yes
+    shell: mv /tmp/behat.yml {{ behat_root }}/behat.yml
+
+  - name: Ensure that xvfb is run
+    service: name=xvfb state=started
+    when: run_javascript_tests == 'yes'
+
+  - name: Export display and enable Chrome
+    shell: firefox & # Add exclusion for firefox
+    environment:
+      DISPLAY: ':99'
+    when: run_javascript_tests == 'yes'
+
+  - name: Run Selenium standalone with Chrome
+    sudo: yes
+    shell: java -jar {{ selenium_jar_path }} -log selenium.log -Dwebdriver.chrome.driver={{ chrome_driver_path }} &
+    environment:
+      DISPLAY: ':99'
+    when: run_javascript_tests == 'yes' and browser == 'chrome'
+
+  - name: Run Selenium standalone with Firefox
+    sudo: yes
+    shell: java -jar {{ selenium_jar_path }} -log selenium.log &
+    environment:
+      DISPLAY: ':99'
+    when: run_javascript_tests == 'yes' and browser == 'firefox'
+
+  - name: Wait until Selenium starts
+    wait_for: port=4444 delay=10 host=127.0.0.1
+    when: run_javascript_tests == 'yes'
+
+  - name: Create directory for build reports
+    sudo: yes
+    file: path={{ behat_drupal_root }}/{{ build_reports_dir }} state=directory mode=0777
+
+  - name: Run full Behat tests
+    ignore_errors: yes
+    environment:
+      DISPLAY: ':99'
+    shell: 'echo "Behat tests: standard file {{ behat_base_url }}/{{ build_reports_dir }}/report.html" >> {{ workspace_root }}/{{ artifacts_file }} && cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }}'
+    when: run_javascript_tests == 'yes'
+
+  - name: Run headless Behat tests
+    ignore_errors: yes
+    shell: 'echo "Behat tests: standard file {{ behat_base_url }}/{{ build_reports_dir }}/report.html" >> {{ workspace_root }}/{{ artifacts_file }} && cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }} --tags "~@javascript"'
+    when: run_javascript_tests == 'no'
+
+  post_tasks:
+  - name: Kill the Selenium process
+    sudo: yes
+    shell: kill `ps wuax | grep 'java -jar {{ selenium_jar_path }}' | grep -v grep | awk '{print $2}'`
+    when: run_javascript_tests == 'yes'

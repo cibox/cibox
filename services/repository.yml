@@ -1,0 +1,13 @@
+---
+# This playbook should generates new project.
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: no
+
+  vars:
+    cmf: drupal
+    repo_subfolder: ../FRESH_REPOSITORY
+    drupal_version: 7
+
+  roles:
+      - { role: '../core/core-repository' }

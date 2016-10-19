@@ -1,0 +1,135 @@
+---
+- name: Creating project folder
+  file:
+    path: '{{ repo_subfolder }}'
+    state: directory
+
+- name: Creating drupal folder
+  file:
+    path: '{{ repo_subfolder }}/{{ drupal_subfolder }}'
+    state: directory
+  register: drupal_stat
+
+- name: Download update.xml
+  get_url:
+    url: http://updates.drupal.org/release-history/drupal/{{ drupal_version }}.x
+    dest: /tmp/drupal_update.xml
+    force: yes
+
+- name: Extract current release
+  shell: cat /tmp/drupal_update.xml | grep -E '<version>.*</version>' | head -1 | awk -F">" '{print $2}' | awk -F"<" '{print $1}'
+  register: drupal_release
+
+- name: Download Drupal to temporary directory
+  get_url:
+    url: https://ftp.drupal.org/files/projects/drupal-{{ drupal_release.stdout }}.tar.gz
+    dest: /tmp/drupal_latest.tar.gz
+    force: yes
+
+- name: Creating temporary directory
+  file:
+    path: /tmp/drupal_latest
+    state: directory
+
+- name: Unarchive the tarball
+  unarchive:
+    copy: no
+    src: /tmp/drupal_latest.tar.gz
+    dest: /tmp/drupal_latest
+
+- name: Copy files to project directory
+  synchronize:
+    src: /tmp/drupal_latest/drupal-{{ drupal_release.stdout }}/
+    dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}'
+  register: drupal_dl
+
+- name: Copy gitignore for Drupal 8
+  synchronize:
+    src: '{{ repo_subfolder }}/{{ drupal_subfolder }}/example.gitignore'
+    dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/.gitignore'
+  when: drupal_version == 8
+
+- name: Create folder for Drupal 8 configs
+  file:
+    recurse: yes
+    path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/sites/default/config/staging'
+    state: directory
+  when: drupal_version == 8
+
+- name: Add htaccess for Drupal 8 in configs
+  file:
+    path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/sites/default/config/staging/.htaccess'
+    state: touch
+  when: drupal_version == 8
+
+- name: Inject pp profile into drupal
+  file:
+    path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/profiles/{{ installation_profile_name }}'
+    state: directory
+  register: is_profile
+
+- name: Copy local profile files to drupal directory
+  synchronize:
+    src: '{{ role_path }}/files/drupal{{ drupal_version }}/profiles/{{ installation_profile_name }}/'
+    dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/profiles/{{ installation_profile_name }}/'
+    recursive: yes
+    archive: no
+  register: profile_copy
+
+- name: Create a folder placeholders for sniffers
+  file:
+    path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/{{ item }}'
+    state: directory
+  ignore_errors: yes
+  with_items: 'drupal_placeholders.drupal{{ drupal_version }}'
+
+- name: Create empty readme files for placeholders
+  file:
+    path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/{{ item }}/readme.txt'
+    state: touch
+    force: yes
+  with_items: 'drupal_placeholders.drupal{{ drupal_version }}'
+
+- name: Restrict access to YAML files
+  lineinfile:
+    dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/.htaccess'
+    line: '# Restrict access to YAML files.\n<Files ~ "\.yml$">\n  Order Allow,Deny\n  Deny from All\n</Files>'
+
+- name: Create Behat folder
+  file:
+    path: '{{ repo_subfolder }}/tests/behat'
+    state: directory
+
+- name: Injecting behat tests into repo
+  synchronize:
+    src: '{{ role_path }}/files/tests'
+    dest: '{{ repo_subfolder }}/'
+    recursive: yes
+    archive: no
+  when: with_vm == True
+  register: vmbox
+
+- name: Injecting vmbox into repo
+  synchronize:
+    src: '{{ role_path }}/files/vagrant/box/'
+    dest: '{{ repo_subfolder }}/'
+    recursive: yes
+    archive: no
+  when: with_tests == True
+  register: tests
+
+- name: Add CIBox core and contrib roles to vagrant box
+  shell: cp -R ../core ../contrib {{ repo_subfolder }}/provisioning/ansible/
+  when: with_vm == True
+
+- name: Copying installation scripts - reinstall.sh and playbook reinstall.yml
+  synchronize:
+    src: '{{ role_path }}/files/drupal{{ drupal_version }}/scripts/'
+    dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/'
+    recursive: yes
+    archive: no
+  when: with_reinstall == True
+
+- name: Setting permissions for drupal tree
+  file: path={{ repo_subfolder }} state=directory mode=777 recurse=yes
+  when: drupal_dl.changed == True or profile_copy.changed == True

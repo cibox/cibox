@@ -1,0 +1,26 @@
+---
+repo_subfolder: REPOSITORY
+with_vm: True
+with_tests: True
+with_reinstall: True
+repository_path: ./
+
+cmf: drupal
+
+# Drupal settings.
+drupal_subfolder: docroot
+installation_profile_name: pp
+drupal_version: 7
+drupal_placeholders:
+  drupal7:
+    - sites/all/modules/custom
+    - sites/all/modules/contrib
+    - sites/all/themes/custom
+    - sites/all/themes/contrib
+    - sites/all/modules/features
+  drupal8:
+    - modules/custom
+    - modules/contrib
+    - themes/custom
+    - themes/contrib
+    - modules/features

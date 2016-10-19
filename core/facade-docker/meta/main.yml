@@ -1,0 +1,4 @@
+---
+# This role is wrapper for 'docker.ubuntu'.
+dependencies:
+  - { role: '../contrib/docker.ubuntu' }

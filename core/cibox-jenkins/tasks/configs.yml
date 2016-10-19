@@ -1,0 +1,78 @@
+---
+# Trick from http://stackoverflow.com/a/30953269
+- name: Copy groovy script
+  template:
+    src: scripts/encrypt.groovy.j2
+    dest: '{{ jenkins_dest }}/encrypt.groovy'
+    owner: root
+    group: root
+    mode: 0755
+    force: yes
+
+- name: Encrypt GitHub password
+  sudo: yes
+  action: command java -jar {{ jenkins.cli_dest }} -s http://localhost:8080 groovy {{ jenkins_dest }}/encrypt.groovy
+  register: encrypted_pass
+  notify: Restart Jenkins
+
+- name: Set encrypted password
+  set_fact: github_encrypted_password="{{ encrypted_pass.stdout }}"
+
+- name: Remove groovy script
+  file:
+    path: '{{ jenkins_dest }}/encrypt.groovy'
+    state: absent
+
+- name: Create folders for Jenkins jobs
+  file:
+    path: /var/lib/jenkins/jobs/{{ item.name }}
+    state: directory
+    owner: jenkins
+    group: jenkins
+  when: item.status == true
+  with_items: jenkins_jobs
+
+- name: Copy Jenkins jobs
+  template:
+    src: jobs/{{ item.template }}
+    dest: /var/lib/jenkins/jobs/{{ item.name }}/config.xml
+    owner: jenkins
+    group: jenkins
+    force: yes
+  notify: Restart Jenkins
+  when: item.status == true
+  with_items: jenkins_jobs
+
+# Automatically scan users directory.
+- name: Create folders for users
+  file:
+    path: /var/lib/jenkins/users/{{ item.name }}
+    state: directory
+    owner: jenkins
+    group: jenkins
+  when: item.status == true
+  with_items: jenkins_users
+
+- name: Copy user configs
+  template:
+    src: users/{{ item.template }}
+    dest: /var/lib/jenkins/users/{{ item.name }}/config.xml
+    owner: jenkins
+    group: jenkins
+    mode: 0755
+    force: yes
+  notify: Restart Jenkins
+  when: item.status == true
+  with_items: jenkins_users
+
+# Automatically scan configs directory.
+- name: Copy Jenkins configs
+  template:
+    src: configs/{{ item | basename }}
+    dest: /var/lib/jenkins/{{ item | basename | regex_replace('\.j2','') }}
+    owner: jenkins
+    group: jenkins
+    force: yes
+  notify: Restart Jenkins
+  with_fileglob:
+    - ../templates/configs/*.j2

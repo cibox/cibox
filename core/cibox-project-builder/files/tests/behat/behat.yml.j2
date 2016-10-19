@@ -1,0 +1,48 @@
+default:
+  formatters:
+    pretty: true
+    html:
+      output_path: {{ behat_drupal_root }}/build_reports
+  suites:
+    default:
+      contexts:
+        - FeatureContext: ~
+        - Drupal\DrupalExtension\Context\MinkContext: ~
+        - Drupal\DrupalExtension\Context\DrupalContext: ~
+        - Drupal\DrupalExtension\Context\MarkupContext: ~
+        - Drupal\DrupalExtension\Context\MessageContext: ~
+  extensions:
+    emuse\BehatHTMLFormatter\BehatHTMLFormatterExtension:
+      name: html
+    Behat\MinkExtension:
+      goutte:
+        guzzle_parameters:
+          config:
+            curl:
+              CURLOPT_TIMEOUT: 600
+              CURLOPT_CONNECTTIMEOUT: 0
+      selenium2:
+        wd_host: {{ selenium_url }}
+        #browser: {{ browser }}
+      base_url: {{ behat_base_url }}
+      files_path: {{ resources_path }}
+    Drupal\DrupalExtension:
+      blackbox: ~
+      api_driver: 'drupal'
+      drush:
+        alias: 'local'
+      drupal:
+        drupal_root: {{ behat_drupal_root }}
+      text:
+        log_in: Log in
+        log_out: Log out
+        username_field: Username
+        password_field: Password
+      selectors:
+        message_selector: .messages
+        error_message_selector: .messages.error
+        success_message_selector: .messages.status
+        warning_message_selector: .messages.warning
+      region_map:
+        content: "#content"
+        sidebar: "#sidebar"

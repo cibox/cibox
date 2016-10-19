@@ -1,0 +1,281 @@
+---
+# This playbook should be executed using ansible-playbook command
+# Developed for ansible version >= 1.7
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    # this variable will be overridden from jenkins.
+    workspace_root: .
+    artifacts_file: commentinfo.md
+    webroot: http://localhost
+    installation_profile_name: pp
+    docroot: docroot/
+    sniff_diffs: false
+    installation_profile_path: "profiles/{{ installation_profile_name }}"
+    scan_security: true
+    phpcs_extensions: php,inc,install,module
+    phpcs_features_extensions: module
+    custom_modules_path: sites/all/modules/custom/
+    custom_themes_path: sites/all/themes/custom
+    features_path: sites/all/modules/features
+    phpcs_modules_ignore:
+      - sites/all/themes/custom/nonstandard
+    phpcs_features_ignore:
+      - sites/all/features/nonstandard
+    phpcs_features_ignore_path: sites/all/features,*.pages_default.inc,*.panelizer.inc,*.features.menu_custom.inc,*.features.webform.inc,*.features.filter.inc,*.strongarm.inc,*.fpp_content_declarations.inc,*.panels_default.inc
+    composer_dir: /usr/share/composer
+    phpcs_bin: /usr/bin/phpcs
+    build_reports_dir: build_reports
+
+    composer_global_require:
+      - { package: 'drupal/coder', version: ':dev-8.x-2.x' }
+      - { package: 'squizlabs/php_codesniffer', version: '=2.*' }
+
+    git_repos:
+      - { branch: 'master', repo: 'http://git.drupal.org/sandbox/coltrane/1921926.git', name: 'DrupalSecure' } # git clone --branch master http://git.drupal.org/sandbox/coltrane/1921926.git DrupalSecure
+      - { branch: 'master', repo: 'https://github.com/podarok/phpcs-security-audit.git', name: 'Security' } #git clone --branch master https://github.com/podarok/phpcs-security-audit.git Security
+      - { branch: 'master', repo: 'https://github.com/podarok/Symfony2-coding-standard.git', name: 'Symfony2' }
+
+    phpcs_standards:
+      - { path: 'vendor/drupal/coder/coder_sniffer/Drupal', name: 'Drupal' } #/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal Drupal
+      - { path: 'vendor/podarok/DrupalSecure/DrupalSecure', name: 'DrupalSecure' } #/root/.composer/vendor/podarok/DrupalSecure DrupalSecure
+      - { path: 'vendor/podarok/Security/Security', name: 'Security' } #/root/.composer/vendor/podarok/Security Security
+
+    npm_packages:
+      - jshint
+
+    gem_packages:
+      - scss-lint
+
+    sniffers_apt_repos:
+      - ppa:chris-lea/node.js
+
+    sniffers_apt_packages:
+      - ruby1.9.1
+      - ruby1.9.1-dev
+      - rubygems1.9.1
+      - irb1.9.1
+      - ri1.9.1
+      - rdoc1.9.1
+      - build-essential
+      - libopenssl-ruby1.9.1
+      - libssl-dev
+      - zlib1g-dev
+      - nodejs
+
+    jshint_folders:
+      - { name: 'modules', path: 'sites/all/modules/custom', exclude: [] }
+      - { name: 'themes', path: 'sites/all/themes/custom', exclude: ['bower'] }
+      - { name: 'profile', path: "{{ installation_profile_path }}", exclude: [] }
+
+    scsslint_folders:
+      - { name: 'themes', path: 'sites/all/themes/custom', exclude: ['bower'] }
+
+    sniffers_update: true
+
+  roles:
+    - { role: devops/roles/cibox-security-testing, when: scan_security == true }
+
+  pre_tasks:
+    - name: Was composer downloaded
+      sudo: yes
+      stat: path={{ composer_dir }}
+      register: is_composer_dir
+      when: sniffers_update == true
+
+    - name: Install apt repos
+      apt_repository: repo={{ item }}
+      with_items: sniffers_apt_repos
+      sudo: yes
+      when: sniffers_update == true
+      tags:
+        - nodejs
+
+    - name: Update apt cache
+      sudo: yes
+      apt: update_cache=yes
+      ignore_errors: yes
+      when: sniffers_update == true
+
+    - name: Install apt packages
+      apt: name={{ item }} state=present
+      with_items: sniffers_apt_packages
+      sudo: yes
+      when: sniffers_update == true
+      tags:
+        - sniffers
+        - composer
+        - git
+
+    - name: prepare directory for global composer libs
+      sudo: yes
+      file: path={{ composer_dir }} state=directory
+      when: sniffers_update == true and is_composer_dir.stat.exists == false
+      tags:
+        - sniffers
+
+    - name: Cleanup composer packages
+      sudo: yes
+      shell: "cd {{ composer_dir }} && composer remove {{ item.package }}"
+      with_items: composer_global_require
+      when: sniffers_update == true
+      tags:
+        - sniffers
+        - composer
+        - git
+
+    - name: Install composer global requires
+      sudo: yes
+      shell: "cd {{ composer_dir }} && composer require --prefer-dist {{ item.package }}{{ item.version }}"
+      with_items: composer_global_require
+      when: sniffers_update == true
+      tags:
+        - sniffers
+        - composer
+        - git
+
+    - name: Install global git repos
+      sudo: yes
+      git: repo={{ item.repo }} dest={{ composer_dir }}/vendor/podarok/{{ item.name }} version={{ item.branch }}
+      with_items: git_repos
+      when: sniffers_update == true
+      tags:
+        - sniffers
+        - git
+
+    - name: Install php codesniffer standards
+      sudo: yes
+      file: src={{ composer_dir }}/{{ item.path }} dest={{ composer_dir }}/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/{{ item.name }} state=link
+      with_items: phpcs_standards
+      when: sniffers_update == true
+      tags:
+        - sniffers
+        - git
+
+    - name: Fix permissions for composer libs
+      sudo: yes
+      file: path={{ composer_dir }} state=directory mode=655 recurse=yes
+      when: sniffers_update == true
+
+    - name: Create symlink to phpcs binary
+      sudo: yes
+      file: src={{ composer_dir }}/vendor/bin/phpcs dest={{ phpcs_bin }} state=link mode=655 force=yes
+      when: sniffers_update == true
+
+    - name: Install nodejs packages
+      sudo: yes
+      npm: name={{ item }} global=yes
+      with_items: npm_packages
+      when: sniffers_update == true
+
+    - name: Update ruby alternatives for using ruby 1.9.1(3) version
+      sudo: yes
+      shell: "update-alternatives --install /usr/bin/ruby ruby /usr/bin/ruby1.9.1 400 --slave /usr/share/man/man1/ruby.1.gz ruby.1.gz /usr/share/man/man1/ruby1.9.1.1.gz --slave /usr/bin/ri ri /usr/bin/ri1.9.1 --slave /usr/bin/irb irb /usr/bin/irb1.9.1 --slave /usr/bin/rdoc rdoc /usr/bin/rdoc1.9.1"
+      when: sniffers_update == true and is_composer_dir.stat.exists == false
+      tags:
+        - sniffers
+        - ruby
+
+    - name: Install gem packages
+      shell: "gem install {{ item }}"
+      with_items: gem_packages
+      ignore_errors: yes
+      sudo: yes
+      when: sniffers_update == true
+      tags:
+        - sniffers
+        - gem
+        - ruby
+
+  tasks:
+    - name: Create directory for build reports
+      sudo: yes
+      file: path={{ build_reports_dir }} state=directory mode=0777
+
+    - name: PHP CodeSniffer run
+      shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} {{ installation_profile_path }} {{ custom_themes_path }} --report-file={{ build_reports_dir }}/{{ item.name }}sniff.txt --ignore={{ phpcs_modules_ignore | join(",") }} || true'
+      with_items: phpcs_standards
+
+    - name: Get latest develop
+      shell: "git fetch origin {{ target_branch }}"
+      args:
+        chdir: "{{ pr_workspace }}"
+      when: (source_hash is defined) and sniff_diffs
+
+    - name: Get branching point hash
+      shell: "diff -u1 <(git rev-list --first-parent {{ source_hash }}) <(git rev-list --first-parent origin/{{ target_branch }}) | sed -ne 's/^ //p'"
+      args:
+        executable: /bin/bash
+        chdir: "{{ pr_workspace }}"
+      register: branching_hash
+      when: (source_hash is defined) and sniff_diffs
+
+    - name: Get branching point hash stdout
+      set_fact: branching_hash_stdout={{ branching_hash.stdout }}
+      when: (source_hash is defined) and sniff_diffs
+
+    - name: Populate list of changed files for sniffers
+      shell: "git diff --name-only --diff-filter=ACMRTUXB {{ branching_hash_stdout }} {{ source_hash }} | sed -e 's@{{ docroot }}@@g' | grep -E '({{ features_path }}|{{ custom_modules_path }}|{{ custom_themes_path }})' | tr '\n' ' '"
+      args:
+        executable: /bin/bash
+        chdir: "{{ pr_workspace }}"
+      register: changed_files
+      when: (branching_hash_stdout is defined) and sniff_diffs
+
+    - name: Populate list of changed files for sniffers stdout
+      set_fact: changed_files_stdout={{ changed_files.stdout }}
+      when: (branching_hash_stdout is defined) and sniff_diffs
+
+    - name: PHP CodeSniffer for changed files run
+      shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_features_extensions }} -n {{ changed_files_stdout }} --report-file={{ build_reports_dir }}/ChangedFiles{{ item.name }}sniff.txt --ignore={{ phpcs_features_ignore | join(",") }} || true'
+      with_items: phpcs_standards
+      when: (changed_files_stdout is defined) and sniff_diffs
+
+    - name: PHP CodeSniffer for changed files reports build
+      ignore_errors: yes
+      shell: 'if grep "FOUND" {{ build_reports_dir }}/ChangedFiles{{ item.name }}sniff.txt; then echo "<strong>`grep -o "\<\| ERROR \|\>" {{ build_reports_dir }}/ChangedFiles{{ item.name }}sniff.txt | wc -l`</strong> errors for CodeSniffer in Changed Files: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/ChangedFiles{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
+      with_items: phpcs_standards
+      when: changed_files_stdout is defined
+      when: (changed_files is defined) and sniff_diffs
+
+    - name: PHP CodeSniffer reports build
+      ignore_errors: yes
+      shell: 'if grep "FOUND" {{ build_reports_dir }}/{{ item.name }}sniff.txt; then echo "<strong>`grep -o "\<\| ERROR \|\>" {{ build_reports_dir }}/{{ item.name }}sniff.txt | wc -l`</strong>  errors for CodeSniffer: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi;'
+      with_items: phpcs_standards
+
+    - name: Security Review report build
+      ignore_errors: yes
+      shell: 'if grep "error" {{ build_reports_dir }}/SecurityReview.txt; then echo "<strong>`grep -o "\<error\>" {{ build_reports_dir }}/SecurityReview.txt | wc -l`</strong>  errors for Security Review: Security Review standard file {{ webroot }}/{{ build_reports_dir }}/SecurityReview.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi;'
+
+    - name: PHP CodeSniffer for features run
+      shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_features_extensions }} -n {{ features_path }} --report-file={{ build_reports_dir }}/Features{{ item.name }}sniff.txt --ignore={{ phpcs_features_ignore | join(",") }} || true'
+      with_items: phpcs_standards
+
+    - name: PHP CodeSniffer for features reports build
+      ignore_errors: yes
+      shell: 'if grep "FOUND" {{ build_reports_dir }}/Features{{ item.name }}sniff.txt; then echo "<strong>`grep -o "\<\| ERROR \|\>" {{ build_reports_dir }}/Features{{ item.name }}sniff.txt | wc -l`</strong> errors for CodeSniffer: Features {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/Features{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
+      with_items: phpcs_standards
+
+    - name: JSHint run
+      shell: 'find {{ item.path }} {{ "! -type d \( -path " + (item.exclude | join(" -path ")) + " \)" if item.exclude else "" }} -type f \( -iname "*.js" ! -iname "*min.js" \) -print0 | sudo xargs -0 jshint > {{ build_reports_dir }}/{{ item.name }}jshint.txt || true'
+      with_items: jshint_folders
+
+    - name: JSHint build reports
+      ignore_errors: yes
+      shell: 'if [ -s {{ build_reports_dir }}/{{ item.name }}jshint.txt ]; then echo "<strong>`wc -l < {{ build_reports_dir }}/{{ item.name }}jshint.txt`</strong> JSHint: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/{{ item.name }}jshint.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
+      with_items: jshint_folders
+
+    - name: SCSS lint run
+      shell: 'find {{ item.path }} {{ "! -type d \( -path " + (item.exclude | join(" -path ")) + " \)" if item.exclude else "" }} -iname "*.scss" -print0 | xargs -0 -r scss-lint -c scss-lint.yml > {{ build_reports_dir }}/scsslint{{ item.name }}.txt || true'
+      with_items: scsslint_folders
+
+    - name: SCSS lint build reports
+      ignore_errors: yes
+      shell: 'if grep -o "\<[E]\>" {{ build_reports_dir }}/scsslint{{ item.name }}.txt; then echo "<strong>`grep -o "\<[E]\>" {{ build_reports_dir }}/scsslint{{ item.name }}.txt | wc -l`</strong> errors for SCSS-lint {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/scsslint{{ item.name }}.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
+      with_items: scsslint_folders
+
+    - name: Website credentials
+      sudo: yes
+      lineinfile: dest={{ workspace_root }}/{{ artifacts_file }} line="Build site installed at {{ webroot }}" create=yes state=present

@@ -1,0 +1,21 @@
+---
+env:
+  trusted_host_patterns: []
+  pre_settings:
+    - { name: '$config_directories["staging"]', status: false, value: 'sites/default/config/staging' }
+    - { name: '$settings["install_profile"]', status: true, value: "{{ installation_profile_name }}" }
+    - { name: '$settings["file_public_path"]', status: true, value: 'sites/default/files' }
+    - { name: '$config["system.file"]["path.temporary"]', status: true, value: '/tmp' }
+  modules:
+    - { name: 'devel config_inspector config_devel', status: false }
+  drush_commands:
+    - { name: 'user-password', status: true, arguments: "{{ drupal_user }} --password={{ drupal_pass }}" }
+    - { name: 'config-set', status: false, arguments: "system.site uuid USER_YOUR_UUID_HERE -y" }
+    # Plese do not use drush for importing configs. See https://www.youtube.com/watch?v=vFsgNjhGr4Y for how to use http://dgo.to/confi
+    - { name: 'cr', status: true, arguments: "" }
+    - { name: 'search-index', status: false, arguments: "" }
+  post_settings:
+    - { name: '$config_directories["staging"]', status: true, value: 'sites/default/config/staging' }
+    - { name: '$settings["cache"]["bins"]["render"]', status: false, value: 'cache.backend.memory' }
+    - { name: '$config["stage_file_proxy.settings"]["origin"]', status: false, value: '{{ origin_site_url }}' }
+
