@@ -1,7 +1,7 @@
 ## Provisioner and GitHub project builder
 ##### [Ansible](http://docs.ansible.com/ansible/intro_installation.html#installation) version 1.7-1.x. 2.0 not yet supported
 
-For Ubuntu 16.04 please install ansible by commands
+For Ubuntu 16.04 please install ansible with commands
 
 ```sh
 sudo apt-get install python-pip
