@@ -25,7 +25,8 @@ github_password: BOT_PASSWORD
 #### Jenkins provisioning using virtualbox/vagrant
 [Requirement: vagrant 1.7+]
 * Change settings in config.yml
-* (Optional) Regenerate keys in ssh-keys subfolder: `ssh-keygen` (select ssh-keys/id_rsa as the key file name)
+* Go to builder-setup folder
+* (Recommended) Regenerate keys in ssh-keys subfolder: `ssh-keygen` (select ssh-keys/id_rsa as the key file name)
 * Prepare target host (VM) as described in the previous section
 * Login to the target host
 * Add contents of `ssh-keys/id_rsa.pub` to ~/.ssh/authorized_keys
