@@ -6,4 +6,7 @@
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/xenial64"
   config.vm.provision "shell", path: "builder-setup.sh"
+  config.vm.synced_folder "..", "/vagrant"
+  # Comment previous, and uncomment line if you have NFS support (recommended)
+  # config.vm.synced_folder "..", "/vagrant", type: "nfs"
 end
