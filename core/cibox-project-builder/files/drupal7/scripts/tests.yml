@@ -7,7 +7,7 @@
     workspace_root: .
     artifacts_file: commentinfo.md
     build_reports_dir: build_reports
-    base_url: http://drupal.192.168.56.132 # WITHOUT TRAILING SLASH
+    base_url: http://drupal.192.168.56.132.xip.io # WITHOUT TRAILING SLASH
     drupal_root: /var/www/docroot
     resources_path: /var/www/tests/behat/resources
     behat_root: '../tests/behat'
