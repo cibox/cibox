@@ -1,6 +1,6 @@
 ---
 # File contains tasks for drupal_core tests.
-- name: Run Simpletest tests
+- name: Run tests
   ignore_errors: yes
   shell: 'php scripts/run-tests.sh --verbose --php /usr/bin/php {{ drupal_core_test_group }} > {{ build_reports_dir }}/SimpletestReport.txt'
 
