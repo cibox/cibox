@@ -19,6 +19,7 @@ pp_environment: 'default'
 # This variable allows select type of installation. Can be overridden by CI server.
 # From installation profile = 'profile', from sql dump = 'sql'.
 workflow_type: 'profile'
+sql_workflow_features_revert_all: false
 is_windows: false
 ci_server_username: 'jenkins'
 # This variable allows make backup from CI environment before processing.
