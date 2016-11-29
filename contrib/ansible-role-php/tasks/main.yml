@@ -13,17 +13,55 @@
     php_webserver_daemon: "{{ __php_webserver_daemon }}"
   when: php_webserver_daemon is not defined
 
-- name: Define php_conf_path.
+- name: Define php_conf_paths.
   set_fact:
-    php_conf_path: "{{ __php_conf_path }}"
-  when: php_conf_path is not defined
+    php_conf_paths: "{{ __php_conf_paths }}"
+  when: php_conf_paths is not defined
+
+- name: Define php_extension_conf_paths.
+  set_fact:
+    php_extension_conf_paths: "{{ __php_extension_conf_paths }}"
+  when: php_extension_conf_paths is not defined
+
+- name: Define php_apc_conf_filename.
+  set_fact:
+    php_apc_conf_filename: "{{ __php_apc_conf_filename }}"
+  when: php_apc_conf_filename is not defined
+
+- name: Define php_opcache_conf_filename.
+  set_fact:
+    php_opcache_conf_filename: "{{ __php_opcache_conf_filename }}"
+  when: php_opcache_conf_filename is not defined
+
+- name: Define php_fpm_conf_path.
+  set_fact:
+    php_fpm_conf_path: "{{ __php_fpm_conf_path }}"
+  when: php_fpm_conf_path is not defined
 
 # Setup/install tasks.
 - include: setup-RedHat.yml
-  when: ansible_os_family == 'RedHat'
+  when: (php_install_from_source == false) and (ansible_os_family == 'RedHat')
 
 - include: setup-Debian.yml
-  when: ansible_os_family == 'Debian'
+  when: (php_install_from_source == false) and (ansible_os_family == 'Debian')
+
+# Install PHP from source when php_install_from_source is true.
+- include: install-from-source.yml
+  when: php_install_from_source == true
+
+- name: Check the installed version of PHP.
+  shell: '{{ php_executable }} -r "echo PHP_VERSION;"'
+  register: php_installed_version
+  changed_when: false
+  always_run: yes
+
+- name: Disable opcache if PHP version is < 5.5.
+  set_fact:
+    php_opcache_enable: 0
+  when: "{{ php_installed_version.stdout | version_compare('5.5', operator='lt') }}"
 
 # Configure PHP.
 - include: configure.yml
+
+# Configure PHP-FPM.
+- include: configure-fpm.yml

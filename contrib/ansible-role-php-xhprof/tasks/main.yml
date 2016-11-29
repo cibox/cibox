@@ -20,13 +20,21 @@
     - "channel://pecl.php.net/xhprof-0.9.4"
     - xhprof
 
-- name: Copy XHProf INI into php.d folder.
+- name: Ensure PHP configuration directories exist.
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  with_items: php_xhprof_config_dirs
+
+- name: Copy XHProf INI into various other conf folders.
   template:
     src: xhprof.ini.j2
-    dest: "{{ php_extension_conf_path }}/xhprof.ini"
+    dest: "{{ item }}/{{ php_xhprof_config_filename }}"
     owner: root
     group: root
     mode: 0644
+  with_items: php_xhprof_config_dirs
   notify: restart webserver
 
 - name: Ensure XHProf output directory exists.

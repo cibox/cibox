@@ -1,6 +1,6 @@
 ---
 # In order to install/update contrib module, run followign command from root of project:
-#        ansible-galaxy install -n -f -r contrib/requirements.yml
+#        ansible-galaxy install -n -f -r contrib/requirements.yml --roles-path contrib
 #
 # Contrib requirements list.
 #
