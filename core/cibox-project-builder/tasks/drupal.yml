@@ -83,14 +83,14 @@
     path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/{{ item }}'
     state: directory
   ignore_errors: yes
-  with_items: 'drupal_placeholders.drupal{{ drupal_version }}'
+  with_items: "{{ drupal_placeholders ['drupal%d' % drupal_version] }}"
 
 - name: Create empty readme files for placeholders
   file:
     path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/{{ item }}/readme.txt'
     state: touch
     force: yes
-  with_items: 'drupal_placeholders.drupal{{ drupal_version }}'
+  with_items: "{{ drupal_placeholders ['drupal%d' % drupal_version] }}"
 
 - name: Restrict access to YAML files
   lineinfile:
