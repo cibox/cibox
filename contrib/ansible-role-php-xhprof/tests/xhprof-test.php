@@ -5,17 +5,28 @@
  * Test if XHProf is available and working.
  */
 
-$success = FALSE;
+$success = TRUE;
 
-// Simple check; this function should return an empty array.
-// $test = xdebug_get_code_coverage();
-// if ($test === array()) {
-//   $success = TRUE;
-//   print "Xdebug working properly.\r\n";
-//   exit(0);
-// }
+xhprof_enable();
+$data = xhprof_disable();
 
-// if (!$success) {
-//   print "Xdebug not working properly.\r\n";
-//   exit(1);
-// }
+if (isset($data['main()==>xhprof_disable'])) {
+  print "XHProf profiling working.\r\n";
+}
+else {
+  print "XHProf profiling not working.\r\n";
+  $success = FALSE;
+}
+
+$output_dir = ini_get("xhprof.output_dir");
+if (!empty($output_dir) && is_writable($output_dir)) {
+  print "XHProf output directory writable.\r\n";
+}
+else {
+  print "XHProf output directory not writable.\r\n";
+  $success = FALSE;
+}
+
+if (!$success) {
+  exit(1);
+}

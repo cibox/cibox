@@ -1,2 +1,2 @@
 ---
-xhprof_output_dir: /tmp/xhprof
+xhprof_output_dir: /var/tmp/xhprof

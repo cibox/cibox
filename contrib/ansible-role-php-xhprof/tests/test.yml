@@ -4,4 +4,5 @@
 
   roles:
     - geerlingguy.php
+    - geerlingguy.php-pecl
     - ansible-role-php-xhprof

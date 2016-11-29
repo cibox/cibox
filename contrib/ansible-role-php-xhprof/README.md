@@ -12,7 +12,9 @@ None.
 
 Available variables are listed below, along with default values (see `defaults/main.yml`):
 
-    TODO
+    xhprof_output_dir: /var/tmp/xhprof
+
+Directory where XHProf runs are stored.
 
 ## Dependencies
 
@@ -23,7 +25,7 @@ Available variables are listed below, along with default values (see `defaults/m
 
     - hosts: webservers
       roles:
-        - { role: geerlingguy.php-xdebug }
+        - { role: geerlingguy.php-xhprof }
 
 ## License
 

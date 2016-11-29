@@ -1,2 +1,7 @@
 ---
-php_xdebug_module_path: /usr/lib64/php/modules
+php_xhprof_lib_dir: /usr/share/pear/xhprof_lib
+php_xhprof_html_dir: /usr/share/pear/xhprof_html
+
+php_xhprof_config_filename: xhprof.ini
+php_xhprof_config_dirs:
+  - /etc/php.d

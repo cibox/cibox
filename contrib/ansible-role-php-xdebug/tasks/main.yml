@@ -2,15 +2,23 @@
 - name: Include OS-specific variables.
   include_vars: "{{ ansible_os_family }}.yml"
 
-- name: Download Xdebug.
-  get_url:
-    url: "https://github.com/xdebug/xdebug/archive/{{ php_xdebug_version }}.tar.gz"
-    dest: "{{ workspace }}"
+- name: Ensure dependencies for building from source are installed (RedHat).
+  yum: "name={{ item }} state=installed"
+  with_items:
+    - '@development'
+  when: ansible_os_family == 'RedHat'
+
+- name: Ensure dependencies for building from source are installed (Debian).
+  apt: "name={{ item }} state=installed"
+  with_items:
+    - build-essential
+  when: ansible_os_family == 'Debian'
 
 - name: Untar Xdebug.
-  command: >
-    tar -C {{ workspace }} -xvzf {{ workspace }}/xdebug-{{ php_xdebug_version }}.tar.gz
-    creates={{ workspace }}/xdebug-{{ php_xdebug_version }}/README
+  unarchive:
+    src: "https://xdebug.org/files/xdebug-{{ php_xdebug_version }}.tgz"
+    dest: "{{ workspace }}"
+    copy: no
 
 - name: Build Xdebug.
   shell: >
@@ -37,23 +45,4 @@
     creates={{ php_xdebug_module_path }}/xdebug.so
   notify: restart webserver
 
-- name: Copy xdebug INI into php.d folder.
-  template:
-    src: xdebug.ini.j2
-    dest: "{{ php_extension_conf_path }}/xdebug.ini"
-    owner: root
-    group: root
-    mode: 0644
-  notify: restart webserver
-
-- name: Check for separate cli php conf.d directory.
-  stat: path=/etc/php5/cli/conf.d
-  register: php_cli_path
-  when: php_xdebug_cli_enable
-
-- name: Symlink xdebug.ini into separate cli directory if it exists.
-  file:
-    src: "{{ php_extension_conf_path }}/xdebug.ini"
-    dest: /etc/php5/cli/conf.d/xdebug.ini
-    state: link
-  when: php_xdebug_cli_enable and php_cli_path.stat.isdir is defined and php_cli_path.stat.isdir
+- include: configure.yml

@@ -6,7 +6,7 @@ Installs PHP [XDebug](http://xdebug.org/) on Linux servers.
 
 ## Requirements
 
-None.
+Prior to running this role, make sure the `php-devel` and `@Development Tools` (for RHEL/CentOS) or `php5-dev` + `build-essential` packages (for Debian/Ubuntu) are present on the system, as they are required for the build of Xdebug.
 
 ## Role Variables
 
@@ -16,9 +16,9 @@ Available variables are listed below, along with default values (see `defaults/m
 
 Where Xdebug setup files will be downloaded and built.
 
-    php_xdebug_version: 2.2.4
+    php_xdebug_version: 2.4.1
 
-The version of Xdebug to be installed (see [Xdebug docs](http://xdebug.org/docs/install) for a current listing).
+The version of Xdebug to be installed (see [Updates](https://xdebug.org/updates.php) for a current listing).
 
     php_xdebug_default_enable: 1
     php_xdebug_coverage_enable: 1
@@ -74,4 +74,4 @@ MIT / BSD
 
 ## Author Information
 
-This role was created in 2014 by [Jeff Geerling](http://jeffgeerling.com/), author of [Ansible for DevOps](http://ansiblefordevops.com/).
+This role was created in 2014 by [Jeff Geerling](http://www.jeffgeerling.com/), author of [Ansible for DevOps](https://www.ansiblefordevops.com/).
