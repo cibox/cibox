@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. ./requirements.sh
+
 export PYTHONUNBUFFERED=1
 
 # Get server IP from config.yml
