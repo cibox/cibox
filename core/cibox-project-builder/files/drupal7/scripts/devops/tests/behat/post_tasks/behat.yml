@@ -1,0 +1,6 @@
+---
+# File contains post tasks for behat tests.
+- name: Kill the Selenium process
+  sudo: yes
+  shell: kill `ps wuax | grep 'java -jar {{ selenium_jar_path }}' | grep -v grep | awk '{print $2}'`
+  when: behat_run_javascript_tests == 'yes'
