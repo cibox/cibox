@@ -22,7 +22,9 @@
   register: solr_tar
 
 - name: Download Solr with Jetty
-  get_url: dest=/opt url=http://archive.apache.org/dist/lucene/solr/{{ jetty_solr_version }}/solr-{{ jetty_solr_version }}.tgz timeout=1000
+  get_url: dest=/opt url=http://archive.apache.org/dist/lucene/solr/{{ jetty_solr_version }}/solr-{{ jetty_solr_version }}.tgz
+  async: 3000
+  poll: 20
   when: solr_tar.stat.exists == false
 
 - name: Unarchive downloaded Solr

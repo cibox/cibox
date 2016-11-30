@@ -9,9 +9,10 @@
 
 # Download Jenkins package
 - name: Download Jenkins deb
-  get_url: url={{ jenkins_pkg_version }} dest=~/jenkins.deb mode=440 timeout=1000
+  get_url: url={{ jenkins_pkg_version }} dest=~/jenkins.deb mode=440
+  async: 3000
+  poll: 20
   sudo: yes
-
 
 # Install Jenkins
 - name: Install Jenkins
