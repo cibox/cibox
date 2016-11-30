@@ -3,6 +3,7 @@
 apt_repos:
   - ppa:ansible/ansible
   - ppa:duggan/jo
+  - ppa:ondrej/php
 
 apt_packages:
   - { name: "imagemagick", status: true }
@@ -40,7 +41,7 @@ pip_packages:
   - jinja2
   - markupsafe
   - MySQL-python
-  - ansible==1.9.4
+  - ansible
   - virtualenv
   - cffi
   - cryptography

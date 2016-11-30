@@ -31,7 +31,7 @@
 - name: Install apt repos
   sudo: yes
   apt_repository: repo={{ item }} validate_certs=no
-  with_items: apt_repos
+  with_items: "{{ apt_repos }}"
 
 - name: Update apt
   apt: update_cache=yes
@@ -49,7 +49,7 @@
 - name: Install Pip packages
   pip: name={{ item }} state=present
   sudo: yes
-  with_items: pip_packages
+  with_items: "{{ pip_packages }}"
 
 - name: Remove premature repository from php role
   sudo: yes
