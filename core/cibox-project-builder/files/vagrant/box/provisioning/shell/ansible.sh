@@ -34,6 +34,6 @@ echo "Installing required python modules."
 pip install paramiko pyyaml jinja2 markupsafe MySQL-python
 
 echo "Installing Ansible."
-pip install ansible==2.2.0
+pip install --upgrade ansible==2.2.0
 
 echo 'Finished installing ansible'

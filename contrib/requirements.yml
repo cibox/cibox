@@ -35,7 +35,7 @@
   path: contrib
 
 - src: https://github.com/geerlingguy/ansible-role-php-xhprof
-  version: 1.1.1
+  version: 2.1.0
   path: contrib
 
 - src: https://github.com/angstwad/docker.ubuntu

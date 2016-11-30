@@ -1,2 +1,7 @@
 ---
+workspace: /root
+
 xhprof_output_dir: /var/tmp/xhprof
+
+php_xhprof_lib_dir: /usr/share/php/xhprof_lib
+php_xhprof_html_dir: /usr/share/php/xhprof_html

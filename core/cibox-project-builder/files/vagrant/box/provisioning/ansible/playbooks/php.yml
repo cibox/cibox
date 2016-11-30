@@ -25,7 +25,7 @@
       - php-pear
       - php-apc
       - libapache2-mod-php5.6
-      - libpcre3-devtl
+      - libpcre3-dev
     php_use_managed_ini: true
     php_display_errors: On
     php_error_reporting: '-1'
@@ -43,8 +43,15 @@
     php_apc_enable_cli: "0"
     cibox_php_pcntl: no
 
+    php_xdebug_default_enable: '1'
+    php_xdebug_remote_connect_back: '1'
+    php_xdebug_remote_enable: '1'
+    php_xdebug_remote_port: '9000'
+    php_xdebug_max_nesting_level: 1000
+
   roles:
     - { role: '../core/facade-php' }
     - { role: '../core/facade-php-pear' }
     - { role: '../core/facade-php-xhprof' }
     - { role: '../core/cibox-php-pcntl' }
+    - { role: '../core/facade-php-xdebug' }

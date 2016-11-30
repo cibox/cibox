@@ -9,7 +9,6 @@ playbooks=(
 /vagrant/provisioning/ansible/playbooks/misc.yml \
 /vagrant/provisioning/ansible/playbooks/www.yml \
 /vagrant/provisioning/ansible/playbooks/php.yml \
-/vagrant/provisioning/ansible/playbooks/php-xdebug.yml \
 /vagrant/provisioning/ansible/playbooks/mysql.yml \
 /vagrant/provisioning/ansible/playbooks/memcached.yml \
 /vagrant/provisioning/ansible/playbooks/composer.yml \
