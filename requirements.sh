@@ -1,17 +1,22 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-# Determine whether ansible is installed or not.
-info="Please install ansible 1.9.*. Visit http://docs.cibox.tools/en/latest/Requirements for more information."
-is_ansible_installed=false
-ansible --version >/dev/null 2>&1 && { is_ansible_installed=true; }
-if [ "$is_ansible_installed" = false ]; then
-  echo ${info}
+help="Visit http://docs.cibox.tools/en/latest/Requirements for more information."
+ansible=$(which ansible)
+
+if [ -z ${ansible} ]; then
+  echo "Ansible not installed. Further interaction is not possible. ${help}"
   exit 1
 fi
 
-# If ansible is installed but version isn't 1.9.* then interrupt script execution.
-is_ansible_1_9=$(ansible --version | grep "1.9")
-if [ -z "$is_ansible_1_9" ]; then
-  echo "Current ansible version is not supported by CIBOX.\n"${info}
-  exit 1
+ansible_version_required="1.9.4"
+# Resulting output of "ansible --version" will be something like this:
+# ansible 2.1.2.0
+#   config file =
+#   configured module search path = Default w/o overrides
+# Use the second column from first row.
+ansible_version_current=$(${ansible} --version | head -1 | awk '{print $2}')
+
+if ! echo ${ansible_version_current} | grep ${ansible_version_required} >/dev/null; then
+  echo "You have installed Ansible ${ansible_version_current}, but CIBox requires ${ansible_version_required}. ${help}"
+  exit 2
 fi
