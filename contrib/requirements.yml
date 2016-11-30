@@ -19,7 +19,7 @@
   path: contrib
 
 - src: https://github.com/geerlingguy/ansible-role-mysql
-  version: 1.5.0
+  version: 2.4.2
   path: contrib
 
 - src: https://github.com/geerlingguy/ansible-role-php
