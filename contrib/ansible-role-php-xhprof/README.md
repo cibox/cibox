@@ -12,14 +12,25 @@ None.
 
 Available variables are listed below, along with default values (see `defaults/main.yml`):
 
+    workspace: /root
+
+Where XHProf setup files will be downloaded and built.
+
     xhprof_output_dir: /var/tmp/xhprof
 
 Directory where XHProf runs are stored.
 
+    php_xhprof_lib_dir: /usr/share/php/xhprof_lib
+
+Directory where the XHProf PHP library is stored.
+
+    php_xhprof_html_dir: /usr/share/php/xhprof_html
+
+Directory where the XHProf UI is stored.
+
 ## Dependencies
 
   - geerlingguy.php
-  - geerlingguy.php-pecl
 
 ## Example Playbook
 

@@ -1,9 +1,4 @@
 ---
-php_xhprof_lib_dir: /usr/share/php/xhprof_lib
-php_xhprof_html_dir: /usr/share/php/xhprof_html
+php_xhprof_module_path: /usr/lib/php5/modules
 
 php_xhprof_config_filename: 20-xhprof.ini
-php_xhprof_config_dirs:
-  - /etc/php5/apache2/conf.d
-  - /etc/php5/cli/conf.d
-  - /etc/php5/fpm/conf.d

@@ -1,6 +1,6 @@
 ---
 - name: "Install Drush with global Composer"
-  shell: "{{drush_composer_bin}} global require drush/drush:{{drush_composer_version}} --prefer-dist --no-interaction --no-ansi --no-plugins --no-scripts"
+  shell: "{{ drush_composer_env_variables }} {{drush_composer_bin}} global require drush/drush:{{drush_composer_version}} --prefer-dist --no-interaction --no-ansi --no-plugins --no-scripts"
   sudo_user: "{{ drush_composer_user }}"
 
 - name: Make drush src available globally
