@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 help="Visit http://docs.cibox.tools/en/latest/Requirements for more information."
 ansible=$(which ansible)
