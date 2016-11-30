@@ -33,6 +33,7 @@ apt_packages:
   - { name: "unattended-upgrades", status: true}
   # See https://github.com/jpmens/jo/blob/master/jo.md
   - { name: "jo", status: true}
+  - { name: "unzip", status: true}
 
 pip_packages:
   - setuptools
