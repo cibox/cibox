@@ -9,7 +9,7 @@ if [ -z ${ansible} ]; then
   exit 1
 fi
 
-ansible_version_required="1.9.4"
+ansible_version_required="2"
 # Resulting output of "ansible --version" will be something like this:
 # ansible 2.1.2.0
 #   config file =

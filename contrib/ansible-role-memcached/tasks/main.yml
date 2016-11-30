@@ -1,14 +1,27 @@
 ---
-- include: setup-RedHat.yml
-  when: ansible_os_family == 'RedHat'
+# Include variables and define needed variables.
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
 
-- include: setup-Debian.yml
+- name: Define memcached_user.
+  set_fact:
+    memcached_user: "{{ __memcached_user }}"
+  when: memcached_user is not defined
+
+# Setup/install tasks.
+- name: Update apt cache.
+  apt: update_cache=yes cache_valid_time=86400
   when: ansible_os_family == 'Debian'
 
+- name: Install Memcached.
+  package: name=memcached state=installed
+  register: memcached_install
+
+# Configure Memcached.
 - name: Copy Memcached configuration.
   template:
-    src: memcached.conf.j2
-    dest: /etc/memcached.conf
+    src: memcached-{{ ansible_os_family }}.conf.j2
+    dest: "{{ memcached_config_file }}"
     owner: root
     group: root
     mode: 0644

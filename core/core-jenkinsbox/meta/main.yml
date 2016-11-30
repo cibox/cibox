@@ -17,3 +17,5 @@ dependencies:
   - { role: '../core/cibox-behat-selenium2' }
   - { role: '../core/cibox-security' }
   - { role: '../core/facade-docker' }
+  - { role: '../core/facade-memcached' }
+

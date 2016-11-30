@@ -1,0 +1,14 @@
+---
+dependencies: []
+
+galaxy_info:
+  description: Install composer
+  license: Apache v2
+  min_ansible_version: 1.4
+  platforms:
+  - name: Ubuntu
+    versions:
+    - all
+  - name: Debian
+    versions:
+    - all
