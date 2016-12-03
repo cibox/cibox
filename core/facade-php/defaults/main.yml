@@ -1,6 +1,7 @@
 ---
 php_packages:
   - php5.6
+  - php5.6-apcu
   - php5.6-mcrypt
   - php5.6-cli
   - php5.6-common
@@ -12,9 +13,23 @@ php_packages:
   - php5.6-gd
   - php5.6-xml
   - php5.6-intl
-  - php-imagick
+#  - php-imagick
   - php-memcache
   - php-pear
-  - php-apc
+#  - php-apc
   - libapache2-mod-php5.6
   - libpcre3-dev
+
+php_conf_paths:
+  - /etc/php/5.6/fpm
+  - /etc/php/5.6/apache2
+  - /etc/php/5.6/cli
+
+php_extension_conf_paths:
+  - /etc/php/5.6/fpm/conf.d
+  - /etc/php/5.6/apache2/conf.d
+  - /etc/php/5.6/cli/conf.d
+
+php_fpm_daemon: php5.6-fpm
+php_fpm_conf_path: "/etc/php/5.6/fpm"
+php_fpm_pool_conf_path: "/etc/php/5.6/fpm/pool.d/www.conf"
