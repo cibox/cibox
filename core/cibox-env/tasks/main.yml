@@ -41,6 +41,8 @@
 - name: Install packages
   shell: apt-get -y install {{ apt_packages|selectattr('status', 'equalto', true)|map(attribute='name')|join(' ') }}
   sudo: yes
+  async: 3000
+  poll: 10
 
 - name: Install Pip
   shell: pip install --upgrade pip
