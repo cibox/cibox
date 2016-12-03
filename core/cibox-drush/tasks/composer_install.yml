@@ -4,7 +4,7 @@
   sudo_user: "{{ drush_composer_user }}"
 
 - name: "Check instalation path"
-  shell: "ls -la ~/.composer/vendor/drush"
+  shell: "ls -la {{ drush_composer_home }}/vendor/drush"
   sudo: yes
 
 - name: Make drush src available globally
