@@ -15,7 +15,7 @@ zlib.output_compression = Off
 implicit_flush = Off
 unserialize_callback_func =
 serialize_precision = 17
-disable_functions =
+disable_functions = {{ php_disable_functions|join(",") }}
 disable_classes =
 
 zend.enable_gc = On
@@ -89,7 +89,7 @@ max_file_uploads = 20
 ; Fopen wrappers ;
 ;;;;;;;;;;;;;;;;;;
 
-allow_url_fopen = On
+allow_url_fopen = {{ php_allow_url_fopen }}
 allow_url_include = Off
 
 default_socket_timeout = 60

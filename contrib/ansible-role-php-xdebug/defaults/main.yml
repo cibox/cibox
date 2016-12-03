@@ -1,5 +1,5 @@
 ---
-workspace: ./
+workspace: /root
 
 php_xdebug_version: 2.4.1
 

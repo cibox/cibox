@@ -1,6 +1,14 @@
 ---
-# Pass in a comma-separated list of repos to use (e.g. "remi,epel").
+# Pass in a comma-separated list of repos to use (e.g. "remi,epel"). Used only
+# for RHEL/CentOS.
 php_enablerepo: ""
+
+# PHP package state; use 'installed' to make sure it's installed, or 'latest' if
+# you want to upgrade or switch versions using a new repo.
+php_packages_state: installed
+
+# Whether to install recommended packages. Used only for Debian/Ubuntu.
+php_install_recommends: yes
 
 # Set this to false if you're not using PHP with Apache/Nginx/etc.
 php_enable_webserver: true
@@ -18,7 +26,7 @@ php_fpm_pm_max_spare_servers: 5
 php_executable: "php"
 
 # OpCache settings (useful for PHP >=5.5).
-php_opcache_enabled_in_ini: false
+php_opcache_zend_extension: "opcache.so"
 php_opcache_enable: "1"
 php_opcache_enable_cli: "0"
 php_opcache_memory_consumption: "96"
@@ -26,16 +34,14 @@ php_opcache_interned_strings_buffer: "16"
 php_opcache_max_accelerated_files: "4096"
 php_opcache_max_wasted_percentage: "5"
 php_opcache_validate_timestamps: "1"
+php_opcache_revalidate_path: "0"
 php_opcache_revalidate_freq: "2"
 php_opcache_max_file_size: "0"
 php_opcache_blacklist_filename: ""
 
-# APC settings (useful for PHP <5.5).
+# APCu settings.
 php_enable_apc: true
-php_apc_enabled_in_ini: false
-php_apc_cache_by_default: "1"
 php_apc_shm_size: "96M"
-php_apc_stat: "1"
 php_apc_enable_cli: "0"
 
 # If this is set to false, none of the following options will have any effect.
@@ -51,10 +57,12 @@ php_realpath_cache_size: "32K"
 php_upload_max_filesize: "64M"
 php_post_max_size: "32M"
 php_date_timezone: "America/Chicago"
+php_allow_url_fopen: "On"
 
 php_sendmail_path: "/usr/sbin/sendmail -t -i"
 php_output_buffering: "4096"
 php_short_open_tag: false
+php_disable_functions: []
 
 php_session_cookie_lifetime: 0
 php_session_gc_probability: 1
@@ -71,6 +79,7 @@ php_display_startup_errors: "Off"
 php_install_from_source: false
 php_source_version: "master"
 php_source_clone_dir: "~/php-src"
+php_source_clone_depth: 1
 php_source_install_path: "/opt/php"
 php_source_install_gmp_path: "/usr/include/x86_64-linux-gnu/gmp.h"
 # For faster compile time: "make --jobs=X" where X is # of cores present.
