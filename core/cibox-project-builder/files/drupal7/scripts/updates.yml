@@ -1,0 +1,26 @@
+---
+# This playbook should be executed using ansible-playbook command
+# Developed for ansible version >= 1.7
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    # this variable will be overridden from jenkins.
+    workspace_root: .
+    artifacts_file: commentinfo.md
+    build_reports_dir: build_reports
+    base_url: http://drupal.192.168.56.132.xip.io # WITHOUT TRAILING SLASH
+    search_regular_expression: 'Proposed version|SECURITY UPDATE'
+    report_file: 'SecurityUpdatesReport.txt'
+
+  tasks:
+    - name: Create directory for build reports
+      sudo: yes
+      file: path={{ build_reports_dir }} state=directory mode=0777
+
+    - name: Check security updates
+      shell: "drush pm-updatestatus --security-only | grep -E '{{ search_regular_expression }}' > {{ build_reports_dir }}/{{ report_file }} || true"
+
+    - name: Security updates report build
+      shell: 'if grep -E "{{ search_regular_expression }}" {{ build_reports_dir }}/{{ report_file }}; then echo "Security updates are available: {{ base_url }}/{{ build_reports_dir }}/{{ report_file }}" >> {{ workspace_root }}/{{ artifacts_file }}; fi;'
