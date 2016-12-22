@@ -259,6 +259,39 @@
         </org.jenkinsci.plugins.ansible.ExtraVar>
       </extraVars>
     </org.jenkinsci.plugins.ansible.AnsiblePlaybookBuilder>
+        <org.jenkinsci.plugins.ansible.AnsiblePlaybookBuilder plugin="ansible@0.5">
+          <playbook>/var/www/build${BUILD_NUMBER}/htmlsniffer.yml</playbook>
+          <limit></limit>
+          <tags></tags>
+          <skippedTags></skippedTags>
+          <startAtTask></startAtTask>
+          <credentialsId></credentialsId>
+          <sudo>false</sudo>
+          <sudoUser></sudoUser>
+          <forks>5</forks>
+          <unbufferedOutput>true</unbufferedOutput>
+          <colorizedOutput>true</colorizedOutput>
+          <hostKeyChecking>false</hostKeyChecking>
+          <additionalParameters>-vvvv -i &apos;localhost,&apos; --connection=local</additionalParameters>
+          <copyCredentialsInWorkspace>false</copyCredentialsInWorkspace>
+          <extraVars>
+            <org.jenkinsci.plugins.ansible.ExtraVar>
+              <key>workspace_root</key>
+              <value>${WORKSPACE}</value>
+              <hidden>false</hidden>
+            </org.jenkinsci.plugins.ansible.ExtraVar>
+            <org.jenkinsci.plugins.ansible.ExtraVar>
+              <key>webroot</key>
+              <value>http://{{ jenkins_server_ip }}/build${BUILD_NUMBER}</value>
+              <hidden>false</hidden>
+            </org.jenkinsci.plugins.ansible.ExtraVar>
+            <org.jenkinsci.plugins.ansible.ExtraVar>
+              <key>htmlcs_path</key>
+              <value>/var/www/build${BUILD_NUMBER}/devops/HTML_CodeSniffer/Contrib/PhantomJS/HTMLCS_Run.js</value>
+              <hidden>false</hidden>
+            </org.jenkinsci.plugins.ansible.ExtraVar>
+          </extraVars>
+        </org.jenkinsci.plugins.ansible.AnsiblePlaybookBuilder>
     <org.jenkinsci.plugins.ansible.AnsiblePlaybookBuilder plugin="ansible@0.5">
       <playbook>/var/www/build${BUILD_NUMBER}/tests.yml</playbook>
       <limit></limit>
