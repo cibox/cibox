@@ -79,3 +79,7 @@
 - name: Updating database
   sudo: yes
   shell: "{{ php_env_vars }} drush -dvy updb -l {{ site_url }}"
+
+- name: Revert features
+  shell: "{{ php_env_vars }} drush -y fra"
+  when: sql_workflow_features_revert_all
