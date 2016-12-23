@@ -13,31 +13,31 @@
 
 - name: Ensure that xvfb is run
   service: name=xvfb state=started
-  when: behat_run_javascript_tests == 'yes'
+  when: run_javascript_tests == 'yes'
 
 - name: Export display and enable Chrome
   shell: firefox & # Add exclusion for firefox
   environment:
     DISPLAY: ':99'
-  when: behat_run_javascript_tests == 'yes'
+  when: run_javascript_tests == 'yes'
 
 - name: Run Selenium standalone with Chrome
   sudo: yes
   shell: java -jar {{ selenium_jar_path }} -log selenium.log -Dwebdriver.chrome.driver={{ chrome_driver_path }} &
   environment:
     DISPLAY: ':99'
-  when: behat_run_javascript_tests == 'yes' and browser == 'chrome'
+  when: run_javascript_tests == 'yes' and browser == 'chrome'
 
 - name: Run Selenium standalone with Firefox
   sudo: yes
   shell: java -jar {{ selenium_jar_path }} -log selenium.log &
   environment:
     DISPLAY: ':99'
-  when: behat_run_javascript_tests == 'yes' and browser == 'firefox'
+  when: run_javascript_tests == 'yes' and browser == 'firefox'
 
 - name: Wait until Selenium starts
   wait_for: port=4444 delay=10 host=127.0.0.1
-  when: behat_run_javascript_tests == 'yes'
+  when: run_javascript_tests == 'yes'
 
 - name: Create directory for build reports
   sudo: yes
@@ -48,9 +48,9 @@
   environment:
     DISPLAY: ':99'
   shell: 'echo "Behat tests: standard file {{ base_url }}/{{ build_reports_dir }}/report.html" >> {{ workspace_root }}/{{ artifacts_file }} && cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }}'
-  when: behat_run_javascript_tests == 'yes'
+  when: run_javascript_tests == 'yes'
 
 - name: Run headless Behat tests
   ignore_errors: yes
   shell: 'echo "Behat tests: standard file {{ base_url }}/{{ build_reports_dir }}/report.html" >> {{ workspace_root }}/{{ artifacts_file }} && cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }} --tags "~@javascript"'
-  when: behat_run_javascript_tests == 'no'
+  when: run_javascript_tests == 'no'
