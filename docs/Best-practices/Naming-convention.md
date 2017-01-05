@@ -34,6 +34,24 @@ Like
 
 ans so on.
 
+Naming Conventions
+CIBox naming conventions
+OpenY naming convention
+Features module naming
+openy_${entity_type|abbr}_${entity_bundle|abbr}_${feature|optional}
+Example: openy_node_blog_feature
+openy_prgf_sc_feature -> OpenY Paragraph Simple Content (name within yml)
+Fields naming (<=20 chars)
+field_${entity_type|abbr}_${entity_bundle|abbr}_{name|abbr}
+Example: field_prgf_sc_body
+All descriptions mandatory!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Modules naming. Depending to the context we should chose the name from below list
+${project_name|abbr}_${business_name|abbr} - when the code looks like legacy and has specifics not ready to be open source
+openy_${business_name|abbr} - when the code is ready to be ejected to OpenY package
+${business_name} - when the code is so abstract that it has no tying to OpenY, and ready to be hosted on Drupal.org as independet project.
+
+
+
 Rules
 =====
 
