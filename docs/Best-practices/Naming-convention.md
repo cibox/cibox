@@ -34,21 +34,36 @@ Like
 
 ans so on.
 
-Naming Conventions
-CIBox naming conventions
-OpenY naming convention
-Features module naming
-openy_${entity_type|abbr}_${entity_bundle|abbr}_${feature|optional}
-Example: openy_node_blog_feature
-openy_prgf_sc_feature -> OpenY Paragraph Simple Content (name within yml)
-Fields naming (<=20 chars)
-field_${entity_type|abbr}_${entity_bundle|abbr}_{name|abbr}
-Example: field_prgf_sc_body
-All descriptions mandatory!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-Modules naming. Depending to the context we should chose the name from below list
-${project_name|abbr}_${business_name|abbr} - when the code looks like legacy and has specifics not ready to be open source
-openy_${business_name|abbr} - when the code is ready to be ejected to OpenY package
-${business_name} - when the code is so abstract that it has no tying to OpenY, and ready to be hosted on Drupal.org as independet project.
+# Naming Conventions
+
+1. [CIBox naming conventions](https://github.com/cibox/cibox/blob/master/docs/Best-practices/Naming-convention.md)
+
+2. OpenY naming convention
+
+    1. Features module naming
+
+        1. **openy_${entity_type|abbr}_${entity_bundle|abbr}_${feature|optional}**
+
+            1. Example: **openy_node_blog_feature**
+
+            2. **openy_prgf_sc_feature** -> OpenY Paragraph Simple Content (name within yml)
+
+    2. Fields naming (<=20 chars)
+
+        2. **field_${entity_type|abbr}_${entity_bundle|abbr}_{name|abbr}**
+
+            3. Example: **field_prgf_sc_body**
+
+    3. **All descriptions mandatory!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!**
+
+3. Modules naming. Depending to the context we should chose the name from below list
+
+    4. **${project_name|abbr}_${business_name|abbr**} - when the code looks like legacy and has specifics not ready to be open source
+
+    5. **openy_${business_name|abbr} **- when the code is ready to be ejected to OpenY package
+
+    6. **${business_name}** - when the code is so abstract that it has no tying to OpenY, and ready to be hosted on Drupal.org as independet project.
+
 
 
 
