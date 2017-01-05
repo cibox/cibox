@@ -1,7 +1,7 @@
 ---
 - name: Recover from possible fail
   sudo: yes
-  shell: 'dpkg --configure -a'
+  shell: 'dpkg --configure -a --force-confdef --force-confold'
   ignore_errors: yes
 
 - name: Update apt cache
@@ -31,7 +31,7 @@
 - name: Install apt repos
   sudo: yes
   apt_repository: repo={{ item }} validate_certs=no
-  with_items: apt_repos
+  with_items: "{{ apt_repos }}"
 
 - name: Update apt
   apt: update_cache=yes
@@ -41,15 +41,17 @@
 - name: Install packages
   shell: apt-get -y install {{ apt_packages|selectattr('status', 'equalto', true)|map(attribute='name')|join(' ') }}
   sudo: yes
+  async: 3000
+  poll: 10
 
 - name: Install Pip
   shell: pip install --upgrade pip
   sudo: yes
 
 - name: Install Pip packages
-  pip: name={{ item }} state=present
+  pip: name={{ item }} state=present extra_args="--upgrade"
   sudo: yes
-  with_items: pip_packages
+  with_items: "{{ pip_packages }}"
 
 - name: Remove premature repository from php role
   sudo: yes

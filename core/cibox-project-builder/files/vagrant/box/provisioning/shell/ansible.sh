@@ -21,10 +21,12 @@ echo "Installing pip via easy_install."
 sudo apt-get -y --force-yes install unzip python-pip python-dev build-essential libffi-dev libssl-dev
 
 sudo pip install --upgrade pip 
-sudo pip install --upgrade virtualenv 
-sudo pip install --upgrade pip
+sudo pip install --upgrade virtualenv
 sudo pip install --upgrade cffi 
 sudo pip install --upgrade cryptography
+sudo pip install --upgrade ndg-httpsclient
+sudo pip install --upgrade pypi
+
 # Make sure setuptools are installed correctly.
 pip install setuptools --no-use-wheel --upgrade
 
@@ -32,6 +34,6 @@ echo "Installing required python modules."
 pip install paramiko pyyaml jinja2 markupsafe MySQL-python
 
 echo "Installing Ansible."
-pip install ansible==1.9.4
+pip install --upgrade ansible==2.2.0
 
 echo 'Finished installing ansible'

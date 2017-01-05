@@ -1,10 +1,14 @@
 ---
 - name: "Install Drush with global Composer"
-  shell: "{{drush_composer_bin}} global require drush/drush:{{drush_composer_version}} --no-interaction --no-ansi"
+  shell: "{{ drush_composer_env_variables }} {{drush_composer_bin}} global require drush/drush:{{drush_composer_version}} --prefer-dist --no-interaction --no-ansi --no-plugins --no-scripts"
   sudo_user: "{{ drush_composer_user }}"
 
+- name: "Check instalation path"
+  shell: "ls -la {{ drush_composer_home }}/vendor/drush"
+  sudo: yes
+
 - name: Make drush src available globally
-  shell: "rsync -avz --delete /root/.composer/vendor/drush/drush/ /usr/local/src/drush"
+  shell: "rsync -avz --delete ~/.composer/vendor/drush/drush/ /usr/local/src/drush"
   sudo: yes
 
 - name: Adding global link to drush binary
@@ -17,7 +21,9 @@
 
 - name: Update all composer dependencies
   sudo: yes
-  command: "{{drush_composer_bin}} update"
+  command: "{{drush_composer_bin}} update --prefer-dist --no-plugins --no-scripts"
+  async: 3000
+  poll: 20
   args:
     chdir: /usr/local/src/drush
 

@@ -1,3 +1,0 @@
----
-- name: Ensure GraphViz is installed.
-  apt: pkg=graphviz state=installed

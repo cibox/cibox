@@ -1,3 +1,0 @@
----
-- name: Ensure GraphViz is installed.
-  yum: pkg=graphviz state=installed

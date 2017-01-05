@@ -2,7 +2,7 @@ default:
   formatters:
     pretty: true
     html:
-      output_path: {{ behat_drupal_root }}/build_reports
+      output_path: {{ drupal_root }}/build_reports
   suites:
     default:
       contexts:
@@ -14,6 +14,8 @@ default:
   extensions:
     emuse\BehatHTMLFormatter\BehatHTMLFormatterExtension:
       name: html
+      renderer: Twig,Behat2
+      file_name: report
     Behat\MinkExtension:
       goutte:
         guzzle_parameters:
@@ -24,7 +26,7 @@ default:
       selenium2:
         wd_host: {{ selenium_url }}
         #browser: {{ browser }}
-      base_url: {{ behat_base_url }}
+      base_url: {{ base_url }}
       files_path: {{ resources_path }}
     Drupal\DrupalExtension:
       blackbox: ~
@@ -32,7 +34,7 @@ default:
       drush:
         alias: 'local'
       drupal:
-        drupal_root: {{ behat_drupal_root }}
+        drupal_root: {{ drupal_root }}
       text:
         log_in: Log in
         log_out: Log out

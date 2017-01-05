@@ -15,6 +15,7 @@
     url: http://updates.drupal.org/release-history/drupal/{{ drupal_version }}.x
     dest: /tmp/drupal_update.xml
     force: yes
+    timeout: 1000
 
 - name: Extract current release
   shell: cat /tmp/drupal_update.xml | grep -E '<version>.*</version>' | head -1 | awk -F">" '{print $2}' | awk -F"<" '{print $1}'
@@ -25,6 +26,7 @@
     url: https://ftp.drupal.org/files/projects/drupal-{{ drupal_release.stdout }}.tar.gz
     dest: /tmp/drupal_latest.tar.gz
     force: yes
+    timeout: 1000
 
 - name: Creating temporary directory
   file:
@@ -81,14 +83,14 @@
     path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/{{ item }}'
     state: directory
   ignore_errors: yes
-  with_items: 'drupal_placeholders.drupal{{ drupal_version }}'
+  with_items: "{{ drupal_placeholders ['drupal%d' % drupal_version] }}"
 
 - name: Create empty readme files for placeholders
   file:
     path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/{{ item }}/readme.txt'
     state: touch
     force: yes
-  with_items: 'drupal_placeholders.drupal{{ drupal_version }}'
+  with_items: "{{ drupal_placeholders ['drupal%d' % drupal_version] }}"
 
 - name: Restrict access to YAML files
   lineinfile:

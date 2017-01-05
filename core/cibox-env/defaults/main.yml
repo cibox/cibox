@@ -3,6 +3,7 @@
 apt_repos:
   - ppa:ansible/ansible
   - ppa:duggan/jo
+  - ppa:ondrej/php
 
 apt_packages:
   - { name: "imagemagick", status: true }
@@ -32,16 +33,18 @@ apt_packages:
   - { name: "unattended-upgrades", status: true}
   # See https://github.com/jpmens/jo/blob/master/jo.md
   - { name: "jo", status: true}
+  - { name: "unzip", status: true}
   - { name: "phantomjs", status: true}
 
 pip_packages:
+  - ndg-httpsclient
   - setuptools
   - paramiko
   - pyyaml
   - jinja2
   - markupsafe
   - MySQL-python
-  - ansible==1.9.4
+  - ansible==2.2.0
   - virtualenv
   - cffi
   - cryptography

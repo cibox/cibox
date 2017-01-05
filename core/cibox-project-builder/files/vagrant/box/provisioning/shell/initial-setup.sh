@@ -5,7 +5,7 @@ export "DEBIAN_FRONTEND=noninteractive"
 # Making a world a bit more perfect in order to continue provision due to possible locks...
 sudo killall apt-get
 sudo killall dpkg
-sudo dpkg --configure -a
+sudo dpkg --configure -a --force-confdef --force-confold
 
 # CIBox ad.
 cat "${VAGRANT_CORE_FOLDER}/shell/self-promotion.txt"

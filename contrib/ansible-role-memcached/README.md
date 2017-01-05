@@ -30,6 +30,10 @@ Memcached limits. The maximum amount of RAM `memcached` will consume (64MB is th
 
 The location of the memcached log file.
 
+    memcached_log_verbosity: ""
+
+Normally memcached does not log anything. Change to "-v" to enable logging or to "-vv" for debug logging.
+
 ## Dependencies
 
 None.
@@ -46,4 +50,4 @@ MIT / BSD
 
 ## Author Information
 
-This role was created in 2014 by [Jeff Geerling](http://jeffgeerling.com/), author of [Ansible for DevOps](http://ansiblefordevops.com/).
+This role was created in 2014 by [Jeff Geerling](http://www.jeffgeerling.com/), author of [Ansible for DevOps](https://www.ansiblefordevops.com/).

@@ -4,6 +4,8 @@ drush_install_mode: composer
 drush_composer_bin: /usr/local/bin/composer
 drush_composer_version: 8.1.2
 drush_composer_user: root
+drush_composer_home: "~/.composer"
+drush_composer_env_variables: 'COMPOSER_HOME="{{ drush_composer_home }}"'
 
 drush_git_repo: https://github.com/drush-ops/drush.git
 drush_git_version: 8.1.2

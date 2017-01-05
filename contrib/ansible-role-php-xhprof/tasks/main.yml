@@ -3,31 +3,63 @@
   include_vars: "{{ ansible_os_family }}.yml"
 
 # Setup/install tasks.
-- include: setup-RedHat.yml
-  when: ansible_os_family == 'RedHat'
-
-- include: setup-Debian.yml
-  when: ansible_os_family == 'Debian'
-
-# Install and configure XHProf.
-- name: Install XHProf using PECL.
-  command: "pecl install {{ item }}"
-  register: pecl_result
-  changed_when: "pecl_result.rc == 0"
-  failed_when: "not (('already installed' in pecl_result.stdout) or ('install ok:' in pecl_result.stdout))"
+- name: Ensure dependencies for installing XHProf are present.
+  package: "name={{ item }} state=installed"
   with_items:
-    # Manual channel installation required for certain PEAR versions.
-    - "channel://pecl.php.net/xhprof-0.9.4"
-    - xhprof
+    - make
+    - gcc
+    - unzip
+    - graphviz
 
-- name: Copy XHProf INI into php.d folder.
-  template:
-    src: xhprof.ini.j2
-    dest: "{{ php_extension_conf_path }}/xhprof.ini"
+# Hack of contrib role, see https://github.com/ansible/ansible-modules-core/issues/4269 for more details.
+- name: Download XHProf.
+  shell: "wget {{ xhprof_download_url }} -P {{ workspace }}/xhprof"
+#  get_url:
+#    url: "{{ xhprof_download_url }}"
+#    dest: "{{ workspace }}/xhprof-master.tar.gz"
+
+- name: untar XHProf.
+  unarchive:
+    src: "{{ workspace }}/xhprof/master.tar.gz"
+    dest: "{{ workspace }}"
+    copy: no
+
+- name: Build XHProf.
+  shell: >
+    {{ item }}
+    chdir={{ workspace }}/{{ xhprof_download_folder_name }}/extension
+    creates={{ workspace }}/{{ xhprof_download_folder_name }}/extension/modules/xhprof.so
+  with_items:
+    - phpize
+    - ./configure
+    - make
+  notify: restart webserver
+
+- name: Ensure XHProf module path exists.
+  file:
+    path: "{{ php_xhprof_module_path }}"
+    state: directory
     owner: root
     group: root
-    mode: 0644
+    mode: 0755
+
+- name: Move XHProf module into place.
+  shell: >
+    cp {{ workspace }}/{{ xhprof_download_folder_name }}/extension/modules/xhprof.so {{ php_xhprof_module_path }}/xhprof.so
+    creates={{ php_xhprof_module_path }}/xhprof.so
   notify: restart webserver
+
+- name: Move XHProf PHP library into place.
+  shell: >
+    cp -r {{ workspace }}/{{ xhprof_download_folder_name }}/xhprof_lib {{ php_xhprof_lib_dir }}
+    creates={{ php_xhprof_lib_dir }}/utils/xhprof_lib.php
+
+- name: Move XHProf UI into place.
+  shell: >
+    cp -r {{ workspace }}/{{ xhprof_download_folder_name }}/xhprof_html {{ php_xhprof_html_dir }}
+    creates={{ php_xhprof_html_dir }}/index.php
+
+- include: configure.yml
 
 - name: Ensure XHProf output directory exists.
   file:

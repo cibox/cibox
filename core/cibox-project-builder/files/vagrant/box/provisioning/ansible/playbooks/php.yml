@@ -8,21 +8,28 @@
 
   vars:
     php_packages:
-      - php5-cli
-      - php5-curl
-      - php5-gd
-      - php5-intl
-      - php5-mcrypt
-      - php5-memcache
-      - php5-imagick
-      - php5-mysql
+      - php5.6
+      - php5.6-mcrypt
+      - php5.6-cli
+      - php5.6-common
+      - php5.6-curl
+      - php5.6-dev
+      - php5.6-fpm
+      - php5.6-mbstring
+      - php5.6-mysql
+      - php5.6-gd
+      - php5.6-xml
+      - php5.6-intl
+      - php-imagick
+      - php-memcache
+      - php-pear
       - php-apc
-      - libapache2-mod-php5
-      - php5-dev
+      - libapache2-mod-php5.6
+      - libpcre3-dev
     php_use_managed_ini: true
     php_display_errors: On
     php_error_reporting: '-1'
-    php_session.save_path: /var/lib/php/session
+    php_session_save_path: /var/lib/php/session
     php_max_execution_time: '300'
     php_memory_limit: 1024M
     php_post_max_size: 64M
@@ -36,8 +43,15 @@
     php_apc_enable_cli: "0"
     cibox_php_pcntl: no
 
+    php_xdebug_default_enable: '1'
+    php_xdebug_remote_connect_back: '1'
+    php_xdebug_remote_enable: '1'
+    php_xdebug_remote_port: '9000'
+    php_xdebug_max_nesting_level: 1000
+
   roles:
     - { role: '../core/facade-php' }
     - { role: '../core/facade-php-pear' }
     - { role: '../core/facade-php-xhprof' }
     - { role: '../core/cibox-php-pcntl' }
+    - { role: '../core/facade-php-xdebug' }

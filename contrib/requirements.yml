@@ -1,9 +1,43 @@
 ---
 # In order to install/update contrib module, run followign command from root of project:
-#        ansible-galaxy install -n -f -r contrib/requirements.yml
+#        ansible-galaxy install -n -f -r contrib/requirements.yml --roles-path contrib
 #
 # Contrib requirements list.
 #
+- src: https://github.com/cibox/ansible-composer
+  path: contrib
+
+- src: https://github.com/cibox/ansible-php-pear
+  path: contrib
+
+- src: https://github.com/geerlingguy/ansible-role-apache
+  version: 1.7.4
+  path: contrib
+
+- src: https://github.com/geerlingguy/ansible-role-memcached
+  version: 1.0.7
+  path: contrib
+
+- src: https://github.com/geerlingguy/ansible-role-mysql
+  version: 2.4.2
+  path: contrib
+
+- src: https://github.com/geerlingguy/ansible-role-php
+  version: 3.4.2
+  path: contrib
+
+- src: https://github.com/geerlingguy/ansible-role-php-pecl
+  version: 1.3.0
+  path: contrib
+
+- src: https://github.com/geerlingguy/ansible-role-php-xdebug
+  version: 2.1.1
+  path: contrib
+
+- src: https://github.com/geerlingguy/ansible-role-php-xhprof
+  version: 2.1.3
+  path: contrib
+
 - src: https://github.com/angstwad/docker.ubuntu
   version: v1.1.8
   path: contrib

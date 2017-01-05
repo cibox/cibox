@@ -3,4 +3,6 @@
 - name: Install dependencies
   sudo: yes
   action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=installed"
-  with_items: jenkins.deb.dependencies
+  with_items: "{{ jenkins.deb.dependencies }}"
+  async: 3000
+  poll: 20
