@@ -73,3 +73,12 @@
 - name: Updating database
   sudo: yes
   shell: "{{ php_env_vars }} drush -dvy updb -l {{ site_url }}"
+  register: updates
+
+- name: Apply pending entity schema updates
+  sudo: yes
+  shell: "{{ php_env_vars }} drush -y entup -l {{ site_url }}"
+
+# Display updates output.
+- name: Updates listing
+  debug: var=updates.stdout_lines
