@@ -39,4 +39,4 @@ location /ghprbhook {
    }
 ```
 
-Add this to your vhosts confogiration.
+Add this to your vhosts configuration.
