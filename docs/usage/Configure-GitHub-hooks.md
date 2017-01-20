@@ -20,3 +20,23 @@ Once you've done step 1 and 2, create new PR or write "retest this please" in al
 
 Also make sure that in repository settings "*/ghprbhook/" endpoint has been added automatically.
 ![](https://cloud.githubusercontent.com/assets/1316234/18311164/83cb3e78-750b-11e6-991b-d9eca7285a06.png)
+
+### 4. Set nGinx to avoid of htpasswd protection
+
+In caseif you have nginx in front of the Jenkins for security reason, there is a need to skip htpasswd protection for webhooks url
+
+```nginx
+location /ghprbhook {
+       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       proxy_set_header Host $http_host;
+       proxy_redirect off;
+       add_header Pragma "no-cache";
+
+       if (!-f $request_filename) {
+           proxy_pass http://app_server;
+           break;
+       }
+   }
+```
+
+Add this to your vhosts configuration.
