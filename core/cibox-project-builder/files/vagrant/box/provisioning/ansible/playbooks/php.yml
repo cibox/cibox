@@ -8,17 +8,16 @@
 
   vars:
     php_packages:
-      - php5-cli
-      - php5-curl
-      - php5-gd
-      - php5-intl
-      - php5-mcrypt
-      - php5-memcache
-      - php5-imagick
-      - php5-mysql
-      - php-apc
-      - libapache2-mod-php5
-      - php5-dev
+      - php5.6-cli
+      - php5.6-curl
+      - php5.6-gd
+      - php5.6-intl
+      - php5.6-mcrypt
+      - php5.6-memcache
+      - php5.6-imagick
+      - php5.6-mysql
+      - libapache2-mod-php5.6
+      - php5.6-dev
     php_use_managed_ini: true
     php_display_errors: On
     php_error_reporting: '-1'
