@@ -12,6 +12,7 @@ __php_packages:
   - php5.6-mysql
   - php5.6-memcached
   - php5.6-imagick
+  - php5.6-xml
   - libapache2-mod-php5.6
   - php-yaml
   - php-mysql
