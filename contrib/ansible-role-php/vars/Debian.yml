@@ -17,6 +17,8 @@ __php_packages:
   - php-yaml
   - php-mysql
   - php-gd
+  - php-mbstring
+  - php5.6-mbstring
 __php_webserver_daemon: "apache2"
 
 # Vendor-specific configuration paths on Debian/Ubuntu make my brain asplode.
