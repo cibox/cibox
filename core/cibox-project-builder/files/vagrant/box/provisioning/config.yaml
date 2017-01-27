@@ -13,8 +13,8 @@ vagrantfile-local:
                     guest: '3306'
         provider:
             virtualbox:
-                box: 'Ubuntu_14_04__CIBox_VM_provisioned'
-                box_url: 'http://cici.ffwua.com/ubuntu14.04provisionedCIBox.box'
+                box: 'u14.04php5.6.box'
+                box_url: 'http://cici.ffwua.com/u14.04php5.6.box'
                 modifyvm:
                     natdnshostresolver1: on
                     memory: '2048'

@@ -1,21 +1,24 @@
 ---
 __php_packages:
-  - php5
-  - libapache2-mod-php5
-  - php5-mcrypt
-  - php5-cli
-  - php5-common
-  - php5-curl
-  - php5-dev
-  - php5-fpm
-  - php5-gd
-  - php-pear
-  - php-apc
+  - php5.6
+  - php5.6-mcrypt
+  - php5.6-cli
+  - php5.6-common
+  - php5.6-curl
+  - php5.6-dev
+  - php5.6-fpm
+  - php5.6-gd
   - libpcre3-dev
-  - php5-mysql
-  - php5-memcached
-  - php5-imagick
-  - libapache2-mod-php5
+  - php5.6-mysql
+  - php5.6-memcached
+  - php5.6-imagick
+  - php5.6-xml
+  - libapache2-mod-php5.6
+  - php-yaml
+  - php-mysql
+  - php-gd
+  - php-mbstring
+  - php5.6-mbstring
 __php_webserver_daemon: "apache2"
 
 # Vendor-specific configuration paths on Debian/Ubuntu make my brain asplode.
@@ -24,4 +27,4 @@ __php_cli_conf_path: '/etc/php5/cli'
 php_extension_conf_path: "/etc/php5/conf.d"
 
 php_apc_conf_filename: 20-apc.ini
-php_fpm_daemon: php5-fpm
+php_fpm_daemon: php5.6-fpm

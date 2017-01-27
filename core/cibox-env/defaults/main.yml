@@ -3,6 +3,9 @@
 apt_repos:
   - ppa:ansible/ansible
   - ppa:duggan/jo
+  # See https://github.com/oerdnj/deb.sury.org/wiki/PPA-migration-to-ppa:ondrej-php
+  - ppa:ondrej/php
+  - ppa:ondrej/php5-compat
 
 apt_packages:
   - { name: "imagemagick", status: true }
@@ -33,6 +36,7 @@ apt_packages:
   # See https://github.com/jpmens/jo/blob/master/jo.md
   - { name: "jo", status: true}
   - { name: "phantomjs", status: true}
+  - { name: "ppa-purge", status: true}
 
 pip_packages:
   - setuptools
