@@ -81,7 +81,7 @@ After this step you'll have an updated version of VM with
 source tree located within docroot folder.
 
 Repository builder enriches your docroot with super convenient
-scripts for rebuuilding your site, which are the logical core
+scripts for rebuilding your site, which are the logical core
 of the CIBox ideology itself. By using those scripts you can
 easily provision CI server and run CIBox's builds for your
 own project.
