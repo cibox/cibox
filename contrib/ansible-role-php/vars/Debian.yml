@@ -14,6 +14,8 @@ __php_packages:
   - php5.6-imagick
   - libapache2-mod-php5.6
   - php-yaml
+  - php-mysql
+  - php-gd
 __php_webserver_daemon: "apache2"
 
 # Vendor-specific configuration paths on Debian/Ubuntu make my brain asplode.
