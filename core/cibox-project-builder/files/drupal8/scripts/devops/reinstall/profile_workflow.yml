@@ -8,11 +8,6 @@
   shell: php -v
   register: installed_php_cli_version
 
-- name: Start the MySQL service
-  shell: service mysql start
-  sudo: yes
-  ignore_errors: true
-
 - name: Display php-cli version
   debug: msg={{ installed_php_cli_version.stdout_lines }}
 
