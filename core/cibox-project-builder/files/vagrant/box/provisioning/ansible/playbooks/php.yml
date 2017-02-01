@@ -10,6 +10,7 @@
     php_packages:
       - php5.6-cli
       - php5.6-curl
+      - php-curl
       - php5.6-gd
       - php5.6-intl
       - php5.6-mcrypt
