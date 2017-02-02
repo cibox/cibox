@@ -1,11 +1,14 @@
 #!/bin/bash
 
 VAGRANT_CORE_FOLDER=$(echo "$1")
-export "DEBIAN_FRONTEND=noninteractive"
+export DEBIAN_FRONTEND=noninteractive
+export PYTHONWARNINGS=ignore
+export PYTHONUNBUFFERED=1
+export ANSIBLE_FORCE_COLOR=true
 # Making a world a bit more perfect in order to continue provision due to possible locks...
-sudo killall apt-get
-sudo killall dpkg
-sudo dpkg --configure -a
+sudo killall apt-get 2> /dev/null
+sudo killall dpkg 2> /dev/null
+sudo dpkg --configure -a || true
 
 # CIBox ad.
 cat "${VAGRANT_CORE_FOLDER}/shell/self-promotion.txt"

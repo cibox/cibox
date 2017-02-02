@@ -4,8 +4,8 @@
     path: "{{ item }}"
     state: directory
   with_items:
-    - "{{ php_conf_path }}"
-    - "{{ php_extension_conf_path }}"
+    - php_conf_path
+    - php_extension_conf_path
 
 - name: Place PHP configuration file in place.
   template:
