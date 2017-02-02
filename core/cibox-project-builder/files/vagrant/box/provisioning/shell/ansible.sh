@@ -1,9 +1,10 @@
 #!/bin/bash
 
 echo 'Installing base packages for ansible'
-export "DEBIAN_FRONTEND=noninteractive"
-export "PYTHONWARNINGS=ignore"
-
+export DEBIAN_FRONTEND=noninteractive
+export PYTHONWARNINGS=ignore
+export PYTHONUNBUFFERED=1
+export ANSIBLE_FORCE_COLOR=true
 # ansible needs python version 2.7.9 to avoid SNIMissingWarning.
 # see http://urllib3.readthedocs.io/en/latest/security.html#snimissingwarning
 apt-get -y --force-yes install python 2.7.9
