@@ -19,6 +19,9 @@ __php_packages:
   - php-mysql
   - php-gd
   - php-mbstring
+  - php-pear
+  - php-dev
+  - php5.6-xdebug
   - php5.6-mbstring
 __php_webserver_daemon: "apache2"
 
