@@ -24,6 +24,7 @@ __php_packages:
   - php5.6-xdebug
   - php5.6-mbstring
   - php5.6-soap
+  - php-soap
 __php_webserver_daemon: "apache2"
 
 # Vendor-specific configuration paths on Debian/Ubuntu make my brain asplode.
