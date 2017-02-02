@@ -25,6 +25,9 @@
       - php5.6-xml
       - php-mbstring
       - php5.6-mbstring
+      - php-pear
+      - php-dev
+      - php5.6-xdebug
     php_use_managed_ini: true
     php_display_errors: On
     php_error_reporting: '-1'
