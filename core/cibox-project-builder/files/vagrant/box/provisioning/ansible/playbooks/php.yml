@@ -31,6 +31,7 @@
       - php5.6-soap
       - php-soap
       - php-xml
+      - php-xdebug
     php_use_managed_ini: true
     php_display_errors: On
     php_error_reporting: '-1'
