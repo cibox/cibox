@@ -1,12 +1,12 @@
 ---
 mysql_daemon: mysql
+mysql_version: 5.6
 mysql_config_file: /etc/mysql/my.cnf
 __mysql_packages:
-  - mysql-common
-  - mysql-client-5.5
-  - mysql-server
-  - mysql-server-5.5
-  - mysql-server-5.5
-  - mysql-server-core-5.5
+  - mysql-common-{{ mysql_version }}
+  - mysql-client-{{ mysql_version }}
+  - mysql-server-{{ mysql_version }}
+  - mysql-client-core-{{ mysql_version }}
+  - mysql-server-core-{{ mysql_version }}
   - python-mysqldb
 mysql_socket: /var/run/mysqld/mysqld.sock
