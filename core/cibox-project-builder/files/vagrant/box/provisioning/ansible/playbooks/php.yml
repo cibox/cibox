@@ -7,28 +7,29 @@
   sudo: yes
 
   vars:
+    php_version: 5.6
     php_packages:
-      - php5.6-cli
-      - php5.6-curl
-      - php-curl
-      - php5.6-gd
-      - php5.6-intl
-      - php5.6-mcrypt
-      - php5.6-memcache
-      - php5.6-imagick
-      - php5.6-mysql
-      - libapache2-mod-php5.6
-      - php5.6-dev
+      - php{{ php_version }}-cli
+      - php{{ php_version }}-curl
+      - php{{ php_version }}-gd
+      - php{{ php_version }}-intl
+      - php{{ php_version }}-mcrypt
+      - php{{ php_version }}-memcache
+      - php{{ php_version }}-imagick
+      - php{{ php_version }}-mysql
+      - php{{ php_version }}-xdebug
+      - php{{ php_version }}-soap
+      - php{{ php_version }}-mbstring
+      - php{{ php_version }}-xml
+      - php{{ php_version }}-dev
+      - libapache2-mod-php{{ php_version }}
       - php-mysql
+      - php-curl
       - php-gd
       - php-yaml
-      - php5.6-xml
       - php-mbstring
-      - php5.6-mbstring
       - php-pear
       - php-dev
-      - php5.6-xdebug
-      - php5.6-soap
       - php-soap
       - php-xml
       - php-xdebug
