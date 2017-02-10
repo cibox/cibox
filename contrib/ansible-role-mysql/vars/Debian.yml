@@ -3,7 +3,10 @@ mysql_daemon: mysql
 mysql_config_file: /etc/mysql/my.cnf
 __mysql_packages:
   - mysql-common
+  - mysql-client-5.5
   - mysql-server
   - mysql-server-5.5
+  - mysql-server-5.5
+  - mysql-server-core-5.5
   - python-mysqldb
 mysql_socket: /var/run/mysqld/mysqld.sock
