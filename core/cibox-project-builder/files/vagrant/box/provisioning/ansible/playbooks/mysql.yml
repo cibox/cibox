@@ -7,10 +7,9 @@
   sudo: yes
 
   vars:
-    mysql_version: 5.6
     mysql_packages:
-      - mysql-client-{{ mysql_version }}
-      - mysql-server-{{ mysql_version }}
+      - mysql-client
+      - mysql-server
     mysql_root_password: root
     mysql_enabled_on_startup: yes
 
