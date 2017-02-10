@@ -1,4 +1,4 @@
 ---
 php_xdebug_module_path: /usr/lib/php5/modules
-php_extension_conf_path: /etc/php5/conf.d
+php_extension_conf_path: /etc/php/{{ php_version }}/apache2/conf.d
 php_webserver_daemon: "apache2"
