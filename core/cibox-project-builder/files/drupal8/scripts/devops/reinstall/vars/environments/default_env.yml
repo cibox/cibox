@@ -5,7 +5,7 @@ env:
     - { name: '$config_directories["staging"]', status: false, value: 'sites/default/config/staging' }
     - { name: '$settings["install_profile"]', status: true, value: "{{ installation_profile_name }}" }
     - { name: '$settings["file_public_path"]', status: true, value: 'sites/default/files' }
-    - { name: '$config["system.file"]["path.temporary"]', status: true, value: '/tmp' }
+    - { name: '$config["system.file"]["path"]["temporary"]', status: true, value: '/tmp' }
   modules:
     - { name: 'devel config_inspector config_devel', status: false }
   drush_commands:
