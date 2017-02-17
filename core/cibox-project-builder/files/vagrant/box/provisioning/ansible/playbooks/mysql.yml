@@ -8,8 +8,8 @@
 
   vars:
     mysql_packages:
-      - mysql-server
       - mysql-client
+      - mysql-server
     mysql_root_password: root
     mysql_enabled_on_startup: yes
 
