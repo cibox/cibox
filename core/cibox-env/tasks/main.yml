@@ -9,7 +9,6 @@
   apt: update_cache=yes
   ignore_errors: yes
 
-# @todo should be tested with DO 14.04 Ubuntu.
 - name: Setup initial packages onto clean system for ansible
   sudo: yes
   # Installing sudo on small ubuntu install.
