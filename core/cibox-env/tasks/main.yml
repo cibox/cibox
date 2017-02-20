@@ -17,7 +17,7 @@
 
 - name: Fixing logger not found
   sudo: yes
-  shell: "apt-get --reinstall install -y bsdutils"
+  shell: "apt-get --reinstall install -y --force-yes bsdutils"
 
 # We have to disable mail sending from CI box.
 # Does not create a link if sendmail is installed.
