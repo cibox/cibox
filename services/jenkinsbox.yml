@@ -39,6 +39,9 @@
       - rewrite.load
       - ssl.load
 
+  environment:
+    PYTHONWARNINGS: ignore
+    
   pre_tasks:
     - name: Check if the playbook was executed with the runner
       fail:
