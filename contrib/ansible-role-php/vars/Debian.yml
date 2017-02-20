@@ -1,38 +1,39 @@
 ---
+php_version: 5.6
 __php_packages:
-  - php5.6
-  - php5.6-mcrypt
-  - php5.6-cli
-  - php5.6-common
-  - php5.6-curl
-  - php-curl
-  - php5.6-dev
-  - php5.6-fpm
-  - php5.6-gd
+  - php{{ php_version }}
+  - php{{ php_version }}-mcrypt
+  - php{{ php_version }}-cli
+  - php{{ php_version }}-common
+  - php{{ php_version }}-curl
+  - php{{ php_version }}-dev
+  - php{{ php_version }}-fpm
+  - php{{ php_version }}-gd
+  - php{{ php_version }}-mysql
+  - php{{ php_version }}-memcached
+  - php{{ php_version }}-imagick
+  - php{{ php_version }}-xml
+  - php{{ php_version }}-xdebug
+  - php{{ php_version }}-mbstring
+  - php{{ php_version }}-soap
   - libpcre3-dev
-  - php5.6-mysql
-  - php5.6-memcached
-  - php5.6-imagick
-  - php5.6-xml
-  - libapache2-mod-php5.6
+  - libapache2-mod-php{{ php_version }}
+  - php-curl
   - php-yaml
   - php-mysql
   - php-gd
   - php-mbstring
   - php-pear
   - php-dev
-  - php5.6-xdebug
-  - php5.6-mbstring
-  - php5.6-soap
   - php-soap
   - php-xml
   - php-xdebug
 __php_webserver_daemon: "apache2"
 
 # Vendor-specific configuration paths on Debian/Ubuntu make my brain asplode.
-__php_conf_path: "{{ '/etc/php5' if php_webserver_daemon and php_webserver_daemon != 'apache2' else '/etc/php5/apache2' }}"
-__php_cli_conf_path: '/etc/php5/cli'
-php_extension_conf_path: "/etc/php5/conf.d"
+__php_conf_path: "{{ '/etc/php/{{ php_version }}' if php_webserver_daemon and php_webserver_daemon != 'apache2' else '/etc/php/{{ php_version }}/apache2' }}"
+__php_cli_conf_path: '/etc/php/{{ php_version }}/cli'
+php_extension_conf_path: "/etc/php/{{ php_version }}/apache2/conf.d"
 
 php_apc_conf_filename: 20-apc.ini
-php_fpm_daemon: php5.6-fpm
+php_fpm_daemon: php{{ php_version }}-fpm
