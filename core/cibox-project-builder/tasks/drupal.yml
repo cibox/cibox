@@ -17,7 +17,7 @@
     force: yes
 
 - name: Extract current release
-  shell: cat /tmp/drupal_update.xml | grep -E '<version>.*</version>' | head -1 | awk -F">" '{print $2}' | awk -F"<" '{print $1}'
+  shell: "grep -oP '(?<=version>)[^<]+' /tmp/drupal_update.xml | head -2 | tail -1"
   register: drupal_release
 
 - name: Download Drupal to temporary directory
