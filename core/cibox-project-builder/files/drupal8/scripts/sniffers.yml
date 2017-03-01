@@ -19,9 +19,9 @@
     custom_themes_path: themes/custom
     features_path: modules/features
     phpcs_modules_ignore:
-      - themes/custom/nonstandard
+      - themes/custom/nonstandard, *.css
     phpcs_features_ignore:
-      - modules/features/nonstandard
+      - modules/features/nonstandard, *.css
     phpcs_features_ignore_path: modules/features,*.pages_default.inc,*.panelizer.inc,*.features.menu_custom.inc,*.features.webform.inc,*.features.filter.inc,*.strongarm.inc,*.fpp_content_declarations.inc,*.panels_default.inc
     composer_dir: /usr/share/composer
     phpcs_bin: /usr/bin/phpcs
