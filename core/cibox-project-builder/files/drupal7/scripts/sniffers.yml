@@ -21,9 +21,9 @@
     custom_themes_path: sites/all/themes/custom
     features_path: sites/all/modules/features
     phpcs_modules_ignore:
-      - sites/all/themes/custom/nonstandard
+      - sites/all/themes/custom/nonstandard, *.css
     phpcs_features_ignore:
-      - sites/all/features/nonstandard
+      - sites/all/features/nonstandard, *.css
     phpcs_features_ignore_path: sites/all/features,*.pages_default.inc,*.panelizer.inc,*.features.menu_custom.inc,*.features.webform.inc,*.features.filter.inc,*.strongarm.inc,*.fpp_content_declarations.inc,*.panels_default.inc
     composer_dir: /usr/share/composer
     phpcs_bin: /usr/bin/phpcs
