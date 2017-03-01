@@ -28,7 +28,7 @@ sudo PYTHONWARNINGS=ignore pip install --upgrade virtualenv
 sudo PYTHONWARNINGS=ignore pip install --upgrade pip
 sudo PYTHONWARNINGS=ignore pip install --upgrade cffi
 sudo PYTHONWARNINGS=ignore pip install --upgrade cryptography
-sudo PYTHONWARNINGS=ignore pip install --upgrade Jinja2==2.9.5
+sudo PYTHONWARNINGS=ignore pip install --upgrade Jinja2
 # Make sure setuptools are installed correctly.
 pip install setuptools --no-use-wheel --upgrade
 
