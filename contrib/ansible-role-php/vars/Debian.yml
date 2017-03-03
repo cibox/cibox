@@ -16,6 +16,7 @@ __php_packages:
   - php{{ php_version }}-xdebug
   - php{{ php_version }}-mbstring
   - php{{ php_version }}-soap
+  - php{{ php_version }}-zip
   - libpcre3-dev
   - libapache2-mod-php{{ php_version }}
   - php-curl
@@ -28,6 +29,7 @@ __php_packages:
   - php-soap
   - php-xml
   - php-xdebug
+  - php-zip
 __php_webserver_daemon: "apache2"
 
 # Vendor-specific configuration paths on Debian/Ubuntu make my brain asplode.
