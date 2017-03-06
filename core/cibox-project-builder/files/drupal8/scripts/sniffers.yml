@@ -19,9 +19,9 @@
     custom_themes_path: themes/custom
     features_path: modules/features
     phpcs_modules_ignore:
-      - themes/custom/nonstandard
+      - themes/custom/nonstandard, *.css
     phpcs_features_ignore:
-      - modules/features/nonstandard
+      - modules/features/nonstandard, *.css
     phpcs_features_ignore_path: modules/features,*.pages_default.inc,*.panelizer.inc,*.features.menu_custom.inc,*.features.webform.inc,*.features.filter.inc,*.strongarm.inc,*.fpp_content_declarations.inc,*.panels_default.inc
     composer_dir: /usr/share/composer
     phpcs_bin: /usr/bin/phpcs
@@ -169,7 +169,7 @@
     - name: Update ruby alternatives for using ruby 1.9.1(3) version
       sudo: yes
       shell: "update-alternatives --install /usr/bin/ruby ruby /usr/bin/ruby1.9.1 400 --slave /usr/share/man/man1/ruby.1.gz ruby.1.gz /usr/share/man/man1/ruby1.9.1.1.gz --slave /usr/bin/ri ri /usr/bin/ri1.9.1 --slave /usr/bin/irb irb /usr/bin/irb1.9.1 --slave /usr/bin/rdoc rdoc /usr/bin/rdoc1.9.1"
-      when: sniffers_update == true and is_composer_dir.stat.exists == false
+      when: sniffers_update == true
       tags:
         - sniffers
         - ruby
