@@ -1,7 +1,7 @@
 ---
 # This script contains commands to create database backup from certain environment.
 - name: Getting timestamp for backup
-  shell: date +'%Y_%m_%d_%M_%S'
+  shell: date +'%Y_%m_%d_%H_%M_%S'
   register: backup_name_raw
 
 - name: Getting name for backup
