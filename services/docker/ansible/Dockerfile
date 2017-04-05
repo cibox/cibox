@@ -11,4 +11,4 @@ RUN pip install --upgrade pip
 RUN pip install --upgrade virtualenv cffi cryptography
 #RUN pip install setuptools --no-use-wheel --upgrade
 #RUN pip install paramiko pyyaml jinja2 markupsafe MySQL-python
-RUN pip install ansible==1.9.4
+RUN pip install ansible==1.9.6
