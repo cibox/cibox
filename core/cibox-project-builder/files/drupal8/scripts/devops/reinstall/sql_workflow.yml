@@ -4,6 +4,12 @@
 # - Importing to database
 # - Running registry rebuild (when modules have been moved to new directory)
 # - Running database updates
+- name: Start the MySQL service
+  service: 
+    name: mysql 
+    state: started
+    enabled: true
+    
 - name: Droping drupal database
   mysql_db: name={{ mysql_db }} state=absent login_user={{ mysql_user }} login_password={{ mysql_pass }}
   when: pp_environment == "demo" or pp_environment == "default"
@@ -67,3 +73,16 @@
 - name: Updating database
   sudo: yes
   shell: "{{ php_env_vars }} drush -dvy updb -l {{ site_url }}"
+  register: updates
+
+- name: Clearing cache after update tasks
+  sudo: yes
+  shell: "{{ php_env_vars }} drush cr -l {{ site_url }}"
+
+- name: Apply pending entity schema updates
+  sudo: yes
+  shell: "{{ php_env_vars }} drush -y entup -l {{ site_url }}"
+
+# Display updates output.
+- name: Updates listing
+  debug: var=updates.stdout_lines

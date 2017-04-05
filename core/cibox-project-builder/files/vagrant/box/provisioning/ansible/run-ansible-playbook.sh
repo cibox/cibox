@@ -1,7 +1,10 @@
 #!/bin/bash
 
 export PYTHONUNBUFFERED=1
+export ANSIBLE_FORCE_COLOR=true
 
+# Commented playbook stay here just in case you'll need it for updating an image or
+# specific software settings.
 playbooks=(
 /vagrant/provisioning/ansible/playbooks/sendmail.yml \
 /vagrant/provisioning/ansible/playbooks/misc.yml \

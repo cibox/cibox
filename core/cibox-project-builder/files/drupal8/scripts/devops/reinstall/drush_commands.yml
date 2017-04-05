@@ -15,3 +15,6 @@
 - name: Debug
   debug: var=item.stdout
   with_items: echo.results
+  
+- name: Clear cache after some drush commands
+  shell: "{{ php_env_vars }} drush cr"

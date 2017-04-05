@@ -9,9 +9,13 @@ before_install:
 install:
  # Install Ansible.
   - sudo pip install ansible==1.9.6
+  # Install bash linter
+  - sudo apt-get install shellcheck -y
+
 
 before_script:
 
 script:
    - ls -la
+   - shellcheck -s bash *.sh
    - sudo ansible-playbook services/jenkinsbox.yml -i 'localhost,' --connection=local --extra-vars="server_ip=127.0.0.1 mysql_root_password="

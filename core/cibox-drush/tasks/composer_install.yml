@@ -8,7 +8,7 @@
   sudo: yes
 
 - name: Adding global link to drush binary
-  file: src=/usr/local/src/drush/drush dest=/usr/local/bin/drush state=link mode=755
+  file: src=/usr/local/src/drush/drush dest=/usr/local/bin/drush state=link mode=755 force=yes
   sudo: yes
 
 - name: Fix permissions for library folder.

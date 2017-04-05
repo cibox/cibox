@@ -7,7 +7,7 @@ dependencies:
   - { role: '../core/facade-composer' }
   - { role: '../core/cibox-drush' }
   - { role: '../core/facade-php-pear' }
-  - { role: '../core/facade-php-xhprof' }
+#  - { role: '../core/facade-php-xhprof' }
   - { role: '../core/cibox-php-pcntl' }
   - { role: '../core/facade-mysql' }
   - { role: '../core/cibox-jenkins' }

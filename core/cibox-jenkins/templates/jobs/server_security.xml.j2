@@ -4,6 +4,14 @@
   <description>Regular task that aims to auto update server&apos;s security per cron task</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <jenkins.plugins.slack.SlackNotifier_-SlackJobProperty plugin="slack@1.8">
       <teamDomain>CHANGE_ME</teamDomain>
       <token>CHANGE_ME</token>
@@ -49,4 +57,6 @@
       <room>CHANGE_ME</room>
     </jenkins.plugins.slack.SlackNotifier>
   </publishers>
-  <buildWrappers/>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.4"/>
+  </buildWrappers>

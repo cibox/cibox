@@ -1,0 +1,89 @@
+= Welcome to CIBox's Virtual Development environment.
+
+
+CIBox uses best practices as virtualbox, vagrant, ansible and dedicated
+virtual machine with configured packages for speedup initial
+provisioning.
+
+For avoiding of issues with ansible playbooks we are using a trick
+and run all provisioning scripts (if requested) within VM itself.
+This trick makes our VM platform agnostic.
+
+By default you'll get configured VM with decent versions of:
+
+* PHP
+* Apache
+* Memcached
+* Docker
+* Ubuntu LTS
+* Ansible
+
+installed for ability to run Drupal 7, 8, Symfony and Wordpress
+projects without additional provisioning steps.
+
+But we ship also a bunch of playbooks for ability to reconfigure
+default VM and keep it up to date from time to time.
+
+= How to update VM
+
+find /root/clean_box.sh within VM itself to zero out space before
+packaging vagrant box
+
+- vagrant up
+- vagrant ssh
+- # make your changes
+- bash /root/clean_box.sh
+- # logoff VM
+- vagrant package --output mynew.box
+- upload the file to public webserver and change
+provisioning/config.yml respectively
+
+Now your Vagrantfile should react on a change.
+
+= How to update default CIBox's VMs
+
+We use Ansible to provision VM and a bunch of playbooks which are
+located in ```cibox``` folder of VM environment (where ```Vagrantfile```
+is located) or ```/core``` and ```/contrib``` folders of CIBox's
+repository.
+
+These playbooks could be used for making changes into VM if
+default provisioned VM doesn't fit your needs.
+
+For that, find respective playbook and its config files and
+try to make changes. After changes made use ```vagrant provision```
+command to get your VM updated. If changes are acceptable and
+provisioned VM fits your needs, export your VM box and share it
+with your team as it was described in "How to update VM" section.
+
+= How to update old VM
+
+If you have an old version of VM or want to migrate your custom
+to CIBox's one you should get used to the architecture of CIBox
+Virtual Development Environment. Visit http://docs.cibox.tools/
+to get more details.
+
+How we, the CIBox team are doing our updates for VM.
+First of all we gather unique requirements that needed for
+specific project. If they are pretty standard, described at
+https://www.drupal.org/docs/7/system-requirements/overview then
+you can easily replace old VM with a CIBox's one
+For getting latest CIBox's VM you need to run ```repository.sh```
+as explained in http://docs.cibox.tools/en/latest/Quickstart/[QUICKSTART]
+
+After script execution is finished all you need is to replace
+default Drupal files, extracted there with your own Drupal instance.
+If it is complicated for you - remove drupal extract step
+from the cibox-project-builder/tasks/drupal.yml or extend
+this step with your own project source tree extractor to make
+it automated.
+After this step you'll have an updated version of VM with
+source tree located within docroot folder.
+
+Repository builder enriches your docroot with super convenient
+scripts for rebuilding your site, which are the logical core
+of the CIBox ideology itself. By using those scripts you can
+easily provision CI server and run CIBox's builds for your
+own project.
+
+

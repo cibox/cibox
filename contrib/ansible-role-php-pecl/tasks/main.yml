@@ -7,5 +7,5 @@
   with_items: php_pecl_extensions
 
 - name: Enable needed extensions
-  lineinfile: line="extension={{ item }}.so" dest=/etc/php5/conf.d/20-pecl.ini create=yes
+  lineinfile: line="extension={{ item }}.so" dest=/etc/php/{{ php_version }}/conf.d/20-pecl.ini create=yes
   with_items: php_pecl_extensions

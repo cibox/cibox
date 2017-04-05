@@ -1,0 +1,8 @@
+---
+# File contains tasks for drupal_core tests.
+- name: Run Simpletest tests
+  ignore_errors: yes
+  shell: 'php scripts/run-tests.sh --verbose --php /usr/bin/php {{ drupal_core_test_group }} > {{ build_reports_dir }}/SimpletestReport.txt'
+
+- name: Simpletest report build
+  shell: 'echo "<strong>`grep -o "Fail" {{ build_reports_dir }}/SimpletestReport.txt | wc -l`</strong> fails for Simpletest: simpletest standard file {{ base_url }}/{{ build_reports_dir }}/SimpletestReport.txt" >> {{ workspace_root }}/{{ artifacts_file }}'

@@ -1,6 +1,5 @@
 ---
-- include: composer_install.yml
-  when: drush_install_mode != 'none'
+- include: phar_install.yml
 
 - name: Create global Drush configuration folder
   file: path=/etc/drush/ state=directory
