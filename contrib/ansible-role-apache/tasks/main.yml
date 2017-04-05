@@ -45,6 +45,7 @@
   when: ansible_os_family == 'Debian'
 
 - name: Ensure Apache is started and enabled on boot.
+  ignore_errors: true
   service:
     name: "{{ apache_daemon }}"
     state: started
