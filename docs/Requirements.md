@@ -5,7 +5,7 @@ For Ubuntu 16.04 please install ansible with commands
 
 ```sh
 sudo apt-get install python-pip
-sudo pip install ansible==1.9.4
+sudo pip install ansible==1.9.6
 ```
 
 ##### [Jinja2](http://jinja.pocoo.org/) version 2.8 (dev)
