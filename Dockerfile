@@ -22,6 +22,10 @@ ADD provisiond.sh /usr/local/cibox/
 ADD repository.sh /usr/local/cibox/
 
 RUN ls -la /usr/local/cibox/
+RUN mkdir /etc/apache/
+RUN mkdir /etc/apache/ssl
+RUN touch /etc/apache/ssl/apache.crt
+
 
 RUN chmod a+x /usr/local/cibox/provisiond.sh
 RUN chmod a+x /usr/local/cibox/core/cibox-project-builder/files/vagrant/box/provisioning/shell/ansible.sh
@@ -29,6 +33,8 @@ RUN chmod a+x /usr/local/cibox/core/cibox-project-builder/files/vagrant/box/prov
 
 RUN cd /usr/local/cibox/core/cibox-project-builder/files/vagrant/box/provisioning/shell/ && ./initial-setup.sh /usr/local/cibox/core/cibox-project-builder/files/vagrant/box/provisioning
 RUN cd /usr/local/cibox/core/cibox-project-builder/files/vagrant/box/provisioning/shell/ && ./ansible.sh
+RUN cd /usr/local/cibox/ && ansible 127.0.0.1 -m setup -a "filter=ansible_os_family"
+RUN sleep 300
 RUN cd /usr/local/cibox/ && ./provisiond.sh
 
 # From Jenkins Dockerfile
