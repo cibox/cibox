@@ -37,39 +37,6 @@ RUN cd /usr/local/cibox/core/cibox-project-builder/files/vagrant/box/provisionin
 RUN cd /usr/local/cibox/ && ansible  -i 'localhost,' 127.0.0.1 -m setup -a "filter=ansible_os_family"
 
 # From mysql Dockerfile
-RUN groupadd -r mysql && useradd -r -g mysql mysql
-
-# add gosu for easy step-down from root
-ENV GOSU_VERSION 1.7
-RUN set -x \
-	&& apt-get update && apt-get install -y --no-install-recommends ca-certificates wget && rm -rf /var/lib/apt/lists/* \
-	&& wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
-	&& wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
-	&& export GNUPGHOME="$(mktemp -d)" \
-	&& gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
-	&& gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
-	&& rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
-	&& chmod +x /usr/local/bin/gosu \
-	&& gosu nobody true \
-	&& apt-get purge -y --auto-remove ca-certificates wget
-
-ENV PATH $PATH:/usr/local/mysql/bin:/usr/local/mysql/scripts
-
-# replicate some of the way the APT package configuration works
-# this is only for 5.5 since it doesn't have an APT repo, and will go away when 5.5 does
-RUN mkdir -p /etc/mysql/conf.d \
-	&& { \
-		echo '[mysqld]'; \
-		echo 'skip-host-cache'; \
-		echo 'skip-name-resolve'; \
-		echo 'datadir = /var/lib/mysql'; \
-		echo '!includedir /etc/mysql/conf.d/'; \
-	} > /etc/mysql/my.cnf
-
-RUN mkdir -p /var/lib/mysql /var/run/mysqld \
-	&& chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
-# ensure that /var/run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
-	&& chmod 777 /var/run/mysqld
 
 EXPOSE 3306
 
