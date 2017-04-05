@@ -8,7 +8,7 @@ export ANSIBLE_FORCE_COLOR=true
 # ansible needs python version 2.7.9 to avoid SNIMissingWarning.
 # see http://urllib3.readthedocs.io/en/latest/security.html#snimissingwarning
 apt-get -y --force-yes install python 2.7.9
-apt-get -y --force-yes install python-dev python-simplejson sudo curl make rsync git libmysqlclient-dev apparmor-utils apt-utils >/dev/null
+apt-get -y --force-yes install wget python-dev python-simplejson sudo curl make rsync git libmysqlclient-dev apparmor-utils apt-utils >/dev/null
 
 # because basic ubuntu is too stripped down we need to add logging.
 apt-get --reinstall install -y --force-yes bsdutils >/dev/null
