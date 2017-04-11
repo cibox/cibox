@@ -50,6 +50,7 @@
 
 # Run registry rebuild.
 - name: Check if registry_rebuild is installed
+  sudo: yes
   shell: "{{ php_env_vars }} drush | grep -c registry_rebuild"
   args:
     chdir: ~/
