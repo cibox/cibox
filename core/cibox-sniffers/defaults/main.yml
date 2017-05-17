@@ -7,6 +7,7 @@ composer_global_require:
   - { package: 'squizlabs/php_codesniffer', version: '=2.*' }
 
 git_repos:
+  - { branch: 'master', repo: 'http://git.drupal.org/sandbox/coltrane/1921926.git', name: 'DrupalSecure' } # git clone --branch master http://git.drupal.org/sandbox/coltrane/1921926.git DrupalSecure
   - { branch: 'master', repo: 'https://github.com/podarok/Symfony2-coding-standard.git', name: 'Symfony2' }
 
 phpcs_standards:

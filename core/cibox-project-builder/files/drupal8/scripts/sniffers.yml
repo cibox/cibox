@@ -31,11 +31,13 @@
       - squizlabs/php_codesniffer=2.9.x-dev
       - drupal/coder:dev-8.x-2.x
     git_repos:
+      - { branch: 'master', repo: 'http://git.drupal.org/sandbox/coltrane/1921926.git', name: 'DrupalSecure' } # git clone --branch master http://git.drupal.org/sandbox/coltrane/1921926.git DrupalSecure
       - { branch: 'master', repo: 'https://github.com/podarok/phpcs-security-audit.git', name: 'Security' } #git clone --branch master https://github.com/podarok/phpcs-security-audit.git Security
       - { branch: 'master', repo: 'https://github.com/podarok/Symfony2-coding-standard.git', name: 'Symfony2' }
 
     phpcs_standards:
       - { path: 'vendor/drupal/coder/coder_sniffer/Drupal', name: 'Drupal' } #/root/.composer/vendor/drupal/coder/coder_sniffer/Drupal Drupal
+      - { path: 'vendor/podarok/DrupalSecure/DrupalSecure', name: 'DrupalSecure' } #/root/.composer/vendor/podarok/DrupalSecure DrupalSecure
       - { path: 'vendor/podarok/Security/Security', name: 'Security' } #/root/.composer/vendor/podarok/Security Security
 
     npm_packages:
