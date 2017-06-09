@@ -1,0 +1,65 @@
+---
+# This playbook should be executed using ansible-playbook decouple.yml
+# Developed for ansible version >= 1.9.6
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  vars:
+    # Repository which has needed folders to be decoupled with saving git log.
+    source_repo_folder: "./ymcahouston"
+    # Destination repository where decoupled folders are going to be pushed
+    destination_repo_folder: "./yd"
+    # Do not run this playbook twice, it'll fail because of conflicts in case if folder was already merged.
+    map_source_folders_for_decouple:
+      - { name: "openy_block_custom_simple", source: "docroot/modules/features/openy_block/modules/openy_block_custom_simple", destination: "docroot/profiles/contrib/openy/modules/openy_features/openy_block/modules" }
+      - { name: "openy_block_flexible_content", source: "docroot/modules/features/openy_block/modules/openy_block_flexible_content", destination: "docroot/profiles/contrib/openy/modules/openy_features/openy_block/modules" }
+
+  tasks:
+  - name: Cleanup source tree to temporary destination
+    shell: rm -rf "{{ item.name }}"
+    with_items: "{{ map_source_folders_for_decouple }}"
+
+  - name: Copy source tree to temporary destination
+    shell: 'cp -r {{ source_repo_folder }} {{ item.name }}'
+    with_items: "{{ map_source_folders_for_decouple }}"
+
+  - name: Git filter branch for all requested source folders
+    shell: "git clean -fd && git reset --hard && git filter-branch --subdirectory-filter {{ item.source }} && git clean -fd"
+    with_items: "{{ map_source_folders_for_decouple }}"
+    args:
+      chdir: "{{ item.name }}"
+
+  - name: Create destination folders
+    shell: "mkdir -p {{ item.destination }}"
+    with_items: "{{ map_source_folders_for_decouple }}"
+    args:
+      chdir: "{{ item.name }}"
+
+  - name: Git move decoupled to destination
+    shell: "git mv * {{ item.destination }} -k && git commit -m 'Move all files to requested destination.'"
+    with_items: "{{ map_source_folders_for_decouple }}"
+    args:
+      chdir: "{{ item.name }}"
+
+  - name: Git make new branch for decoupled
+    shell: "git checkout -b decouple_{{ item.name }}"
+    with_items: "{{ map_source_folders_for_decouple }}"
+    args:
+      chdir: "{{ item.name }}"
+
+  - name: Git pull decoupled into destination repo - add remotes
+    shell: "git remote remove {{ item.name }} || true && git remote add {{ item.name }} ../{{ item.name }}"
+    with_items: "{{ map_source_folders_for_decouple }}"
+    args:
+      chdir: "{{ destination_repo_folder }}"
+
+  - name: Git pull decoupled into destination repo - merge branches
+    shell: "git fetch {{ item.name }} && git merge remotes/{{ item.name }}/decouple_{{ item.name }}"
+    with_items: "{{ map_source_folders_for_decouple }}"
+    args:
+      chdir: "{{ destination_repo_folder }}"
+
+  - name: Cleanup temporary source tree
+    shell: 'rm -rf {{ item.name }}'
+    with_items: "{{ map_source_folders_for_decouple }}"
