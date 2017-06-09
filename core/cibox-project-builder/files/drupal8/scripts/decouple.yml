@@ -37,7 +37,7 @@
       chdir: "{{ item.name }}"
 
   - name: Git move decoupled to destination
-    shell: "git mv * {{ item.destination }} -k && git commit -m 'Move all files to requested destination.'"
+    shell: "git mv * {{ item.destination }} -k && git commit -m '[AUTO] Move all files to requested destination.'"
     with_items: "{{ map_source_folders_for_decouple }}"
     args:
       chdir: "{{ item.name }}"
