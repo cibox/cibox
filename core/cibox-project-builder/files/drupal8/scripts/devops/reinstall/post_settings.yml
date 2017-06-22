@@ -7,7 +7,7 @@
 
 - name: Getting name for settings (UNIX)
   set_fact: platform_settings_file={{ settings_file_path }}
-  when: is_windows == false
+  when: item.status is defined and is_windows == false
 
 - name: Copy settings to tmp folder (WINDOWS)
   shell: cp {{ settings_file_path }} {{ platform_settings_file }}
@@ -15,7 +15,7 @@
 
 - name: Add general post-settings to settings.php
   lineinfile: dest='{{ platform_settings_file }}' line='{{ item.name }} = \"{{ item.value }}\";'
-  when: item.status == true
+  when: item.status is defined and item.status == true
   with_items: global_env.post_settings
 
 - name: Add environment specific post-settings
