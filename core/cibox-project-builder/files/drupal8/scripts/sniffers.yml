@@ -13,7 +13,7 @@
     installation_profile_name: pp
     installation_profile_path: "profiles/{{ installation_profile_name }}"
     scan_security: false
-    phpcs_extensions: php,inc,install,module
+    phpcs_extensions: php,inc,install,module,theme
     phpcs_features_extensions: module
     custom_modules_path: modules/custom/
     custom_themes_path: themes/custom
