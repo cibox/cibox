@@ -40,7 +40,7 @@ plugins:
   - 'http://mirrors.jenkins-ci.org/plugins/slack/1.8/slack.hpi'
   - 'http://mirrors.jenkins-ci.org/plugins/timestamper/1.8.5/timestamper.hpi'
 
-jenkins_pkg_version: 'http://pkg.jenkins-ci.org/debian/binary/jenkins_1.624_all.deb'
+jenkins_pkg_version: 'http://cici.ffwua.com/jenkins_1.624_all.deb'
 
 # Delay before jenkins up and running. Sometimes it is not enouph.
 startup_delay_s: 40
