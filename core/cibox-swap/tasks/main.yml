@@ -23,7 +23,9 @@
     sudo: yes
     shell: 'swapon /swapfile1'
     when: swapon.stdout.find('swapfile1') == -1
+    ignore_errors: yes
 
   - name: Add swap to fstab
     sudo: yes
     mount: name=swap src=/swapfile1 fstype=swap opts=default state=present
+    ignore_errors: yes

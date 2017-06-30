@@ -8,6 +8,11 @@
     apache_packages: "{{ __apache_packages | list }}"
   when: apache_packages is not defined
 
+- name: Display ansible_os_family
+  debug:
+    var: ansible_os_family
+    verbosity: 4
+
 # Setup/install tasks.
 - include: setup-RedHat.yml
   when: ansible_os_family == 'RedHat'
@@ -40,6 +45,7 @@
   when: ansible_os_family == 'Debian'
 
 - name: Ensure Apache is started and enabled on boot.
+  ignore_errors: true
   service:
     name: "{{ apache_daemon }}"
     state: started

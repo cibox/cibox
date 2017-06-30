@@ -29,6 +29,14 @@
         servername: "drupal.{{ cibox_server_ip }}.xip.io",
         documentroot: "/var/www/docroot"
       }
+      - {
+        servername: "openy.{{ cibox_server_ip }}.xip.io",
+        documentroot: "/var/www/docroot"
+      }
+      - {
+        servername: "redwing.{{ cibox_server_ip }}.xip.io",
+        documentroot: "/var/www/docroot"
+      }
     apache_vhosts_ssl:
       - {
         servername: "drupal.{{ cibox_server_ip }}.xip.io",
