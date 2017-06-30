@@ -33,4 +33,4 @@ RUN cd /usr/local/cibox/core/cibox-project-builder/files/vagrant/box/provisionin
 RUN cd /usr/local/cibox/ && /usr/local/cibox/repository.sh
 # Apache part
 RUN mkdir -p /var/www/docroot
-RUN cd /usr/local/cibox/FRESH_REPOSITORY/provisioning/ansible/playbooks/ && ansible-playbook -i 'localhost,' memcached.yml --connection=local
+RUN cd /usr/local/cibox/FRESH_REPOSITORY/provisioning/ansible/playbooks/ && ansible-playbook -i 'localhost,' drush.yml --connection=local
