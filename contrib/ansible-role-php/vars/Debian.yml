@@ -3,7 +3,6 @@ php_version: 7.1
 __php_packages:
   - php{{ php_version }}
   - php{{ php_version }}-mcrypt
-  - php-cli
   - php{{ php_version }}-common
   - php{{ php_version }}-curl
   - php{{ php_version }}-dev
