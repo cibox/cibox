@@ -54,6 +54,7 @@
     <hudson.tasks.Shell>
       <command>
 export PYTHONUNBUFFERED=1
+export ANSIBLE_FORCE_COLOR=true
 cd new_pull_request
 sudo git log -1 --stat > docroot/git-status.txt
 sudo rsync --delete -ra docroot/ /var/www/demo
