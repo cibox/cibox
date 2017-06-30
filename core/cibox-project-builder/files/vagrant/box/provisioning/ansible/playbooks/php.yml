@@ -9,7 +9,7 @@
   vars:
     php_version: 5.6
     php_packages:
-      - php{{ php_version }}-cli
+      - php-cli
       - php{{ php_version }}-curl
       - php{{ php_version }}-gd
       - php{{ php_version }}-intl
