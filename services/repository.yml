@@ -7,7 +7,7 @@
   vars:
     cmf: drupal
     repo_subfolder: ../FRESH_REPOSITORY
-    drupal_version: 7
+    drupal_version: 8
 
   roles:
       - { role: '../core/core-repository' }
