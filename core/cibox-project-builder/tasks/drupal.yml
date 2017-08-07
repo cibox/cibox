@@ -98,6 +98,12 @@
     dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/.htaccess'
     line: '# Restrict access to YAML files.\n<Files ~ "\.yml$">\n  Order Allow,Deny\n  Deny from All\n</Files>'
 
+- name: Allow to commit vendor's folder
+  lineinfile:
+    dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/.gitignore'
+    regexp: '^vendor'
+    line: '# vendor'
+
 - name: Create Behat folder
   file:
     path: '{{ repo_subfolder }}/tests/behat'
