@@ -292,54 +292,6 @@
                 </org.jenkinsci.plugins.ansible.ExtraVar>
             </extraVars>
         </org.jenkinsci.plugins.ansible.AnsiblePlaybookBuilder>
-        <org.jenkinsci.plugins.ansible.AnsiblePlaybookBuilder plugin="ansible@0.5">
-            <playbook>/var/www/build${BUILD_NUMBER}/tests.yml</playbook>
-            <limit></limit>
-            <tags></tags>
-            <skippedTags></skippedTags>
-            <startAtTask></startAtTask>
-            <credentialsId></credentialsId>
-            <sudo>false</sudo>
-            <sudoUser></sudoUser>
-            <forks>5</forks>
-            <unbufferedOutput>true</unbufferedOutput>
-            <colorizedOutput>true</colorizedOutput>
-            <hostKeyChecking>false</hostKeyChecking>
-            <additionalParameters> -i 'localhost,' --connection=local</additionalParameters>
-            <copyCredentialsInWorkspace>false</copyCredentialsInWorkspace>
-            <extraVars>
-                <org.jenkinsci.plugins.ansible.ExtraVar>
-                    <key>workspace_root</key>
-                    <value>${WORKSPACE}</value>
-                    <hidden>false</hidden>
-                </org.jenkinsci.plugins.ansible.ExtraVar>
-                <org.jenkinsci.plugins.ansible.ExtraVar>
-                    <key>behat_base_url</key>
-                    <value>http://{{ jenkins_server_ip }}/build${BUILD_NUMBER}</value>
-                    <hidden>false</hidden>
-                </org.jenkinsci.plugins.ansible.ExtraVar>
-                <org.jenkinsci.plugins.ansible.ExtraVar>
-                    <key>update_dependencies</key>
-                    <value>yes</value>
-                    <hidden>false</hidden>
-                </org.jenkinsci.plugins.ansible.ExtraVar>
-                <org.jenkinsci.plugins.ansible.ExtraVar>
-                    <key>resources_path</key>
-                    <value>${WORKSPACE}/{{ jenkins_sourcode_folder }}/tests/behat/resources</value>
-                    <hidden>false</hidden>
-                </org.jenkinsci.plugins.ansible.ExtraVar>
-                <org.jenkinsci.plugins.ansible.ExtraVar>
-                    <key>behat_drupal_root</key>
-                    <value>/var/www/build${BUILD_NUMBER}</value>
-                    <hidden>false</hidden>
-                </org.jenkinsci.plugins.ansible.ExtraVar>
-                <org.jenkinsci.plugins.ansible.ExtraVar>
-                    <key>behat_root</key>
-                    <value>${WORKSPACE}/{{ jenkins_sourcode_folder }}/tests/behat</value>
-                    <hidden>false</hidden>
-                </org.jenkinsci.plugins.ansible.ExtraVar>
-            </extraVars>
-        </org.jenkinsci.plugins.ansible.AnsiblePlaybookBuilder>
     </builders>
     <publishers />
     <buildWrappers>
