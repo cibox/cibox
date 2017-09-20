@@ -1,10 +1,12 @@
 ---
-- name: Add Varnish apt key.
-  apt_key: url=http://repo.varnish-cache.org/debian/GPG-key.txt state=present
+- name: Add packagecloud.io Varnish apt key.
+  apt_key:
+    url: https://packagecloud.io/varnishcache/varnish30/gpgkey
+    state: present
 
-- name: Add Varnish apt repository.
+- name: Add packagecloud.io Varnish apt repository.
   apt_repository:
-    repo: "deb http://repo.varnish-cache.org/ubuntu {{ ansible_distribution_release }} varnish-3.0"
+    repo: "deb https://packagecloud.io/varnishcache/varnish30/{{ ansible_distribution | lower }}/ {{ ansible_distribution_release }} main"
     state: present
 
 - name: Install Varnish.
