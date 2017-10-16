@@ -1,5 +1,5 @@
 ---
-- include: phar_install.yml
+- include: git_install.yml
 
 - name: Create global Drush configuration folder
   file: path=/etc/drush/ state=directory

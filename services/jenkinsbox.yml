@@ -5,7 +5,7 @@
   remote_user: root
 
   vars:
-    drush_composer_version: 8.1.9
+    drush_composer_version: 8.1.15
 
     drushrc:
       drush_usage_log: 1
