@@ -3,7 +3,7 @@
   git: dest={{drush_git_dest}} repo={{drush_git_repo}} version={{drush_git_version}}
   tags: [drush]
 - name: "Create Drush binary symlink"
-  file: path={{drush_git_bin}} src={{drush_git_dest}}/drush state=link
+  file: path={{drush_git_bin}} src={{drush_git_dest}}/drush state=link mode=755 force=yes
   tags: [drush]
 - name: "Composer install"
   shell: chdir="{{drush_git_dest}}" {{drush_composer_bin}} install --no-interaction --no-ansi

@@ -2,7 +2,7 @@
 drush_install_mode: phar
 
 drush_composer_bin: /usr/local/bin/composer
-drush_composer_version: 8.1.9
+drush_composer_version: 8.1.15
 drush_composer_user: root
 
 drush_git_repo: https://github.com/drush-ops/drush.git
