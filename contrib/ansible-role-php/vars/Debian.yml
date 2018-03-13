@@ -1,5 +1,6 @@
 ---
 php_version: 5.6
+edge_php_version: 7.1
 __php_packages:
   - php{{ php_version }}
   - php{{ php_version }}-mcrypt
@@ -19,17 +20,18 @@ __php_packages:
   - php{{ php_version }}-zip
   - libpcre3-dev
   - libapache2-mod-php{{ php_version }}
-  - php-curl
-  - php-yaml
-  - php-mysql
-  - php-gd
-  - php-mbstring
-  - php-pear
-  - php-dev
-  - php-soap
-  - php-xml
-  - php-xdebug
-  - php-zip
+  - libapache2-mod-php{{ edge_php_version }}
+  - php{{ edge_php_version }}-curl
+  - php{{ edge_php_version }}-yaml
+  - php{{ edge_php_version }}-mysql
+  - php{{ edge_php_version }}-gd
+  - php{{ edge_php_version }}-mbstring
+  - php{{ edge_php_version }}-pear
+  - php{{ edge_php_version }}-dev
+  - php{{ edge_php_version }}-soap
+  - php{{ edge_php_version }}-xml
+  - php{{ edge_php_version }}-xdebug
+  - php{{ edge_php_version }}-zip
 __php_webserver_daemon: "apache2"
 
 # Vendor-specific configuration paths on Debian/Ubuntu make my brain asplode.
