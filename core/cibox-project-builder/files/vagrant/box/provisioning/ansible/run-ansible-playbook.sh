@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export PYTHONUNBUFFERED=1
+export ANSIBLE_FORCE_COLOR=true
 
 # Commented playbook stay here just in case you'll need it for updating an image or
 # specific software settings.
@@ -22,7 +23,7 @@ playbooks=(
 for i in "${playbooks[@]}"
 do
    echo "Install "${i}
-   ansible-playbook -vvvv -i 'localhost,' ${i} --connection=local
+   ansible-playbook -i 'localhost,' ${i} --connection=local
    if [ "$?" == "0" ]; then
     echo "Finished installing "${i}
    else

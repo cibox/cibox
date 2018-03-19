@@ -1,0 +1,14 @@
+---
+- name: "Install Drush via phar"
+  shell: "wget https://s3.amazonaws.com/files.drush.org/drush.phar"
+  sudo_user: "{{ drush_composer_user }}"
+
+- name: "Install Drush globally"
+  shell: "mv drush.phar /usr/local/bin/drush"
+  sudo_user: "{{ drush_composer_user }}"
+  sudo: yes
+
+- name: "Make it executable"
+  shell: "chmod +x /usr/local/bin/drush"
+  sudo_user: "{{ drush_composer_user }}"
+  sudo: yes

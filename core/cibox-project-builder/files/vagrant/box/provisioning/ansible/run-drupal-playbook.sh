@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export PYTHONUNBUFFERED=1
+export ANSIBLE_FORCE_COLOR=true
 
 playbooks=(
 /var/www/docroot/reinstall.yml \

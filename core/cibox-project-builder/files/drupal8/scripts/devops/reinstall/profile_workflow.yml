@@ -4,6 +4,13 @@
   file: name={{ settings_file_path }} state=absent
   sudo: yes
 
+- name: Check php-cli version
+  shell: php -v
+  register: installed_php_cli_version
+
+- name: Display php-cli version
+  debug: msg={{ installed_php_cli_version.stdout_lines }}
+
 - name: Installing drupal
   sudo: yes
   shell: "{{ php_env_vars }} drush -y si {{ installation_profile_name }} --db-url=mysql://{{ mysql_user }}:{{ mysql_pass }}@127.0.0.1:/{{ mysql_db }} --account-name={{ drupal_user }} --account-pass={{ drupal_pass }} --uri={{ site_url }}"

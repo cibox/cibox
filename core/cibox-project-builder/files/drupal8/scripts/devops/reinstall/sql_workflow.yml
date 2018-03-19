@@ -4,12 +4,18 @@
 # - Importing to database
 # - Running registry rebuild (when modules have been moved to new directory)
 # - Running database updates
+- name: Start the MySQL service
+  service: 
+    name: mysql 
+    state: started
+    enabled: true
+    
 - name: Droping drupal database
-  mysql_db: name={{ mysql_db }} state=absent login_user={{ mysql_user }} login_password={{ mysql_pass }}
+  mysql_db: name={{ mysql_db }} state=absent login_user={{ mysql_user }} login_password={{ mysql_pass }} login_host={{ mysql_host }}
   when: pp_environment == "demo" or pp_environment == "default"
 
 - name: Creating drupal database
-  mysql_db: name={{ mysql_db }} state=present login_user={{ mysql_user }} login_password={{ mysql_pass }}
+  mysql_db: name={{ mysql_db }} state=present login_user={{ mysql_user }} login_password={{ mysql_pass }} login_host={{ mysql_host }}
 
 # Vagrant build.
 - name: Downloading latest backup to local environment
@@ -22,7 +28,7 @@
   when: pp_environment == "default" and ((ansible_env.USER is not defined or ansible_env.USER != "{{ ci_server_username }}") and (ansible_env.SUDO_USER is not defined or ansible_env.SUDO_USER != "{{ ci_server_username }}"))
 
 - name: Importing from remote backup
-  mysql_db: name={{ mysql_db }} state=import target={{ backup_folder }}/latest_remote.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
+  mysql_db: name={{ mysql_db }} state=import target={{ backup_folder }}/latest_remote.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }} login_host={{ mysql_host }}
   sudo: yes
   when: pp_environment == "default" and ((ansible_env.USER is not defined or ansible_env.USER != "{{ ci_server_username }}") and (ansible_env.SUDO_USER is not defined or ansible_env.SUDO_USER != "{{ ci_server_username }}"))
 
@@ -33,7 +39,7 @@
   when: (pp_environment == "default" or pp_environment == "demo") and ((ansible_env.USER is defined and ansible_env.USER == "{{ ci_server_username }}") or (ansible_env.SUDO_USER is defined and ansible_env.SUDO_USER == "{{ ci_server_username }}"))
 
 - name: Importing from local backup
-  mysql_db: name={{ mysql_db }} state=import target=./latest.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }}
+  mysql_db: name={{ mysql_db }} state=import target=./latest.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }} login_host={{ mysql_host }}
   sudo: yes
   when: (pp_environment == "default" or pp_environment == "demo") and ((ansible_env.USER is defined and ansible_env.USER == "{{ ci_server_username }}") or (ansible_env.SUDO_USER is defined and ansible_env.SUDO_USER == "{{ ci_server_username }}"))
 
@@ -67,3 +73,16 @@
 - name: Updating database
   sudo: yes
   shell: "{{ php_env_vars }} drush -dvy updb -l {{ site_url }}"
+  register: updates
+
+- name: Clearing cache after update tasks
+  sudo: yes
+  shell: "{{ php_env_vars }} drush cr -l {{ site_url }}"
+
+- name: Apply pending entity schema updates
+  sudo: yes
+  shell: "{{ php_env_vars }} drush -y entup -l {{ site_url }}"
+
+# Display updates output.
+- name: Updates listing
+  debug: var=updates.stdout_lines

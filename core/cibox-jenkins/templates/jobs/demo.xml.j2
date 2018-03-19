@@ -4,6 +4,14 @@
   <description>Build demo site based on latest codebase.</description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.9.1">
       <projectUrl>{{ github_url }}</projectUrl>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
@@ -46,6 +54,7 @@
     <hudson.tasks.Shell>
       <command>
 export PYTHONUNBUFFERED=1
+export ANSIBLE_FORCE_COLOR=true
 cd new_pull_request
 sudo git log -1 --stat > docroot/git-status.txt
 sudo rsync --delete -ra docroot/ /var/www/demo
@@ -59,6 +68,7 @@ sudo chown -R www-data:jenkins ../demo</command>
   </builders>
   <publishers/>
   <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.4"/>
     <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.0">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>

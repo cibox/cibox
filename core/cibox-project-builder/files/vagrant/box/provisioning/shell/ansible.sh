@@ -1,7 +1,10 @@
 #!/bin/bash
 
 echo 'Installing base packages for ansible'
-export "DEBIAN_FRONTEND=noninteractive"
+export DEBIAN_FRONTEND=noninteractive
+export PYTHONWARNINGS=ignore
+export PYTHONUNBUFFERED=1
+export ANSIBLE_FORCE_COLOR=true
 # ansible needs python version 2.7.9 to avoid SNIMissingWarning.
 # see http://urllib3.readthedocs.io/en/latest/security.html#snimissingwarning
 apt-get -y --force-yes install python 2.7.9
@@ -20,11 +23,12 @@ echo 'Installing ansible'
 echo "Installing pip via easy_install."
 sudo apt-get -y --force-yes install unzip python-pip python-dev build-essential libffi-dev libssl-dev
 
-sudo pip install --upgrade pip 
-sudo pip install --upgrade virtualenv 
-sudo pip install --upgrade pip
-sudo pip install --upgrade cffi 
-sudo pip install --upgrade cryptography
+sudo PYTHONWARNINGS=ignore pip install --upgrade pip
+sudo PYTHONWARNINGS=ignore pip install --upgrade virtualenv
+sudo PYTHONWARNINGS=ignore pip install --upgrade pip
+sudo PYTHONWARNINGS=ignore pip install --upgrade cffi
+sudo PYTHONWARNINGS=ignore pip install --upgrade cryptography
+sudo PYTHONWARNINGS=ignore pip install --upgrade Jinja2
 # Make sure setuptools are installed correctly.
 pip install setuptools --no-use-wheel --upgrade
 

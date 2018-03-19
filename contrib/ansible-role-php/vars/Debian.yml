@@ -1,27 +1,43 @@
 ---
+php_version: 5.6
+edge_php_version: 7.1
 __php_packages:
-  - php5
-  - libapache2-mod-php5
-  - php5-mcrypt
-  - php5-cli
-  - php5-common
-  - php5-curl
-  - php5-dev
-  - php5-fpm
-  - php5-gd
-  - php-pear
-  - php-apc
+  - php{{ php_version }}
+  - php{{ php_version }}-mcrypt
+  - php{{ php_version }}-cli
+  - php{{ php_version }}-common
+  - php{{ php_version }}-curl
+  - php{{ php_version }}-dev
+  - php{{ php_version }}-fpm
+  - php{{ php_version }}-gd
+  - php{{ php_version }}-mysql
+  - php{{ php_version }}-memcached
+  - php{{ php_version }}-imagick
+  - php{{ php_version }}-xml
+  - php{{ php_version }}-xdebug
+  - php{{ php_version }}-mbstring
+  - php{{ php_version }}-soap
+  - php{{ php_version }}-zip
   - libpcre3-dev
-  - php5-mysql
-  - php5-memcached
-  - php5-imagick
-  - libapache2-mod-php5
+  - libapache2-mod-php{{ php_version }}
+  - libapache2-mod-php{{ edge_php_version }}
+  - php{{ edge_php_version }}-curl
+  - php{{ edge_php_version }}-yaml
+  - php{{ edge_php_version }}-mysql
+  - php{{ edge_php_version }}-gd
+  - php{{ edge_php_version }}-mbstring
+  - php{{ edge_php_version }}-pear
+  - php{{ edge_php_version }}-dev
+  - php{{ edge_php_version }}-soap
+  - php{{ edge_php_version }}-xml
+  - php{{ edge_php_version }}-xdebug
+  - php{{ edge_php_version }}-zip
 __php_webserver_daemon: "apache2"
 
 # Vendor-specific configuration paths on Debian/Ubuntu make my brain asplode.
-__php_conf_path: "{{ '/etc/php5' if php_webserver_daemon and php_webserver_daemon != 'apache2' else '/etc/php5/apache2' }}"
-__php_cli_conf_path: '/etc/php5/cli'
-php_extension_conf_path: "/etc/php5/conf.d"
+__php_conf_path: "{{ '/etc/php/{{ php_version }}' if php_webserver_daemon and php_webserver_daemon != 'apache2' else '/etc/php/{{ php_version }}/apache2' }}"
+__php_cli_conf_path: '/etc/php/{{ php_version }}/cli'
+php_extension_conf_path: "/etc/php/{{ php_version }}/apache2/conf.d"
 
 php_apc_conf_filename: 20-apc.ini
-php_fpm_daemon: php5-fpm
+php_fpm_daemon: php{{ php_version }}-fpm

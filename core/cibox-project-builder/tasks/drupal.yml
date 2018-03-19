@@ -17,8 +17,11 @@
     force: yes
 
 - name: Extract current release
-  shell: cat /tmp/drupal_update.xml | grep -E '<version>.*</version>' | head -1 | awk -F">" '{print $2}' | awk -F"<" '{print $1}'
+  shell: 'grep -E -m 1 -o "<version>[0-9]{1,4}.[0-9]{1,4}.[0-9]{1,4}</version>" /tmp/drupal_update.xml | head -1 | tail -1 | sed -e "s,.*<version>\([^<]*\)</version>.*,\1,g"'
   register: drupal_release
+
+- debug:
+    msg: "Drupal version - {{ drupal_release.stdout }}"
 
 - name: Download Drupal to temporary directory
   get_url:
@@ -94,6 +97,12 @@
   lineinfile:
     dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/.htaccess'
     line: '# Restrict access to YAML files.\n<Files ~ "\.yml$">\n  Order Allow,Deny\n  Deny from All\n</Files>'
+
+- name: Allow to commit vendor's folder
+  lineinfile:
+    dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/.gitignore'
+    regexp: '^vendor'
+    line: '# vendor'
 
 - name: Create Behat folder
   file:

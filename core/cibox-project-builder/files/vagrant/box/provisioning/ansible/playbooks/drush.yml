@@ -9,7 +9,7 @@
     - { role: '../core/cibox-drush' }
 
   vars:
-    drush_composer_version: 8.*
+    drush_composer_version: 8.1.15
     drushrc:
       drush_usage_log: 1
       drush_usage_send: 1
