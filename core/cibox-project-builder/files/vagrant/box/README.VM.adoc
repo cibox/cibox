@@ -35,7 +35,7 @@ packaging vagrant box
 - bash /root/clean_box.sh
 - # logoff VM
 - vagrant package --output mynew.box
-- upload the file to public webserver and change
+- upload the file ```mynew.box``` to public webserver and change
 provisioning/config.yml respectively
 
 Now your Vagrantfile should react on a change.
