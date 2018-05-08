@@ -45,7 +45,7 @@
   notify: restart webserver
 
 - name: Check for separate apache2 xdebug.ini
-  stat: path=/etc/php/{{ php_version }}/apache2/conf.d/xdebug.ini
+  stat: path=/etc/php/{{ php_version }}/apache2/conf.d/20-xdebug.ini
   register: php_apache_xdebug_ini
 
 - name: Symlink xdebug.ini into separate Apache2 directory.
