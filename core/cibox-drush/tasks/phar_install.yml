@@ -1,6 +1,6 @@
 ---
 - name: "Install Drush via phar"
-  shell: "wget https://s3.amazonaws.com/files.drush.org/drush.phar"
+  shell: "wget https://github.com/drush-ops/drush/releases/download/8.1.16/drush.phar"
   sudo_user: "{{ drush_composer_user }}"
 
 - name: "Install Drush globally"
