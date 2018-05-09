@@ -47,6 +47,13 @@
   sudo: yes
   file: name=./latest.sql.gz state=absent
   when: pp_environment == "default" or pp_environment == "demo"
+  
+- name: Check php-cli version
+  shell: php -v
+  register: installed_php_cli_version
+
+- name: Display php-cli version
+  debug: msg={{ installed_php_cli_version.stdout_lines }}
 
 # Run registry rebuild.
 - name: Check if registry_rebuild is installed
