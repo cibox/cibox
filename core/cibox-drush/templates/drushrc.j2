@@ -1,11 +1,11 @@
 <?php
 # {{ ansible_managed }}
 {% set keys = [] -%}
-{%- for key, value in drushrc.iteritems() recursive -%}
+{%- for key, value in drushrc.items() recursive -%}
 {%- set ignore = keys.append(key) -%}
 {%- set outer_loop = loop -%}
 {%- if value is mapping -%}
-{{ outer_loop(value.iteritems()) }}
+{{ outer_loop(value.items()) }}
 {%- elif value is string %}
   $options["{{ keys|join('"]["') }}"] = "{{ value }}";
 {% elif value is sequence %}

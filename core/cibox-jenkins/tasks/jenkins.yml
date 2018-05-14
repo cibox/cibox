@@ -9,7 +9,7 @@
 
 # Download Jenkins package
 - name: Download Jenkins deb
-  get_url: url={{ jenkins_pkg_version }} dest=~/jenkins.deb mode=440
+  get_url: url="{{ jenkins_pkg_version }}" dest=~/jenkins.deb mode=440
   sudo: yes
 
 # Install Jenkins

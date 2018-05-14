@@ -6,7 +6,11 @@
   tags: [drush]
 
 - name: Create global Drush configuration (drushrc) file
-  template: src=drushrc.j2 dest=/etc/drush/drushrc.php validate='php -l %s' mode=0644
+  template:
+    src: drushrc.j2
+    dest: /etc/drush/drushrc.php
+    validate: 'php -l %s'
+    mode: 0644
   tags: [drush]
 
 - name: Configure Drush BASH completion

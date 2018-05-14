@@ -1,6 +1,7 @@
 ---
 - name: Was composer downloaded
-  stat: path={{ composer_dir }}
+  stat:
+    path: "{{ composer_dir }}"
   register: is_composer_dir
 
 - include: install.yml
