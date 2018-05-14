@@ -4,7 +4,7 @@
 - name: Install/update plugins
   sudo: yes
   action: command java -jar "{{ jenkins.cli_dest }}" -s http://localhost:8080 install-plugin "{{ item }}"
-  with_items: plugins
+  with_items: "{{ plugins }}"
   notify:
     - 'Restart Jenkins'
     

@@ -1,7 +1,9 @@
 ---
 
 - name: Install apt keys for Google Chrome
-  apt_key: url=https://dl-ssl.google.com/linux/linux_signing_key.pub state=present
+  apt_key:
+    url: https://dl-ssl.google.com/linux/linux_signing_key.pub
+    state: present
   tags: behat-selenium
 
 - name: Adding Chrome APT repo to local database
@@ -11,7 +13,7 @@
 - name: Install dependencies
   sudo: yes
   action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=installed update-cache=yes"
-  with_items: behat_selenium2_dependencies
+  with_items: "{{ behat_selenium2_dependencies }}"
   tags: behat-selenium
   ignore_errors: yes
 
@@ -20,7 +22,10 @@
 - include: selenium.yml
 
 - name: Create xvfb startup script
-  template: src=xvfb.j2 dest=/etc/init.d/xvfb  mode=0750
+  template:
+    src: xvfb.j2
+    dest: /etc/init.d/xvfb
+    mode: "0750"
   tags: behat-selenium
 
 - name: Enable xvfb on boot
