@@ -19,5 +19,5 @@ ansible_version_current=$(${ansible} --version | head -1 | awk '{print $2}')
 
 if ! echo "${ansible_version_current}" | grep ${ansible_version_required} >/dev/null; then
   echo "You have installed Ansible ${ansible_version_current}, but CIBox requires ${ansible_version_required}. ${help}"
-  exit 2
+#  exit 2
 fi

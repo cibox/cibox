@@ -10,10 +10,11 @@
     name: "root"
     host: "{{ item }}"
     password: "{{ mysql_root_password }}"
+    login_password: "{{ mysql_root_password }}"
   with_items:
-    - 127.0.0.1
-    - ::1
-    - localhost
+    - '127.0.0.1'
+    - '::1'
+    - 'localhost'
   when: mycnf_file.stat.exists == false
 
 # Has to be after the root password assignment, for idempotency.
