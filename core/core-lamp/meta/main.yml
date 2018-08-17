@@ -9,7 +9,7 @@ dependencies:
   - { role: '../core/facade-php-pear' }
 #  - { role: '../core/facade-php-xhprof' }
   - { role: '../core/cibox-php-pcntl' }
-  - { role: '../core/facade-mysql' }
+#  - { role: '../core/facade-mysql' }
 #  - { role: '../core/cibox-jenkins' }
 #  - { role: '../core/cibox-jetty-solr' }
 #  - { role: '../core/cibox-sniffers' }
