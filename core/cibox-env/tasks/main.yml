@@ -32,6 +32,7 @@
   sudo: yes
   apt_repository: repo={{ item }} validate_certs=no
   with_items: apt_repos
+  ignore_errors: true
 
 - name: Update apt
   apt: update_cache=yes

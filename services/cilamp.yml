@@ -1,0 +1,49 @@
+---
+# Do not run this playbook manually! Use 'run.sh'.
+- hosts: all
+  gather_facts: yes
+  remote_user: root
+
+  vars:
+    drush_composer_version: 8.1.17
+
+    drushrc:
+      drush_usage_log: 1
+      drush_usage_send: 1
+
+    # PHP configs.
+    php_apc_enabled_in_ini: true
+
+    cibox_php_pcntl: no
+    # Apache config.
+    cibox_ssl_folder: /etc/apache/ssl
+    apache_create_vhosts: true
+    apache_vhosts_filename: "vhosts.conf"
+    apache_remove_default_vhost: true
+    apache_default_vhost_filename: "000-default.conf"
+    apache_vhosts:
+      - {
+        servername: "openy",
+        serveralias: "*.*",
+        documentroot: "/var/www"
+      }
+    apache_vhosts_ssl:
+      - {
+        servername: "openy",
+        serveralias: "*.*",
+        documentroot: "/var/www",
+        certificate_file: "{{ cibox_ssl_folder }}/apache.crt",
+        certificate_key_file: "{{ cibox_ssl_folder }}/apache.key",
+      }
+    apache_mods_enabled:
+      - rewrite.load
+      - ssl.load
+
+  pre_tasks:
+    - name: Check if the playbook was executed with the runner
+      fail:
+        msg: "Please, run this playbook with provision.sh."
+      when: server_ip is not defined
+
+  roles:
+    - { role: '../core/core-lamp' }

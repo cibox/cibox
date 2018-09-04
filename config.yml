@@ -1,4 +1,5 @@
-server_ip: 192.168.1.101
+server_ip: localhost
+connection: local
 github_url: https://github.com/NAME/REPOSITORY
 # Never put your own user as a bot, because you won't be able to get your PRs tested.
 github_username: BOT_NAME
