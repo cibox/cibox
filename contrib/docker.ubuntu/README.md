@@ -52,7 +52,7 @@ The following role variables are defined:
 ```
 ---
 # docker-engine is the default package name
-docker_pkg_name: docker-engine
+docker_pkg_name: 'docker-ce docker-ce-cli containerd.io'
 docker_apt_cache_valid_time: 600
 
 # docker dns path for docker.io package ( changed at ubuntu 14.04 from docker to docker.io )

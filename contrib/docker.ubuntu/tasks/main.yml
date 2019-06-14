@@ -34,11 +34,8 @@
     state: present
 
 - name: Install (or update) docker package
-  apt:
-    name: "{{ docker_pkg_name }}"
-    state: "{{ 'latest' if update_docker_package else 'present' }}"
-    update_cache: yes
-    cache_valid_time: "{{ docker_apt_cache_valid_time }}"
+  shell: "apt-get -qq install {{ docker_pkg_name }}"
+  sudo: yes
 
 - name: Set docker daemon options
   copy:
@@ -83,32 +80,7 @@
     - Restart docker
   when: docker_opts != "" and ansible_distribution_version|version_compare(15.04, '>=')
 
-- name: Fix DNS in docker.io
-  lineinfile:
-    dest: "{{ docker_defaults_file_path }}"
-    regexp: "DOCKER_OPTS="
-    line: 'DOCKER_OPTS="--dns {{ ansible_docker0.ipv4.address }}"'
-  register: dns_fix
-  notify: Restart dockerio
-  when: docker_pkg_name == 'docker.io'
 
-- meta: flush_handlers
-  when: "dns_fix|changed"
-
-- pause:
-    seconds: 1
-  when: "dns_fix|changed"
-
-# We must install pip via apt before we can use the pip module below
-- name: Install pip, python-dev package with apt
-  apt:
-    pkg: "{{ item }}"
-    state: latest
-    update_cache: yes
-    cache_valid_time: "{{ docker_apt_cache_valid_time }}"
-  with_items:
-    - python-dev
-    - python-pip
 
 # Upgrade pip with pip to fix angstwad/docker.ubuntu/pull/35 and docker-py/issues/525
 # Install latest version when no specific release is set.
@@ -136,6 +108,7 @@
     - { name: docker-py, version: "{{ pip_version_docker_py }}", install: "{{ pip_install_docker_py }}" }
     - { name: docker-compose, version: "{{ pip_version_docker_compose }}", install: "{{ pip_install_docker_compose }}" }
   when: (item.version!="latest" and item.install)
+  ignore_errors: yes
 
 - name: Check if /etc/updatedb.conf exists
   stat:
@@ -167,13 +140,6 @@
   service:
     name: docker
     state: started
-  when: docker_pkg_name.find('lxc-docker') != -1 or docker_pkg_name.find('docker-engine') != -1
-
-- name: Start docker.io
-  service:
-    name: docker.io
-    state: started
-  when: docker_pkg_name == 'docker.io'
 
   # ATTENTION: this task can potentially create new users!
 - name: Add users to the docker group

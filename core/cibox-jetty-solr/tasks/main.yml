@@ -10,11 +10,11 @@
   file: path=/usr/java state=directory
 
 - name: Prepare java binaries for amd64
-  file: src=/usr/lib/jvm/java-7-openjdk-amd64 dest=/usr/java/default state=link
+  file: src=/usr/lib/jvm/java-8-openjdk-amd64 dest=/usr/java/default state=link
   when: ansible_machine == 'amd64' or ansible_machine == 'x86_64'
 
 - name: Prepare java binaries for i686
-  file: src=/usr/lib/jvm/java-1.7.0-openjdk-i386 dest=/usr/java/default state=link
+  file: src=/usr/lib/jvm/java-1.8.0-openjdk-i386 dest=/usr/java/default state=link
   when: ansible_machine == 'i686'
 
 - name: If solr was downloaded
@@ -65,7 +65,5 @@
 - include: cores.yml
 
 - name: Ensure jetty is running.
-  service:
-    name: jetty
-    state: started
-    enabled: yes
+  shell: "service jetty restart || true"
+  sudo: yes
