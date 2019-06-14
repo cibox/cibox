@@ -16,7 +16,8 @@ vagrantfile-local:
                     guest: '443'
         provider:
             virtualbox:
-                box: 'damianlewis/ubuntu-18.04-lamp'
+                box: 'u18.04php7.2.box'
+                box_url: 'http://cici.ffwua.com/u18.04php7.2.box'
                 modifyvm:
                     natdnshostresolver1: on
                     memory: '2048'
