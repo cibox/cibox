@@ -54,16 +54,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.usable_port_range = (10200..10500)
 
-  if !data['vm']['provider']['virtualbox'].empty?
-    config.vm.provider :virtualbox do |virtualbox|
-      data['vm']['provider']['virtualbox']['modifyvm'].each do |key, value|
-        if key == "natdnshostresolver1"
-          value = value ? "on" : "off"
-        end
-        virtualbox.customize ["modifyvm", :id, "--#{key}", "#{value}"]
-      end
-    end
-  end
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  # config.vm.network "public_network"
 
   # Do a provision only if it manually requested ("vagrant provision" executed).
   # https://github.com/mitchellh/vagrant/issues/7043#issuecomment-197935659
@@ -79,15 +73,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.provision :shell, keep_color: true,
       :path => "provisioning/ansible/run-ansible-playbook.sh"
   end
+  #
+  # View the documentation for the provider you are using for more
+  # information on available options.
 
-  # Install drupal within vm for testing.
-  if !ENV['VAGRANT_CI'].nil?
-    config.vm.provision :shell, keep_color: true, :path => "provisioning/ansible/run-drupal-playbook.sh"
-  end
-
-  config.ssh.username = "vagrant"
-  config.ssh.password = "vagrant"
-  config.ssh.shell = "sh"
-  config.ssh.insert_key = "false"
-  config.ssh.forward_agent = true
+  # Enable provisioning with a shell script. Additional provisioners such as
+  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
+  # documentation for more information about their specific syntax and use.
+  # config.vm.provision "shell", inline: <<-SHELL
+  #   apt-get update
+  #   apt-get install -y apache2
+  # SHELL
 end

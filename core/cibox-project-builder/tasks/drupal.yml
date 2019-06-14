@@ -19,40 +19,47 @@
 - name: Extract current release
   shell: 'grep -E -m 1 -o "<version>[0-9]{1,4}.[0-9]{1,4}.[0-9]{1,4}</version>" /tmp/drupal_update.xml | head -1 | tail -1 | sed -e "s,.*<version>\([^<]*\)</version>.*,\1,g"'
   register: drupal_release
+  ignore_errors: yes
 
 - debug:
     msg: "Drupal version - {{ drupal_release.stdout }}"
 
 - name: Download Drupal to temporary directory
+  ignore_errors: yes
   get_url:
     url: https://ftp.drupal.org/files/projects/drupal-{{ drupal_release.stdout }}.tar.gz
     dest: /tmp/drupal_latest.tar.gz
     force: yes
 
 - name: Creating temporary directory
+  ignore_errors: yes
   file:
     path: /tmp/drupal_latest
     state: directory
 
 - name: Unarchive the tarball
+  ignore_errors: yes
   unarchive:
     copy: no
     src: /tmp/drupal_latest.tar.gz
     dest: /tmp/drupal_latest
 
 - name: Copy files to project directory
+  ignore_errors: yes
   synchronize:
     src: /tmp/drupal_latest/drupal-{{ drupal_release.stdout }}/
     dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}'
   register: drupal_dl
 
 - name: Copy gitignore for Drupal 8
+  ignore_errors: yes
   synchronize:
     src: '{{ repo_subfolder }}/{{ drupal_subfolder }}/example.gitignore'
     dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/.gitignore'
   when: drupal_version == 8
 
 - name: Create folder for Drupal 8 configs
+  ignore_errors: yes
   file:
     recurse: yes
     path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/sites/default/config/staging'
@@ -60,18 +67,21 @@
   when: drupal_version == 8
 
 - name: Add htaccess for Drupal 8 in configs
+  ignore_errors: yes
   file:
     path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/sites/default/config/staging/.htaccess'
     state: touch
   when: drupal_version == 8
 
 - name: Inject pp profile into drupal
+  ignore_errors: yes
   file:
     path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/profiles/{{ installation_profile_name }}'
     state: directory
   register: is_profile
 
 - name: Copy local profile files to drupal directory
+  ignore_errors: yes
   synchronize:
     src: '{{ role_path }}/files/drupal{{ drupal_version }}/profiles/{{ installation_profile_name }}/'
     dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/profiles/{{ installation_profile_name }}/'
@@ -80,6 +90,7 @@
   register: profile_copy
 
 - name: Create a folder placeholders for sniffers
+  ignore_errors: yes
   file:
     path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/{{ item }}'
     state: directory
@@ -87,6 +98,7 @@
   with_items: 'drupal_placeholders.drupal{{ drupal_version }}'
 
 - name: Create empty readme files for placeholders
+  ignore_errors: yes
   file:
     path: '{{ repo_subfolder }}/{{ drupal_subfolder }}/{{ item }}/readme.txt'
     state: touch
@@ -94,22 +106,26 @@
   with_items: 'drupal_placeholders.drupal{{ drupal_version }}'
 
 - name: Restrict access to YAML files
+  ignore_errors: yes
   lineinfile:
     dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/.htaccess'
     line: '# Restrict access to YAML files.\n<Files ~ "\.yml$">\n  Order Allow,Deny\n  Deny from All\n</Files>'
 
 - name: Allow to commit vendor's folder
+  ignore_errors: yes
   lineinfile:
     dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/.gitignore'
     regexp: '^vendor'
     line: '# vendor'
 
 - name: Create Behat folder
+  ignore_errors: yes
   file:
     path: '{{ repo_subfolder }}/tests/behat'
     state: directory
 
 - name: Injecting behat tests into repo
+  ignore_errors: yes
   synchronize:
     src: '{{ role_path }}/files/tests'
     dest: '{{ repo_subfolder }}/'
@@ -119,6 +135,7 @@
   register: vmbox
 
 - name: Injecting vmbox into repo
+  ignore_errors: yes
   synchronize:
     src: '{{ role_path }}/files/vagrant/box/'
     dest: '{{ repo_subfolder }}/'
@@ -128,10 +145,12 @@
   register: tests
 
 - name: Add CIBox core and contrib roles to vagrant box
+  ignore_errors: yes
   shell: cp -R ../core ../contrib {{ repo_subfolder }}/provisioning/ansible/
   when: with_vm == True
 
 - name: Copying installation scripts - reinstall.sh and playbook reinstall.yml
+  ignore_errors: yes
   synchronize:
     src: '{{ role_path }}/files/drupal{{ drupal_version }}/scripts/'
     dest: '{{ repo_subfolder }}/{{ drupal_subfolder }}/'
@@ -140,5 +159,6 @@
   when: with_reinstall == True
 
 - name: Setting permissions for drupal tree
+  ignore_errors: yes
   file: path={{ repo_subfolder }} state=directory mode=777 recurse=yes
   when: drupal_dl.changed == True or profile_copy.changed == True

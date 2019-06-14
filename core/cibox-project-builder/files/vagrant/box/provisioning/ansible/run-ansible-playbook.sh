@@ -7,16 +7,16 @@ export ANSIBLE_FORCE_COLOR=true
 # specific software settings.
 playbooks=(
 /vagrant/provisioning/ansible/playbooks/sendmail.yml \
-/vagrant/provisioning/ansible/playbooks/misc.yml \
-/vagrant/provisioning/ansible/playbooks/www.yml \
-/vagrant/provisioning/ansible/playbooks/php.yml \
-/vagrant/provisioning/ansible/playbooks/php-xdebug.yml \
-/vagrant/provisioning/ansible/playbooks/mysql.yml \
+#/vagrant/provisioning/ansible/playbooks/misc.yml \
+#/vagrant/provisioning/ansible/playbooks/www.yml \
+#/vagrant/provisioning/ansible/playbooks/php.yml \
+#/vagrant/provisioning/ansible/playbooks/php-xdebug.yml \
+#/vagrant/provisioning/ansible/playbooks/mysql.yml \
 /vagrant/provisioning/ansible/playbooks/memcached.yml \
-/vagrant/provisioning/ansible/playbooks/composer.yml \
-/vagrant/provisioning/ansible/playbooks/drush.yml \
+#/vagrant/provisioning/ansible/playbooks/composer.yml \
+#/vagrant/provisioning/ansible/playbooks/drush.yml \
 /vagrant/provisioning/ansible/playbooks/solr.yml \
-/vagrant/provisioning/ansible/playbooks/sniffers.yml \
+#/vagrant/provisioning/ansible/playbooks/sniffers.yml \
 /vagrant/provisioning/ansible/playbooks/docker.yml \
 )
 
