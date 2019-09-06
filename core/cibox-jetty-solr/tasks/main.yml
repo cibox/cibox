@@ -3,8 +3,8 @@
 
 - name: Install dependencies
   sudo: yes
-  action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=installed"
-  with_items: jetty_solr_dependencies
+  action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=present"
+  with_items: "{{ jetty_solr_dependencies }}"
 
 - name: Prepare Java folder
   file: path=/usr/java state=directory

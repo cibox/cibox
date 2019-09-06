@@ -10,4 +10,4 @@
 
 - name: Set configs to Solr
   shell: rsync -ra /root/{{ jetty_solr_module }}/{{ jetty_solr_module_config_path }}/ /opt/solr/solr/{{ item.value.name }}/conf/
-  with_dict: jetty_solr_cores
+  with_dict: "{{ jetty_solr_cores }}"
