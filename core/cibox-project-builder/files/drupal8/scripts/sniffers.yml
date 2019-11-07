@@ -11,6 +11,7 @@
     artifacts_file: commentinfo.md
     webroot: http://localhost
     installation_profile_name: pp
+    docroot: docroot/
     installation_profile_path: "profiles/{{ installation_profile_name }}"
     scan_security: false
     phpcs_extensions: php,inc,install,module,theme
@@ -71,6 +72,7 @@
       - { name: 'themes', path: 'themes/custom', exclude: ['bower'] }
 
     sniffers_update: true
+    sniff_diffs: false
 
   roles:
     - { role: devops/roles/cibox-security-testing, when: scan_security == true }
@@ -109,7 +111,7 @@
     - name: Prepare directory for global composer libs
       sudo: yes
       file: path={{ composer_dir }} state=directory
-      when: sniffers_update == true and is_composer_dir.stat.exists == false
+      when: sniffers_update == true and is_composer_dir is defined and is_composer_dir.stat.exists == false
       tags:
         - sniffers
 
@@ -118,6 +120,7 @@
       file:
         path: "{{ composer_dir }}/{{ item }}"
         state: absent
+      when: sniffers_update == true
       with_items:
         - composer.lock
         - composer.json
@@ -189,6 +192,71 @@
     - name: Create directory for build reports
       sudo: yes
       file: path={{ build_reports_dir }} state=directory mode=0777
+
+    - name: Get latest sourcecode
+      shell: "git fetch origin {{ target_branch }}"
+      args:
+        chdir: "{{ pr_workspace }}"
+      when: source_hash is defined
+
+    - name: Get branching point hash
+      shell: "git merge-base origin/{{ target_branch }} {{ source_hash }}"
+      args:
+        chdir: "{{ pr_workspace }}"
+      register: branching_hash
+      when: source_hash is defined and sniff_diffs
+
+    - name: Populate list of changed files for PHPCS sniffers
+      shell: "git diff --name-only --diff-filter=ACMRTUXB {{ branching_hash.stdout }} {{ source_hash }} | grep -E '({{ features_path }}|{{ custom_modules_path }}|{{ custom_themes_path }})' | grep -E '.php|.info|.module|.inc' | tr '\n' ' '"
+      args:
+        chdir: "{{ pr_workspace }}"
+      register: changed_files_phpcs
+      when: branching_hash.stdout is defined and sniff_diffs
+
+    - name: Populate list of changed files for JS sniffers
+      shell: "git diff --name-only --diff-filter=ACMRTUXB {{ branching_hash.stdout }} {{ source_hash }} | grep -E '({{ features_path }}|{{ custom_modules_path }}|{{ custom_themes_path }})' | grep -E '.js' | tr '\n' ' '"
+      args:
+        chdir: "{{ pr_workspace }}"
+      register: changed_files_js
+      when: branching_hash.stdout is defined and sniff_diffs
+
+    - name: Populate list of changed files for SCSS sniffers
+      shell: "git diff --name-only --diff-filter=ACMRTUXB {{ branching_hash.stdout }} {{ source_hash }} | grep -E '({{ features_path }}|{{ custom_modules_path }}|{{ custom_themes_path }})' | grep -E '.scss' | tr '\n' ' '"
+      args:
+        chdir: "{{ pr_workspace }}"
+      register: changed_files_scss
+      when: branching_hash.stdout is defined and sniff_diffs
+
+    - name: PHP CodeSniffer for changed files run
+      shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_features_extensions }} -n {{ changed_files_phpcs.stdout }} --report-file={{ build_reports_dir }}/ChangedFiles{{ item.name }}sniff.txt --ignore={{ phpcs_features_ignore | join(",") }} || true'
+      with_items: phpcs_standards
+      when: changed_files_phpcs is defined and changed_files_phpcs.stdout and sniff_diffs
+
+    - name: PHP CodeSniffer for changed files reports build
+      ignore_errors: yes
+      shell: 'if grep "FOUND" {{ build_reports_dir }}/ChangedFiles{{ item.name }}sniff.txt; then echo "<strong>`grep -o "| ERROR |" {{ build_reports_dir }}/ChangedFiles{{ item.name }}sniff.txt | wc -l` errors</strong> for CodeSniffer in Changed Files: {{ item.name }} standard file {{ webroot }}/build_reports/ChangedFiles{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
+      args:
+        executable: /bin/bash
+      with_items: phpcs_standards
+      when: changed_files_phpcs is defined and changed_files_phpcs.stdout and sniff_diffs
+
+    - name: JSHint run for changed files
+      shell: 'find {{ changed_files_js.stdout }} ! -path "*mute*" -type f \( -iname "*.js" ! -iname "*min.js" \) -print0 | xargs -0 jshint > {{ build_reports_dir }}/ChangedFilesjshint.txt || true'
+      when: changed_files_js is defined and changed_files_js.stdout and sniff_diffs
+
+    - name: JSHint build reports for changed files
+      ignore_errors: yes
+      shell: 'if [ -s {{ build_reports_dir }}/ChangedFilesjshint.txt ]; then echo "<strong>`tail -1 < {{ build_reports_dir }}/ChangedFilesjshint.txt`</strong> JSHint: in ChangedFiles {{ webroot }}/{{ build_reports_dir }}/ChangedFilesjshint.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
+      when: changed_files is defined and changed_files.stdout and sniff_diffs
+
+    - name: SCSS lint run for changed files
+      shell: 'find {{ changed_files_scss.stdout }} -name "*.scss" -print0 | xargs -0 -r scss-lint -c scss-lint.yml > {{ build_reports_dir }}/ChangedFiles_scsslint.txt || true'
+      when: changed_files_scss is defined and changed_files_scss.stdout and sniff_diffs
+
+    - name: SCSS lint build reports for changed files
+      ignore_errors: yes
+      shell: 'if grep -o "\<[E]\>" {{ build_reports_dir }}/ChangedFiles_scsslint.txt; then echo "<strong>`grep -o "\<[E]\>" {{ build_reports_dir }}/ChangedFiles_scsslint.txt | wc -l`</strong> errors for SCSS-lint in ChangedFiles {{ webroot }}/build_reports/ChangedFiles_scsslint.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
+      when: changed_files is defined and changed_files.stdout and sniff_diffs
 
     - name: PHP CodeSniffer run
       shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} {{ installation_profile_path }} {{ custom_themes_path }} --report-file={{ build_reports_dir }}/{{ item.name }}sniff.txt --ignore={{ phpcs_modules_ignore | join(",") }} || true'
