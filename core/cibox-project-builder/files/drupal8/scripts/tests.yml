@@ -7,39 +7,95 @@
     workspace_root: .
     artifacts_file: commentinfo.md
     build_reports_dir: build_reports
-    base_url: http://drupal.192.168.56.132.xip.io # WITHOUT TRAILING SLASH
-    drupal_root: /var/www/docroot
+    behat_base_url: http://admin:propeople@drupal.192.168.56.132.xip.io # WITHOUT TRAILING SLASH
+    behat_drupal_root: /var/www/docroot
     resources_path: /var/www/tests/behat/resources
     behat_root: '../tests/behat'
     config_file: behat.yml
     features_dir: features
     browser: 'chrome'
-    selenium_url: 127.0.0.1:4444/wd/hub
-    run_javascript_tests: 'no'
+    selenium_ip: 127.0.0.1
+    selenium_port: 4444
+    selenium_url: "{{ selenium_ip }}:{{ selenium_port }}/wd/hub"
+    run_javascript_tests: 'yes'
     update_dependencies: 'yes'
-    selenium_jar_path: /var/lib/selenium/selenium.jar
-    chrome_driver_path: /var/lib/chrome-driver/chromedriver
-    drupal_core_test_group: 'group,groups,separated,by,comma'
-    run_behat_tests: 'yes'
-    run_drupal_core_tests: 'yes'
+    container_name: 'selenium'
+    container_image: 'selenium/standalone-chrome:2.53.0'
 
   pre_tasks:
-  - include: devops/tests/behat/pre_tasks/behat.yml
-    when: run_behat_tests == 'yes'
+    - name: Prepare folder with test suites
+      file:
+        path: "{{ behat_root }}"
+        state: directory
+        mode: 0777
+        recurse: yes
+      sudo: yes
 
-  - include: devops/tests/drupal_core/pre_tasks/drupal_core.yml
-    when: run_drupal_core_tests == 'yes'
+    - name: Install behat dependencies from composer.json
+      shell: "cd {{ behat_root }} && composer up"
+      when: update_dependencies == 'yes'
+
+    - name: Create dynamic behat.yml
+      template: src={{ behat_root }}/behat.yml.j2 dest=/tmp/behat.yml
+
+    - name: Move behat.yml
+      sudo: yes
+      shell: mv /tmp/behat.yml {{ behat_root }}/behat.yml
+
+    - name: Wait for Selenium container to be stopped
+      wait_for:
+        host: "{{ selenium_ip }}"
+        port: "{{ selenium_port }}"
+        delay: 0
+        state: stopped
+      when: run_javascript_tests == 'yes'
 
   tasks:
-  - include: devops/tests/behat/tasks/behat.yml
-    when: run_behat_tests == 'yes'
+    - name: Run Selenium container
+      docker:
+        name: "{{ container_name }}"
+        image: "{{ container_image }}"
+        detach: true
+        ports: "{{ selenium_port }}:{{ selenium_port }}"
+        state: started
+      sudo: yes
+      when: run_javascript_tests == 'yes'
 
-  - include: devops/tests/drupal_core/tasks/drupal_core.yml
-    when: run_drupal_core_tests == 'yes'
+    - name: Wait for Selenium container to be run
+      wait_for:
+        host: "{{ selenium_ip }}"
+        port: "{{ selenium_port }}"
+        delay: 10
+        state: drained
+      when: run_javascript_tests == 'yes'
+
+    - name: Create directory for build reports
+      sudo: yes
+      file: path={{ behat_drupal_root }}/{{ build_reports_dir }} state=directory mode=0777
+
+    - name: Run full Behat tests
+      ignore_errors: yes
+      shell: 'echo "Behat tests: standard file {{ behat_base_url }}/{{ build_reports_dir }}/behat_report.html" >> {{ workspace_root }}/{{ artifacts_file }} && cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }} --tags "~@ignore"'
+      when: run_javascript_tests == 'yes'
+
+    - name: Run headless Behat tests
+      ignore_errors: yes
+      shell: 'echo "Behat tests: standard file {{ behat_base_url }}/{{ build_reports_dir }}/behat_report.html" >> {{ workspace_root }}/{{ artifacts_file }} && cd {{ behat_root }} && bin/behat --config {{ config_file }} {{ features_dir }} --tags "~@javascript&&~@ignore"'
+      when: run_javascript_tests == 'no'
 
   post_tasks:
-  - include: devops/tests/behat/post_tasks/behat.yml
-    when: run_behat_tests == 'yes'
+    - name: Stop Selenium container
+      docker:
+        name: "{{ container_name }}"
+        image: "{{ container_image }}"
+        state: stopped
+      sudo: yes
+      when: run_javascript_tests == 'yes'
 
-  - include: devops/tests/drupal_core/post_tasks/drupal_core.yml
-    when: run_drupal_core_tests == 'yes'
+    - name: Remove Selenium container
+      docker:
+        name: "{{ container_name }}"
+        image: "{{ container_image }}"
+        state: absent
+      sudo: yes
+      when: run_javascript_tests == 'yes'
