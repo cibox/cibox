@@ -9,7 +9,6 @@
   apt: update_cache=yes
   ignore_errors: yes
 
-# @todo should be tested with DO 14.04 Ubuntu.
 - name: Setup initial packages onto clean system for ansible
   sudo: yes
   # Installing sudo on small ubuntu install.
@@ -17,7 +16,7 @@
 
 - name: Fixing logger not found
   sudo: yes
-  shell: "apt-get --reinstall install -y bsdutils"
+  shell: "apt-get --reinstall install -y --force-yes bsdutils"
 
 # We have to disable mail sending from CI box.
 # Does not create a link if sendmail is installed.
