@@ -1,23 +1,23 @@
 ---
-php_version: 7.1
+php_version: 7.3 php7.4-xml php7.4-xdebug php7.4-mbstring php7.4-soap php7.4-zip libapache2-mod-php7.4 php7.4-json php7.4-opcache php7.4-readline
 edge_php_version: ""
 __php_packages:
-  - php{{ php_version }}
-  - php{{ php_version }}-mcrypt
+  - php{{ php_version }}-mysql
   - php{{ php_version }}-cli
   - php{{ php_version }}-common
   - php{{ php_version }}-curl
   - php{{ php_version }}-dev
   - php{{ php_version }}-fpm
   - php{{ php_version }}-gd
-  - php{{ php_version }}-mysql
   - php{{ php_version }}-memcached
-  - php{{ php_version }}-imagick
-  - php{{ php_version }}-xml
+  - php{{ php_version }}-imagic
   - php{{ php_version }}-xdebug
   - php{{ php_version }}-mbstring
   - php{{ php_version }}-soap
   - php{{ php_version }}-zip
+  - php{{ php_version }}-json
+  - php{{ php_version }}-opcache
+  - php{{ php_version }}-readline
   - libpcre3-dev
   - libapache2-mod-php{{ php_version }}
   #- libapache2-mod-php{{ edge_php_version }}
