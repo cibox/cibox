@@ -1,5 +1,5 @@
 ---
-php_version: 7.3 php7.4-xml php7.4-xdebug php7.4-mbstring php7.4-soap php7.4-zip libapache2-mod-php7.4 php7.4-json php7.4-opcache php7.4-readline
+php_version: 7.3
 edge_php_version: ""
 __php_packages:
   - php{{ php_version }}-mysql
