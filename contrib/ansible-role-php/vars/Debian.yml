@@ -18,6 +18,7 @@ __php_packages:
   - php{{ php_version }}-json
   - php{{ php_version }}-opcache
   - php{{ php_version }}-readline
+  - php{{ php_version }}-xml
   - libpcre3-dev
   - libapache2-mod-php{{ php_version }}
   #- libapache2-mod-php{{ edge_php_version }}
