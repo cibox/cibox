@@ -10,7 +10,7 @@ __php_packages:
   - php{{ php_version }}-fpm
   - php{{ php_version }}-gd
   - php{{ php_version }}-memcached
-  - php{{ php_version }}-imagic
+  - php{{ php_version }}-imagick
   - php{{ php_version }}-xdebug
   - php{{ php_version }}-mbstring
   - php{{ php_version }}-soap
