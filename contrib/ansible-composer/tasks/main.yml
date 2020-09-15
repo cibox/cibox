@@ -10,3 +10,7 @@
 - name: make composer executable
   file: path=/usr/local/bin/composer state=touch mode=0755
   tags: composer
+  
+- name: stick with 1.10.0 composer
+  shell: composer self-update 1.10.0
+  tags: composer
