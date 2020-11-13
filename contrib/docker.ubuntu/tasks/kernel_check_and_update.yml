@@ -13,7 +13,7 @@
 - name: Install Xorg packages for backported kernels (very optional)
   apt:
     pkg: "{{ item }}"
-    state: installed
+    state: present
     update_cache: yes
     cache_valid_time: 600
   loop:

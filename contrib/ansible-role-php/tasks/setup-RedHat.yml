@@ -2,7 +2,7 @@
 - name: Ensure PHP packages are installed.
   yum:
     name: "{{ item }}"
-    state: installed
+    state: latest
     enablerepo: "{{ php_enablerepo }}"
   loop: "{{ php_packages }}"
   notify: restart webserver
