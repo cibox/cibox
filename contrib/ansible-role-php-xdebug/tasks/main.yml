@@ -17,7 +17,7 @@
     {{ item }}
     chdir={{ workspace }}/xdebug-{{ php_xdebug_version }}
     creates={{ workspace }}/xdebug-{{ php_xdebug_version }}/modules/xdebug.so
-  with_items:
+  loop:
     - phpize
     - ./configure
     - make

@@ -6,4 +6,4 @@
     password: "{{ item.password }}"
     priv: "{{ item.priv | default('*.*:USAGE') }}"
     state: present
-  with_items: mysql_users
+  loop: mysql_users

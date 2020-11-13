@@ -18,48 +18,48 @@
   tasks:
   - name: Cleanup source tree to temporary destination
     shell: rm -rf "{{ item.name }}"
-    with_items: "{{ map_source_folders_for_decouple }}"
+    loop: "{{ map_source_folders_for_decouple }}"
 
   - name: Copy source tree to temporary destination
     shell: 'cp -r {{ source_repo_folder }} {{ item.name }}'
-    with_items: "{{ map_source_folders_for_decouple }}"
+    loop: "{{ map_source_folders_for_decouple }}"
 
   - name: Git filter branch for all requested source folders
     shell: "git clean -fd && git reset --hard && git filter-branch --subdirectory-filter {{ item.source }} && git clean -fd"
-    with_items: "{{ map_source_folders_for_decouple }}"
+    loop: "{{ map_source_folders_for_decouple }}"
     args:
       chdir: "{{ item.name }}"
 
   - name: Create destination folders
     shell: "mkdir -p {{ item.destination }}"
-    with_items: "{{ map_source_folders_for_decouple }}"
+    loop: "{{ map_source_folders_for_decouple }}"
     args:
       chdir: "{{ item.name }}"
 
   - name: Git move decoupled to destination
     shell: "git mv * {{ item.destination }} -k && git commit -m '[AUTO] Move all files to requested destination.'"
-    with_items: "{{ map_source_folders_for_decouple }}"
+    loop: "{{ map_source_folders_for_decouple }}"
     args:
       chdir: "{{ item.name }}"
 
   - name: Git make new branch for decoupled
     shell: "git checkout -b decouple_{{ item.name }}"
-    with_items: "{{ map_source_folders_for_decouple }}"
+    loop: "{{ map_source_folders_for_decouple }}"
     args:
       chdir: "{{ item.name }}"
 
   - name: Git pull decoupled into destination repo - add remotes
     shell: "git remote remove {{ item.name }} || true && git remote add {{ item.name }} ../{{ item.name }}"
-    with_items: "{{ map_source_folders_for_decouple }}"
+    loop: "{{ map_source_folders_for_decouple }}"
     args:
       chdir: "{{ destination_repo_folder }}"
 
   - name: Git pull decoupled into destination repo - merge branches
     shell: "git fetch {{ item.name }} && git merge remotes/{{ item.name }}/decouple_{{ item.name }}"
-    with_items: "{{ map_source_folders_for_decouple }}"
+    loop: "{{ map_source_folders_for_decouple }}"
     args:
       chdir: "{{ destination_repo_folder }}"
 
   - name: Cleanup temporary source tree
     shell: 'rm -rf {{ item.name }}'
-    with_items: "{{ map_source_folders_for_decouple }}"
+    loop: "{{ map_source_folders_for_decouple }}"

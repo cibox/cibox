@@ -31,7 +31,7 @@
 - name: Install apt repos
   become: yes
   apt_repository: repo={{ item }} validate_certs=no
-  with_items: apt_repos
+  loop: apt_repos
   ignore_errors: true
 
 - name: Update apt
@@ -52,7 +52,7 @@
     name: "{{ pip_packages }}" 
     state: present
   become: yes
-  #with_items: pip_packages
+  #loop: pip_packages
 
 - name: Remove premature repository from php role
   become: yes

@@ -30,7 +30,7 @@
     owner: jenkins
     group: jenkins
   when: item.status == true
-  with_items: jenkins_jobs
+  loop: jenkins_jobs
 
 - name: Copy Jenkins jobs
   template:
@@ -41,7 +41,7 @@
     force: yes
   notify: Restart Jenkins
   when: item.status == true
-  with_items: jenkins_jobs
+  loop: jenkins_jobs
 
 # Automatically scan users directory.
 - name: Create folders for users
@@ -51,7 +51,7 @@
     owner: jenkins
     group: jenkins
   when: item.status == true
-  with_items: jenkins_users
+  loop: jenkins_users
 
 - name: Copy user configs
   template:
@@ -63,7 +63,7 @@
     force: yes
   notify: Restart Jenkins
   when: item.status == true
-  with_items: jenkins_users
+  loop: jenkins_users
 
 # Automatically scan configs directory.
 - name: Copy Jenkins configs

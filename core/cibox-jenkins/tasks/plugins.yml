@@ -4,7 +4,7 @@
 - name: Install/update plugins
   become: yes
   action: command java -jar {{ jenkins.cli_dest }} -s http://localhost:8080 install-plugin {{ item }}
-  with_items: plugins
+  loop: plugins
   notify:
     - 'Restart Jenkins'
     

@@ -15,7 +15,7 @@
   register: pecl_result
   changed_when: "pecl_result.rc == 0"
   failed_when: "not (('already installed' in pecl_result.stdout) or ('install ok:' in pecl_result.stdout))"
-  with_items:
+  loop:
     # Manual channel installation required for certain PEAR versions.
     - "channel://pecl.php.net/xhprof-0.9.4"
     - xhprof

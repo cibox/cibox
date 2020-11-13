@@ -8,4 +8,4 @@
   apt: 
     name: "{{ apache_packages }}"
     state: latest
-  #with_items: apache_packages
+  #loop: apache_packages

@@ -7,5 +7,5 @@
   apt:
     name: "{{ item }}"
     state: installed
-  with_items: php_packages
+  loop: php_packages
   notify: restart webserver

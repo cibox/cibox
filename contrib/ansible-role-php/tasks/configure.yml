@@ -3,7 +3,7 @@
   file:
     path: "{{ item }}"
     state: directory
-  with_items:
+  loop:
     - php_conf_path
     - php_extension_conf_path
 

@@ -106,7 +106,7 @@
     state: latest
     update_cache: yes
     cache_valid_time: "{{ docker_apt_cache_valid_time }}"
-  with_items:
+  loop:
     - python-dev
     - python-pip
 
@@ -116,7 +116,7 @@
   pip:
     name: "{{ item.name }}"
     state: latest
-  with_items:
+  loop:
     - { name: pip, version: "{{ pip_version_pip }}", install: "{{ pip_install_pip }}" }
     - { name: setuptools, version: "{{ pip_version_setuptools }}", install: "{{ pip_install_setuptools }}" }
     - { name: docker-py, version: "{{ pip_version_docker_py }}", install: "{{ pip_install_docker_py }}" }
@@ -130,7 +130,7 @@
     name: "{{ item.name }}"
     state: present
     version: "{{ item.version }}"
-  with_items:
+  loop:
     - { name: pip, version: "{{ pip_version_pip }}", install: "{{ pip_install_pip }}" }
     - { name: setuptools, version: "{{ pip_version_setuptools }}", install: "{{ pip_install_setuptools }}" }
     - { name: docker-py, version: "{{ pip_version_docker_py }}", install: "{{ pip_install_docker_py }}" }
@@ -181,7 +181,7 @@
     name:   "{{ item }}"
     groups: docker
     append: yes
-  with_items: "{{docker_group_members}}"
+  loop: "{{docker_group_members}}"
   when: docker_group_members is defined
 
 - name: update facts if docker0 is not defined
