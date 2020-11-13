@@ -7,5 +7,5 @@
 - name: Ensure Apache is installed.
   apt: 
     name: "{{ apache_packages }}"
-    state: installed
+    state: latest
   #with_items: apache_packages
