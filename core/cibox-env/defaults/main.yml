@@ -45,7 +45,7 @@ pip_packages:
   - jinja2
   - markupsafe
   - MySQL-python
-  - ansible==1.9.6
+  - ansible
   - virtualenv
   - cffi
   - cryptography
