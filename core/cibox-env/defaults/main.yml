@@ -44,8 +44,9 @@ pip_packages:
   - pyyaml
   - jinja2
   - markupsafe
-  - MySQL-python
+  #- MySQL-python
   - ansible
+  - mysql-connector
   - virtualenv
   - cffi
   - cryptography
