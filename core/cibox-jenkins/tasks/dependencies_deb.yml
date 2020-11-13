@@ -2,5 +2,5 @@
 # Install Jenkins dependencies
 - name: Install dependencies
   become: yes
-  action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=installed"
+  action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=latest"
   loop: "{{ jenkins.deb.dependencies }}"

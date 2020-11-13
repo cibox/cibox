@@ -4,4 +4,4 @@
   ignore_errors: yes
 
 - name: Install Memcached.
-  apt: name=memcached state=installed
+  apt: name=memcached state=latest

@@ -10,7 +10,7 @@
 
 - name: Install dependencies
   become: yes
-  action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=installed update-cache=yes"
+  action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=latest update-cache=yes"
   loop: "{{ behat_selenium2_dependencies }}"
   tags: behat-selenium
   ignore_errors: yes
