@@ -16,7 +16,7 @@
 
   tasks:
     - name: Create directory for build reports
-      sudo: yes
+      become: yes
       file: path={{ build_reports_dir }} state=directory mode=0777
 
     - name: Check security updates

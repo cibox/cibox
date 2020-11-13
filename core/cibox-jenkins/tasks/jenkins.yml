@@ -10,11 +10,11 @@
 # Download Jenkins package
 - name: Download Jenkins deb
   get_url: url={{ jenkins_pkg_version }} dest=~/jenkins.deb mode=440
-  sudo: yes
+  become: yes
 
 # Install Jenkins
 - name: Install Jenkins
-  sudo: yes
+  become: yes
   shell: "dpkg -i ~/jenkins.deb"
   when: ansible_distribution in [ 'Debian', 'Ubuntu' ]
   register: jenkins_install

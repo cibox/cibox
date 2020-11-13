@@ -9,7 +9,7 @@
   lineinfile: dest=/etc/sudoers line="jenkins ALL=(ALL) NOPASSWD:ALL"
 
 - name: Starting random rnd-tools service
-  sudo: yes
+  become: yes
   shell: rngd -r /dev/urandom
   when: ansible_virtualization_type != "openvz"
 

@@ -5,18 +5,18 @@
 
 - name: Make drush src available globally
   shell: "rsync -avz --delete /root/.composer/vendor/drush/drush/ /usr/local/src/drush"
-  sudo: yes
+  become: yes
 
 - name: Adding global link to drush binary
   file: src=/usr/local/src/drush/drush dest=/usr/local/bin/drush state=link mode=755 force=yes
-  sudo: yes
+  become: yes
 
 - name: Fix permissions for library folder.
   file: path=/usr/local/src/drush/lib state=directory mode=0777
-  sudo: yes
+  become: yes
 
 - name: Update all composer dependencies
-  sudo: yes
+  become: yes
   command: "{{drush_composer_bin}} update"
   args:
     chdir: /usr/local/src/drush

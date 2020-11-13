@@ -1,11 +1,11 @@
 ---
 
   - name: Prepare mysql tmpdir - step 1
-    sudo: yes
+    become: yes
     shell: "rm -rf {{ mysql_tmpdir }}"
 
   - name: Prepare mysql tmpdir - step 2
-    sudo: yes
+    become: yes
     shell: "mkdir {{ mysql_tmpdir }} && chown mysql:mysql /run/shm/mysql && chmod -R 777 /run/shm/mysql"
     tags:
       - mysql
@@ -14,34 +14,34 @@
 
   - name: Adding tmpdir preparation to rc.local
     lineinfile: dest=/etc/rc.local regexp="^exit 0" insertbefore=yes line="rm -rf /run/shm/mysql && mkdir /run/shm/mysql || true && chown mysql:mysql /run/shm/mysql && chmod -R 777 /run/shm/mysql"
-    sudo: yes
+    become: yes
     tags:
       - mysql
       - php-stack
 
   - name: Disable apparmor
-    sudo: yes
+    become: yes
     shell: "update-rc.d -f apparmor remove"
     ignore_errors: yes
 
   - name: Teardown apparmor
-    sudo: yes
+    become: yes
     shell: "/etc/init.d/apparmor teardown"
     ignore_errors: yes
 
   - name: Stop apparmor
-    sudo: yes
+    become: yes
     shell: "/etc/init.d/apparmor stop"
     ignore_errors: yes
 
   - name: Setting mysqld to complain mode
-    sudo: yes
+    become: yes
     shell: aa-complain /usr/sbin/mysqld
     ignore_errors: yes
 
   - name: Add preconfigured settings to my.cnf file
     ini_file: dest=/etc/mysql/my.cnf section={{ item.section }} option={{ item.option }} value={{ item.value }}
-    sudo: yes
+    become: yes
     with_items: my_cnf
     tags:
       - mysql

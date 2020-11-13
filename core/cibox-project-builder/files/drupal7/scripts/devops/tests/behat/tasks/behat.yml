@@ -8,7 +8,7 @@
   template: src={{ behat_root }}/behat.yml.j2 dest=/tmp/behat.yml
 
 - name: Move behat.yml
-  sudo: yes
+  become: yes
   shell: mv /tmp/behat.yml {{ behat_root }}/behat.yml
 
 - name: Ensure that xvfb is run
@@ -22,14 +22,14 @@
   when: behat_run_javascript_tests == 'yes'
 
 - name: Run Selenium standalone with Chrome
-  sudo: yes
+  become: yes
   shell: java -jar {{ selenium_jar_path }} -log selenium.log -Dwebdriver.chrome.driver={{ chrome_driver_path }} &
   environment:
     DISPLAY: ':99'
   when: behat_run_javascript_tests == 'yes' and browser == 'chrome'
 
 - name: Run Selenium standalone with Firefox
-  sudo: yes
+  become: yes
   shell: java -jar {{ selenium_jar_path }} -log selenium.log &
   environment:
     DISPLAY: ':99'
@@ -40,7 +40,7 @@
   when: behat_run_javascript_tests == 'yes'
 
 - name: Create directory for build reports
-  sudo: yes
+  become: yes
   file: path={{ drupal_root }}/{{ build_reports_dir }} state=directory mode=0777
 
 - name: Run full Behat tests

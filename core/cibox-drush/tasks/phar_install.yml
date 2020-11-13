@@ -6,9 +6,9 @@
 - name: "Install Drush globally"
   shell: "mv drush.phar /usr/local/bin/drush"
   sudo_user: "{{ drush_composer_user }}"
-  sudo: yes
+  become: yes
 
 - name: "Make it executable"
   shell: "chmod +x /usr/local/bin/drush"
   sudo_user: "{{ drush_composer_user }}"
-  sudo: yes
+  become: yes

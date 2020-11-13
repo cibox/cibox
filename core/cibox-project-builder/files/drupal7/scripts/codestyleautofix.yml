@@ -44,20 +44,20 @@
 
   pre_tasks:
     - name: Was composer downloaded
-      sudo: yes
+      become: yes
       stat: path={{ composer_dir }}
       register: is_composer_dir
       when: sniffers_update == true
 
     - name: prepare directory for global composer libs
-      sudo: yes
+      become: yes
       file: path={{ composer_dir }} state=directory
       when: sniffers_update == true and is_composer_dir.stat.exists == false
       tags:
         - sniffers
 
     - name: Cleanup composer packages
-      sudo: yes
+      become: yes
       shell: "cd {{ composer_dir }} && composer remove {{ item.package }}"
       with_items: composer_global_require
       when: sniffers_update == true
@@ -67,7 +67,7 @@
         - git
 
     - name: Install composer global requires
-      sudo: yes
+      become: yes
       shell: "cd {{ composer_dir }} && composer require --prefer-dist {{ item.package }}{{ item.version }}"
       with_items: composer_global_require
       when: sniffers_update == true
@@ -77,7 +77,7 @@
         - git
 
     - name: Install php codesniffer standards
-      sudo: yes
+      become: yes
       file: src={{ composer_dir }}/{{ item.path }} dest={{ composer_dir }}/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/{{ item.name }} state=link
       with_items: phpcbf_standards
       when: sniffers_update == true
@@ -86,12 +86,12 @@
         - git
 
     - name: Fix permissions for composer libs
-      sudo: yes
+      become: yes
       file: path={{ composer_dir }} state=directory mode=655 recurse=yes
       when: sniffers_update == true
 
     - name: Create symlink to phpcbf binary
-      sudo: yes
+      become: yes
       file: src={{ composer_dir }}/vendor/bin/phpcbf dest={{ phpcbf_bin }} state=link mode=655 force=yes
       when: sniffers_update == true
 

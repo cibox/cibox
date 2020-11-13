@@ -104,7 +104,7 @@ before
 
 ```yml
 name: Stage File Proxy settings
-sudo: yes
+become: yes
 lineinfile: dest='sites/default/settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"{{ stage_file_proxy_url }}";'
 ```
 
@@ -112,15 +112,15 @@ after:
 
 ```yml
 name: Copy settings.php
-sudo: yes
+become: yes
 shell: cp sites/default/settings.php /tmp/reinstall_settings.php
 
 name: Stage File Proxy settings
-sudo: yes
+become: yes
 lineinfile: dest='sites/default/settings.php' line='$conf[\"stage_file_proxy_origin\"] = \"{{ stage_file_proxy_url }}\";'
 
 name: Restore settings.php
-sudo: yes
+become: yes
 shell: cp /tmp/reinstall_settings.php sites/default/settings.php
 ```
 

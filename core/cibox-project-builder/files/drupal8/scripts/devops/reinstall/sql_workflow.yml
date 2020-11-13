@@ -24,27 +24,27 @@
 
 - name: Removing possible abandoned dump
   shell: rm -rf {{ backup_folder }}/latest_remote.sql
-  sudo: yes
+  become: yes
   when: pp_environment == "default" and ((ansible_env.USER is not defined or ansible_env.USER != "{{ ci_server_username }}") and (ansible_env.SUDO_USER is not defined or ansible_env.SUDO_USER != "{{ ci_server_username }}"))
 
 - name: Importing from remote backup
   mysql_db: name={{ mysql_db }} state=import target={{ backup_folder }}/latest_remote.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }} login_host={{ mysql_host }}
-  sudo: yes
+  become: yes
   when: pp_environment == "default" and ((ansible_env.USER is not defined or ansible_env.USER != "{{ ci_server_username }}") and (ansible_env.SUDO_USER is not defined or ansible_env.SUDO_USER != "{{ ci_server_username }}"))
 
 # CI server build.
 - name: Copy latest backup to build folder
-  sudo: yes
+  become: yes
   copy: src={{ backup_folder }}/{{ source_backup_name }} dest=./latest.sql.gz force=yes mode=0644
   when: (pp_environment == "default" or pp_environment == "demo") and ((ansible_env.USER is defined and ansible_env.USER == "{{ ci_server_username }}") or (ansible_env.SUDO_USER is defined and ansible_env.SUDO_USER == "{{ ci_server_username }}"))
 
 - name: Importing from local backup
   mysql_db: name={{ mysql_db }} state=import target=./latest.sql.gz login_user={{ mysql_user }} login_password={{ mysql_pass }} login_host={{ mysql_host }}
-  sudo: yes
+  become: yes
   when: (pp_environment == "default" or pp_environment == "demo") and ((ansible_env.USER is defined and ansible_env.USER == "{{ ci_server_username }}") or (ansible_env.SUDO_USER is defined and ansible_env.SUDO_USER == "{{ ci_server_username }}"))
 
 - name: Remove local backup from build folder
-  sudo: yes
+  become: yes
   file: name=./latest.sql.gz state=absent
   when: pp_environment == "default" or pp_environment == "demo"
   
@@ -62,32 +62,32 @@
   ignore_errors: true
 
 - name: Downloading registry_rebuild
-  sudo: yes
+  become: yes
   shell: "{{ php_env_vars }} drush -y dl registry_rebuild"
   when: rebuild_registry and registry_rebuild_installed.stdout == "0"
 
 - name: Clear drush cache
-  sudo: yes
+  become: yes
   shell: "{{ php_env_vars }} drush cc drush"
   when: rebuild_registry and registry_rebuild_installed.stdout == "0"
 
 - name: Rebuilding drupal registry
-  sudo: yes
+  become: yes
   shell: "{{ php_env_vars }} drush -y rr -l {{ site_url }} || true"
   when: rebuild_registry
 
 # Update database. See https://www.youtube.com/watch?v=vFsgNjhGr4Y how-to update configs with http://dgo.to/confi
 - name: Updating database
-  sudo: yes
+  become: yes
   shell: "{{ php_env_vars }} drush -dvy updb -l {{ site_url }}"
   register: updates
 
 - name: Clearing cache after update tasks
-  sudo: yes
+  become: yes
   shell: "{{ php_env_vars }} drush cr -l {{ site_url }}"
 
 - name: Apply pending entity schema updates
-  sudo: yes
+  become: yes
   shell: "{{ php_env_vars }} drush -y entup -l {{ site_url }}"
 
 # Display updates output.

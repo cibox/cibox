@@ -9,7 +9,7 @@
   tags: behat-selenium
 
 - name: Install dependencies
-  sudo: yes
+  become: yes
   action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=installed update-cache=yes"
   with_items: behat_selenium2_dependencies
   tags: behat-selenium
@@ -24,6 +24,6 @@
   tags: behat-selenium
 
 - name: Enable xvfb on boot
-  sudo: yes
+  become: yes
   shell: update-rc.d xvfb defaults
   tags: behat-selenium
