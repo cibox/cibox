@@ -3,4 +3,4 @@
 - name: Install dependencies
   become: yes
   action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=installed"
-  loop: jenkins.deb.dependencies
+  loop: "{{ jenkins.deb.dependencies }}"

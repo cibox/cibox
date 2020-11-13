@@ -2,4 +2,4 @@
 
 - name: Ensure MySQL packages are installed.
   yum: "name={{ item }} state=installed enablerepo={{ mysql_enablerepo }}"
-  loop: mysql_packages
+  loop: "{{ mysql_packages }}"

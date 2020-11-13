@@ -3,9 +3,9 @@
 - name: Run general drush commands
   shell: "{{ php_env_vars }} drush -y {{ item.name }} {{ item.arguments }}"
   when: item.status == true
-  loop: global_env.drush_commands
+  loop: "{{ global_env.drush_commands }}"
 
 - name: Run environment specific drush commands
   shell: "{{ php_env_vars }} drush -y {{ item.name }} {{ item.arguments }}"
   when: item.status == true
-  loop: env.drush_commands
+  loop: "{{ env.drush_commands }}"

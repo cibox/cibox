@@ -39,7 +39,7 @@
 
   - name: Remove files from temporary folder
     shell: "find {{ tmp_folder }} -maxdepth 1 -name '{{ item }}' -delete"
-    loop: remove_patterns
+    loop: "{{ remove_patterns }}"
 
   - name: Remove configs from temporary folder
     shell: "rm -rf {{ tmp_folder }}/confi*"

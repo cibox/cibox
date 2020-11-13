@@ -4,7 +4,7 @@
 - name: Install dependencies
   become: yes
   action: "{{ ansible_pkg_mgr }} pkg={{ item }} state=installed"
-  loop: jetty_solr_dependencies
+  loop: "{{ jetty_solr_dependencies }}"
 
 - name: Prepare Java folder
   file: path=/usr/java state=directory

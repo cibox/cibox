@@ -59,7 +59,7 @@
     - name: Cleanup composer packages
       become: yes
       shell: "cd {{ composer_dir }} && composer remove {{ item.package }}"
-      loop: composer_global_require
+      loop: "{{ composer_global_require }}"
       when: sniffers_update == true
       tags:
         - sniffers
@@ -69,7 +69,7 @@
     - name: Install composer global requires
       become: yes
       shell: "cd {{ composer_dir }} && composer require --prefer-dist {{ item.package }}{{ item.version }}"
-      loop: composer_global_require
+      loop: "{{ composer_global_require }}"
       when: sniffers_update == true
       tags:
         - sniffers
@@ -79,7 +79,7 @@
     - name: Install php codesniffer standards
       become: yes
       file: src={{ composer_dir }}/{{ item.path }} dest={{ composer_dir }}/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/{{ item.name }} state=link
-      loop: phpcbf_standards
+      loop: "{{ phpcbf_standards }}"
       when: sniffers_update == true
       tags:
         - sniffers
@@ -98,4 +98,4 @@
   tasks:
     - name: PHP CodeSniffer codestyle autofix run
       shell: '{{ phpcbf_bin }} --standard={{ item.name }} --extensions={{ phpcbf_extensions }} -n {{ custom_modules_path }} {{ installation_profile_path }} {{ custom_themes_path }} --ignore={{ phpcbf_modules_ignore | join(",") }} || true'
-      loop: phpcbf_standards
+      loop: "{{ phpcbf_standards }}"

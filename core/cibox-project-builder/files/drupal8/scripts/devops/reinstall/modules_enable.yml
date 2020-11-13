@@ -3,9 +3,9 @@
 - name: Enable general modules
   shell: "{{ php_env_vars }} drush -y en {{ item.name }}"
   when: item.status == true
-  loop: global_env.modules
+  loop: "{{ global_env.modules }}"
 
 - name: Enable environment specific modules
   shell: "{{ php_env_vars }} drush -y en {{ item.name }}"
   when: item.status == true
-  loop: env.modules
+  loop: "{{ env.modules }}"

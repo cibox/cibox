@@ -4,4 +4,4 @@
     name: "{{ item }}"
     state: installed
     enablerepo: "{{ apache_enablerepo }}"
-  loop: apache_packages
+  loop: "{{ apache_packages }}"

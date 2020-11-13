@@ -4,8 +4,8 @@
   register: pecl_result
   changed_when: "pecl_result.rc == 0"
   failed_when: "not (('already installed' in pecl_result.stdout) or ('install ok:' in pecl_result.stdout))"
-  loop: php_pecl_extensions
+  loop: "{{ php_pecl_extensions }}"
 
 - name: Enable needed extensions
   lineinfile: line="extension={{ item }}.so" dest=/etc/php/{{ php_version }}/conf.d/20-pecl.ini create=yes
-  loop: php_pecl_extensions
+  loop: "{{ php_pecl_extensions }}"

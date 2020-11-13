@@ -13,14 +13,14 @@
     src: "{{ apache_server_root }}/mods-available/{{ item }}"
     dest: "{{ apache_server_root }}/mods-enabled/{{ item }}"
     state: link
-  loop: apache_mods_enabled
+  loop: "{{ apache_mods_enabled }}"
   notify: restart apache
 
 - name: Disable Apache mods.
   file:
     path: "{{ apache_server_root }}/mods-enabled/{{ item }}"
     state: absent
-  loop: apache_mods_disabled
+  loop: "{{ apache_mods_disabled }}"
   notify: restart apache
 
 - name: Add apache vhosts configuration.

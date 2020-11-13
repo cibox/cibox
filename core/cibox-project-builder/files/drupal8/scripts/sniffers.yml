@@ -84,7 +84,7 @@
 
     - name: Install apt repos
       apt_repository: repo={{ item }}
-      loop: sniffers_apt_repos
+      loop: "{{ sniffers_apt_repos }}"
       become: yes
       when: sniffers_update == true
       tags:
@@ -98,7 +98,7 @@
 
     - name: Install apt packages
       apt: name={{ item }} state=present
-      loop: sniffers_apt_packages
+      loop: "{{ sniffers_apt_packages }}"
       become: yes
       when: sniffers_update == true
       tags:
@@ -125,7 +125,7 @@
     - name: Install composer global requires
       become: yes
       shell: "cd {{ composer_dir }} && composer require --prefer-dist {{ item }}"
-      loop: composer_global_require
+      loop: "{{ composer_global_require }}"
       when: sniffers_update == true
       tags:
         - sniffers
@@ -135,7 +135,7 @@
     - name: Install global git repos
       become: yes
       git: repo={{ item.repo }} dest={{ composer_dir }}/vendor/podarok/{{ item.name }} version={{ item.branch }}
-      loop: git_repos
+      loop: "{{ git_repos }}"
       when: sniffers_update == true
       tags:
         - sniffers
@@ -144,7 +144,7 @@
     - name: Install php codesniffer standards
       become: yes
       file: src={{ composer_dir }}/{{ item.path }} dest={{ composer_dir }}/vendor/squizlabs/php_codesniffer/CodeSniffer/Standards/{{ item.name }} state=link
-      loop: phpcs_standards
+      loop: "{{ phpcs_standards }}"
       when: sniffers_update == true
       tags:
         - sniffers
@@ -163,7 +163,7 @@
     - name: Install nodejs packages
       become: yes
       npm: name={{ item }} global=yes
-      loop: npm_packages
+      loop: "{{ npm_packages }}"
       when: sniffers_update == true
 
     - name: Update ruby alternatives for using ruby 1.9.1(3) version
@@ -176,7 +176,7 @@
 
     - name: Install gem packages
       shell: "gem install {{ item }}"
-      loop: gem_packages
+      loop: "{{ gem_packages }}"
       ignore_errors: yes
       become: yes
       when: sniffers_update == true
@@ -192,12 +192,12 @@
 
     - name: PHP CodeSniffer run
       shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_extensions }} -n {{ custom_modules_path }} {{ installation_profile_path }} {{ custom_themes_path }} --report-file={{ build_reports_dir }}/{{ item.name }}sniff.txt --ignore={{ phpcs_modules_ignore | join(",") }} || true'
-      loop: phpcs_standards
+      loop: "{{ phpcs_standards }}"
 
     - name: PHP CodeSniffer reports build
       ignore_errors: yes
       shell: 'if grep "FOUND" {{ build_reports_dir }}/{{ item.name }}sniff.txt; then echo "<strong>`grep -o "\<\| ERROR \|\>" {{ build_reports_dir }}/{{ item.name }}sniff.txt | wc -l`</strong>  errors for CodeSniffer: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi;'
-      loop: phpcs_standards
+      loop: "{{ phpcs_standards }}"
 
     - name: Security Review report build
       ignore_errors: yes
@@ -205,30 +205,30 @@
 
     - name: PHP CodeSniffer for features run
       shell: '{{ phpcs_bin }} --standard={{ item.name }} --extensions={{ phpcs_features_extensions }} -n {{ features_path }} --report-file={{ build_reports_dir }}/Features{{ item.name }}sniff.txt --ignore={{ phpcs_features_ignore | join(",") }} || true'
-      loop: phpcs_standards
+      loop: "{{ phpcs_standards }}"
 
     - name: PHP CodeSniffer for features reports build
       ignore_errors: yes
       shell: 'if grep "FOUND" {{ build_reports_dir }}/Features{{ item.name }}sniff.txt; then echo "<strong>`grep -o "\<\| ERROR \|\>" {{ build_reports_dir }}/Features{{ item.name }}sniff.txt | wc -l`</strong> errors for CodeSniffer: Features {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/Features{{ item.name }}sniff.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
-      loop: phpcs_standards
+      loop: "{{ phpcs_standards }}"
 
     - name: JSHint run
       shell: 'sudo jshint {{ item.path }} > {{ build_reports_dir }}/{{ item.name }}jshint.txt || true'
-      loop: jshint_folders
+      loop: "{{ jshint_folders }}"
 
     - name: JSHint build reports
       ignore_errors: yes
       shell: 'if [ -s {{ build_reports_dir }}/{{ item.name }}jshint.txt ]; then echo "<strong>`wc -l < {{ build_reports_dir }}/{{ item.name }}jshint.txt`</strong> JSHint: {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/{{ item.name }}jshint.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
-      loop: jshint_folders
+      loop: "{{ jshint_folders }}"
 
     - name: SCSS lint run
       shell: 'find {{ item.path }} {{ "! -type d \( -path " + (item.exclude | join(" -path ")) + " \)" if item.exclude else "" }} -iname "*.scss" -print0 | xargs -0 -r scss-lint > {{ build_reports_dir }}/scsslint{{ item.name }}.txt || true'
-      loop: scsslint_folders
+      loop: "{{ scsslint_folders }}"
 
     - name: SCSS lint build reports
       ignore_errors: yes
       shell: 'if grep -o "\<[E]\>" {{ build_reports_dir }}/scsslint{{ item.name }}.txt; then echo "<strong>`grep -o "\<[E]\>" {{ build_reports_dir }}/scsslint{{ item.name }}.txt | wc -l`</strong> errors for SCSS-lint {{ item.name }} standard file {{ webroot }}/{{ build_reports_dir }}/scsslint{{ item.name }}.txt" >> {{ workspace_root }}/{{ artifacts_file }} && exit 1; fi'
-      loop: scsslint_folders
+      loop: "{{ scsslint_folders }}"
 
     - name: Website credentials
       become: yes
