@@ -1,5 +1,5 @@
 ---
-php_version: 7.3
+php_version: 7.4
 edge_php_version: ""
 __php_packages:
   - php{{ php_version }}-mysql
@@ -10,7 +10,7 @@ __php_packages:
   - php{{ php_version }}-fpm
   - php{{ php_version }}-gd
   - php{{ php_version }}-memcached
-  - php{{ php_version }}-imagick
+  - php{{ php_version }}-imagic
   - php{{ php_version }}-mbstring
   - php{{ php_version }}-soap
   - php{{ php_version }}-zip
