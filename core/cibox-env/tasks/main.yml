@@ -48,9 +48,11 @@
   become: yes
 
 - name: Install Pip packages
-  pip: name={{ item }} state=present
+  pip: 
+    name: {{ item }} 
+    state: present
   become: yes
-  with_items: {{ pip_packages }}
+  with_items: pip_packages
 
 - name: Remove premature repository from php role
   become: yes
