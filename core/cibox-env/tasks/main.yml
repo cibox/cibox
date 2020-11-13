@@ -49,7 +49,7 @@
 
 - name: Install Pip packages
   pip: 
-    name: {{ item }} 
+    name: "{{ item }}" 
     state: present
   become: yes
   with_items: pip_packages
