@@ -2,11 +2,11 @@
 drush_install_mode: phar
 
 drush_composer_bin: /usr/local/bin/composer
-drush_composer_version: 8.1.16
+drush_composer_version: 8.4.5
 drush_composer_user: root
 
 drush_git_repo: https://github.com/drush-ops/drush.git
-drush_git_version: 8.1.16
+drush_git_version: 8.4.5
 drush_git_dest: /opt/drush
 drush_git_bin: /usr/local/bin/drush
 
